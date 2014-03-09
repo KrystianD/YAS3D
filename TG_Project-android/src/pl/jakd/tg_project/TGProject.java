@@ -15,6 +15,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -25,10 +26,9 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -36,12 +36,13 @@ import com.badlogic.gdx.utils.Timer;
 
 public class TGProject implements ApplicationListener, SensorEventListener, InputProcessor
 {
+	public OrthographicCamera cam1;
 	public PerspectiveCamera cam;
 	public ModelBatch modelBatch;
 	public Model model[] = new Model[10];
 	public ModelInstance instance[] = new ModelInstance[10];
-	public Model model2, modelSnakePart;
-	public ModelInstance instance2, instSnakePart;
+	public Model model2, modelSnakePart, modelFood;
+	public ModelInstance instance2, instSnakePart, instFood;
 	public Environment environment;
 	public CameraInputController camController;
 	public BitmapFont font;
@@ -65,19 +66,31 @@ public class TGProject implements ApplicationListener, SensorEventListener, Inpu
 		//System.loadLibrary ("mad");
 	}
 
-	Vector3 pt[] = new Vector3[100];
+	Vector3 foodPoints[] = new Vector3[100];
 
 	Vector3 dir = new Vector3 (0, 0, 1);
+	Vector3 snakePos = new Vector3 (1, 0, 0.2f);
+
+	final float snakeSphereSize = 0.5f / 15f;
+	final float foodSphereSize = 0.5f / 15f;
+
+	PointLight light = new PointLight ();
 
 	@Override
 	public void create ()
 	{
-		dir.nor ();
 		font = new BitmapFont ();
 		batch = new SpriteBatch ();
 		modelBatch = new ModelBatch ();
 
-		cam = new PerspectiveCamera (60, Gdx.graphics.getWidth (), Gdx.graphics.getHeight ());
+		cam1 = new OrthographicCamera (1, 1);
+		cam1.near = -100f;
+		cam1.far = 300f;
+		cam1.position.set (0f, 0f, 1);
+		cam1.lookAt (0, 0, 0);
+		cam1.update ();
+
+		cam = new PerspectiveCamera (50, Gdx.graphics.getWidth (), Gdx.graphics.getHeight ());
 		cam.position.set (3f, 3f, 3f);
 		cam.position.set (0f, 0f, 30f);
 		cam.position.set (0f, 0f, 0f);
@@ -87,7 +100,7 @@ public class TGProject implements ApplicationListener, SensorEventListener, Inpu
 		cam.update ();
 
 		camController = new CameraInputController (cam);
-		Gdx.input.setInputProcessor (camController);
+		//Gdx.input.setInputProcessor (camController);
 		Gdx.input.setInputProcessor (this);
 
 		ModelBuilder modelBuilder = new ModelBuilder ();
@@ -104,18 +117,24 @@ public class TGProject implements ApplicationListener, SensorEventListener, Inpu
 		//instance2 = new ModelInstance (model2);
 
 		model2 = modelBuilder.createSphere (
-				1, 1, 1, 10, 10,
-				new Material (ColorAttribute.createDiffuse (Color.RED)), Usage.Position | Usage.Normal);
+				0.1f, 0.1f, 0.1f, 10, 10,
+				new Material (ColorAttribute.createDiffuse (Color.BLUE)), Usage.Position | Usage.Normal);
 		instance2 = new ModelInstance (model2);
 
 		modelSnakePart = modelBuilder.createSphere (
-				1, 1, 1, 5, 5,
-				new Material (ColorAttribute.createDiffuse (Color.RED)), Usage.Position | Usage.Normal);
+				snakeSphereSize, snakeSphereSize, snakeSphereSize, 10, 10,
+				new Material (ColorAttribute.createDiffuse (Color.GREEN)), Usage.Position | Usage.Normal);
 		instSnakePart = new ModelInstance (modelSnakePart);
+
+		modelFood = modelBuilder.createSphere (
+				foodSphereSize, foodSphereSize, foodSphereSize, 10, 10,
+				new Material (ColorAttribute.createDiffuse (Color.RED)), Usage.Position | Usage.Normal);
+		instFood = new ModelInstance (modelFood);
 
 		environment = new Environment ();
 		environment.set (new ColorAttribute (ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
-		environment.add (new DirectionalLight ().set (0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
+		//environment.add (new DirectionalLight ().set (0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
+		environment.add (light.set (0.8f, 0.8f, 0.8f, 2f, 0f, 0f, 5));
 
 		mSensorManager = (SensorManager)ctx.getSystemService (Context.SENSOR_SERVICE);
 		mAccel = mSensorManager.getDefaultSensor (Sensor.TYPE_ACCELEROMETER);
@@ -130,9 +149,9 @@ public class TGProject implements ApplicationListener, SensorEventListener, Inpu
 
 		for (int i = 0; i < 100; i++)
 		{
-			pt[i] = new Vector3 (r.nextFloat () * 2 - 1, r.nextFloat () * 2 - 1, r.nextFloat () * 2 - 1);
-			pt[i] = pt[i].nor ();
-			pt[i] = pt[i].mul (20);
+			foodPoints[i] = new Vector3 (r.nextFloat () * 2 - 1, r.nextFloat () * 2 - 1, r.nextFloat () * 2 - 1);
+			foodPoints[i] = foodPoints[i].nor ();
+			//foodPoints[i] = foodPoints[i].mul (20);
 		}
 
 		Timer.schedule (new Timer.Task ()
@@ -166,7 +185,6 @@ public class TGProject implements ApplicationListener, SensorEventListener, Inpu
 	}
 
 	float x = 0;
-	Vector3 snakePos = new Vector3 (1, 0, 0);
 	ArrayList<Vector3> points = new ArrayList<Vector3> ();
 	float snakeAng = 0, snakeAngInc = 0;
 
@@ -183,6 +201,10 @@ public class TGProject implements ApplicationListener, SensorEventListener, Inpu
 		font.drawMultiLine (batch, getOrientationString (), 20, Gdx.graphics.getHeight () - 10);
 		batch.end ();
 
+		Vector3 lightPos = new Vector3 (2, 0, 0);
+		lightPos.mul (quat);
+		light.position.set (lightPos);
+
 		modelBatch.begin (cam);
 
 		for (int i = 0; i < 3; i++)
@@ -195,12 +217,29 @@ public class TGProject implements ApplicationListener, SensorEventListener, Inpu
 
 		for (int i = 0; i < 1; i++)
 		{
-			Vector3 snakePosNorm = snakePos;
+			Vector3 snakePosNorm = new Vector3 (snakePos);
 			snakePosNorm.nor ();
+
+			//Log.d ("KD", "st " + leftPressed + " " + rightPressed + " " + lastPressed);
+			if (leftPressed && rightPressed)
+			{
+				snakeAngInc = lastPressed * 0.02f;
+			}
+			else if (leftPressed || rightPressed)
+			{
+				if (leftPressed)
+					snakeAngInc = -0.02f;
+				if (rightPressed)
+					snakeAngInc = 0.02f;
+			}
+			else
+			{
+				snakeAngInc = 0;
+			}
 
 			dir.rotateRad (snakePosNorm, snakeAngInc * 5);
 
-			Vector3 dir2 = new Vector3 (dir).mul (0.005f);
+			Vector3 dir2 = new Vector3 (dir).mul (0.01f);
 			Vector3 newPt = new Vector3 (snakePos).add (dir2);
 			newPt.nor ();
 
@@ -213,20 +252,36 @@ public class TGProject implements ApplicationListener, SensorEventListener, Inpu
 				points.remove (0);
 		}
 
-		//Quaternion q = new Quaternion ();
-		//q.setFromAxisRad (snakePosNorm, 0.1f);
+		for (int i = 100 - 1; i >= 0; i--)
+		{
+			float lensq = new Vector3 (snakePos).sub (foodPoints[i]).len2 ();
 
-		Matrix3 a = new Matrix3 ();
+			float maxDiff = foodSphereSize / 2f + snakeSphereSize / 2f;
+			if (lensq < maxDiff * maxDiff)
+			{
+				foodPoints[i].x = 10000;
+
+				continue;
+			}
+			instFood.transform.idt ();
+			instFood.transform.rotate (quat);
+			instFood.transform.translate (foodPoints[i]);
+			modelBatch.render (instFood, environment);
+		}
 
 		for (int i = 0; i < points.size (); i++)
 		{
 			instSnakePart.transform.idt ();
 			instSnakePart.transform.rotate (quat);
-			instSnakePart.transform.translate (points.get (i).x * 15, points.get (i).y * 15, points.get (i).z * 15);
+			instSnakePart.transform.translate (points.get (i));
 
 			//instSnakePart.transform.scale (1, 1.0f / 5.0f, 1);
 			modelBatch.render (instSnakePart, environment);
 		}
+
+		instance[1].transform.idt ();
+		instance[1].transform.translate (-15f, 0, 0);
+		modelBatch.render (instance[1], environment);
 
 		/*Vector3 ang = latlongToMeters (new Vector2 (x, 0.3f));
 
@@ -244,16 +299,53 @@ public class TGProject implements ApplicationListener, SensorEventListener, Inpu
 		instance2.transform.rotate (quat);
 		instance2.transform.translate (0, 0, 1.5f);
 		modelBatch.render (instance2, environment);*/
-		for (int i = 0; i < 100; i++)
-		{
-			instance2.transform.idt ();
-			instance2.transform.rotate (quat);
-			instance2.transform.translate (pt[i]);
-			modelBatch.render (instance2, environment);
 
-		}
 		modelBatch.end ();
+
+		modelBatch.begin (cam1);
+
+		/*Vector3 sn = new Vector3 (snakePos);
+		sn.mul (quat);
+
+		Vector3 sn2 = new Vector3 (sn);
+		//sn2.nor ();
+
+		float d = intersectPlane (new Vector3 (0, 1, 0), new Vector3 (0, 0.3f, 0), new Vector3 (0, 0, 0), sn2);
+
+		sn2.mul (d);
+
+		Log.d ("KD", "D " + d + " " + sn2);
+
+		sn.x = Math.min (1, Math.max (-1, sn.x));
+		sn.y = Math.min (1, Math.max (-1, sn.y));
+		//Log.d ("KD", "" + snakePos + " " + sn);
+
+		instance2.transform.idt ();
+		instance2.transform.translate (sn.x / 2f, sn.y / 2f, 0);
+		instance2.transform.translate (sn2.x, sn2.y, 0);
+		if (d != 999999 && sn2.z < 2)
+		{
+			modelBatch.render (instance2, environment);
+		}*/
+
+		modelBatch.end ();
+
 	}
+
+	float intersectPlane (Vector3 n, Vector3 p0, Vector3 l0, Vector3 l)
+	{
+		// assuming vectors are all normalized
+		float denom = n.dot (l);
+		if (denom > 1e-6)
+		{
+			Vector3 p0l0 = new Vector3 (p0);
+			p0l0.sub (l0);
+			float d = p0l0.dot (n) / denom;
+			return d;
+		}
+		return 999999;
+	}
+
 	@Override
 	public void resize (int width, int height)
 	{
@@ -364,15 +456,24 @@ public class TGProject implements ApplicationListener, SensorEventListener, Inpu
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	Boolean leftPressed = false, rightPressed = false;
+	int lastPressed = 0;
+
 	@Override
 	public boolean touchDown (int arg0, int arg1, int arg2, int arg3)
 	{
-		Log.d ("KD", "d" + arg0);
+		//Log.d ("KD", "do " + leftPressed + " " + rightPressed + " " + lastPressed);
 		if (arg0 < Gdx.app.getGraphics ().getWidth () / 2)
-			snakeAngInc = -0.01f;
+		{
+			leftPressed = true;
+			lastPressed = -1;
+		}
 		else
-			snakeAngInc = 0.01f;
-		// TODO Auto-generated method stub
+		{
+			rightPressed = true;
+			lastPressed = 1;
+		}
 		return false;
 	}
 	@Override
@@ -384,9 +485,11 @@ public class TGProject implements ApplicationListener, SensorEventListener, Inpu
 	@Override
 	public boolean touchUp (int arg0, int arg1, int arg2, int arg3)
 	{
-		Log.d ("KD", "u");
-		snakeAngInc = 0f;
-		// TODO Auto-generated method stub
+		//Log.d ("KD", "up " + leftPressed + " " + rightPressed + " " + lastPressed);
+		if (arg0 < Gdx.app.getGraphics ().getWidth () / 2)
+			leftPressed = false;
+		else
+			rightPressed = false;
 		return false;
 	}
 }
