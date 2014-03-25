@@ -436,6 +436,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 	public boolean keyDown (int keycode)
 	{
 		if(keycode == Keys.BACK){
+			Gdx.input.setCatchBackKey(false);
 			game.setScreen(new MainMenu(game));
 		}
 		return true;

@@ -60,6 +60,7 @@ public class MainMenu extends ScreenAdapter {
 		startGameButton.addListener(new EventListener() {
 			@Override
 			public boolean handle(Event event) {
+				
 				game.setScreen(new LevelScreen(game, game.getContext()));
 				return true;
 			}
