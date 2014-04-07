@@ -1,5 +1,12 @@
 package pl.jakd.tg_project;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -10,8 +17,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
-import com.badlogic.gdx.ApplicationListener;
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
@@ -58,6 +63,8 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 	private SensorManager mSensorManager;
 	private Sensor mAccel, mGyro, mMagnet;
 
+	private DatagramSocket udpSocket = null;
+	
 	float aX = 0, aY = 0, aZ = 0, gX = 0, gY = 0, gZ = 0, mX = 0, mY = 0, mZ = 0;
 	Boolean hasA = false, hasG = false, hasM = false;
 	Mad mad;
@@ -70,6 +77,23 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 		mad = new Mad ();
 		//System.loadLibrary ("mad");
 		Gdx.input.setCatchBackKey(true);
+		
+		try {
+			udpSocket = new DatagramSocket(9999);
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			Log.e("KD", "==================================================================================================");
+			e.printStackTrace();
+		}
+		
+		mSensorManager = (SensorManager)ctx.getSystemService (Context.SENSOR_SERVICE);
+		mAccel = mSensorManager.getDefaultSensor (Sensor.TYPE_ACCELEROMETER);
+		mGyro = mSensorManager.getDefaultSensor (Sensor.TYPE_GYROSCOPE);
+		mMagnet = mSensorManager.getDefaultSensor (Sensor.TYPE_MAGNETIC_FIELD);
+
+		mSensorManager.registerListener (this, mAccel, SensorManager.SENSOR_DELAY_FASTEST);
+		mSensorManager.registerListener (this, mGyro, SensorManager.SENSOR_DELAY_FASTEST);
+		mSensorManager.registerListener (this, mMagnet, SensorManager.SENSOR_DELAY_FASTEST);	
 	}
 
 	Vector3 foodPoints[] = new Vector3[100];
@@ -84,7 +108,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 
 	@Override
 	public void show ()
-	{
+	{			
 		font = new BitmapFont ();
 		batch = new SpriteBatch ();
 		modelBatch = new ModelBatch ();
@@ -142,14 +166,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 		//environment.add (new DirectionalLight ().set (0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 		environment.add (light.set (0.8f, 0.8f, 0.8f, 2f, 0f, 0f, 5));
 
-		mSensorManager = (SensorManager)ctx.getSystemService (Context.SENSOR_SERVICE);
-		mAccel = mSensorManager.getDefaultSensor (Sensor.TYPE_ACCELEROMETER);
-		mGyro = mSensorManager.getDefaultSensor (Sensor.TYPE_GYROSCOPE);
-		mMagnet = mSensorManager.getDefaultSensor (Sensor.TYPE_MAGNETIC_FIELD);
 
-		mSensorManager.registerListener (this, mAccel, SensorManager.SENSOR_DELAY_FASTEST);
-		mSensorManager.registerListener (this, mGyro, SensorManager.SENSOR_DELAY_FASTEST);
-		mSensorManager.registerListener (this, mMagnet, SensorManager.SENSOR_DELAY_FASTEST);
 
 		Random r = new Random ();
 
@@ -174,6 +191,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 	@Override
 	public void dispose ()
 	{
+		udpSocket.close();
 		modelBatch.dispose ();
 	}
 
@@ -361,7 +379,14 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 	@Override
 	public void resume ()
 	{
-
+		if(udpSocket.isClosed()){
+			try {
+				udpSocket = new DatagramSocket(9999);
+			} catch (SocketException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private String getOrientationString ()
@@ -391,6 +416,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 	@Override
 	public void onSensorChanged (SensorEvent event)
 	{
+		Log.d("KD", "sensC");
 		if (event.sensor.getType () == Sensor.TYPE_ACCELEROMETER)
 		{
 			aX = event.values[1];
@@ -412,24 +438,82 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 			mZ = event.values[2];
 			hasM = true;
 		}
-
+		
 	}
-
+	
+	private float oq0=0,oq1=0,oq2=0,oq3=0;
+	private boolean isStabilized = false;
 	public void calc ()
 	{
-		if (hasA && hasM)
+		if (hasA && hasM && isStabilized)
 		{
 			long ticks = System.currentTimeMillis ();
 			if (lastCalc == 0)
 				lastCalc = ticks;
 			float diff = (float)(ticks - lastCalc) / 1000.0f;
-			lastCalc = ticks;
-
+			
+			if(diff < 0.015)
+				return;
 			//Log.d ("KD",
 			//		String.format ("ax %10f, ay %10f, az %10f, mx %10f, my %10f, mz %10f, gx %10f, gy %10f, gz %10f", aX, aY, aZ, mX, mY, mZ, gX, gY, gZ));
+			//Log.d("KD", ticks+"      "+diff);
+			
+			lastCalc = ticks;
+			
+			final ByteBuffer bArray = ByteBuffer.allocate(9*4 + 1*8);
+			bArray.order(ByteOrder.LITTLE_ENDIAN);
+			bArray.putFloat(aX);
+			bArray.putFloat(aY);
+			bArray.putFloat(aZ);
+			bArray.putFloat(gX);
+			bArray.putFloat(gY);
+			bArray.putFloat(gZ);
+			bArray.putFloat(mX);
+			bArray.putFloat(mY);
+			bArray.putFloat(mZ);
+			bArray.putLong(ticks);
+			
+				Thread t = new Thread(
+				new Runnable() {	
+					@Override
+					public void run() {
+						DatagramPacket dp = new DatagramPacket(bArray.array(), 9*4 + 1*8);
+						try {
+							if(udpSocket == null)
+								udpSocket = new DatagramSocket(9999);
+							udpSocket.setBroadcast(true);
+							dp.setSocketAddress(new InetSocketAddress("192.168.2.200", 9999));
+							udpSocket.send(dp);
+						} catch (SocketException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				});
+				t.start();
+		
+				mad.MadgwickAHRSupdate (gX, gY, gZ, aX, aY, aZ, mX, mY, mZ, diff);
 
-			mad.MadgwickAHRSupdate (gX, gY, gZ, aX, aY, aZ, mX, mY, mZ, 0.02f);
-			gX = gY = gZ = 0;
+				gX = gY = gZ = 0;
+			//Log.d("KD", mad.q0 + " " +mad.q1 + " " +mad.q2 + " " +mad.q3);
+			
+		} else if (hasA && hasM && !isStabilized){
+			float diff = 0.0005f;
+			mad.MadgwickAHRSupdate(0, 0, 0, aX, aY, aZ, mX, mY, mZ, 0.02f * 100);
+			
+			Log.d("KD", ""+ (Math.abs(mad.q0 - oq0) <= diff) +" "+ (Math.abs(mad.q1 - oq1) <= diff) +" "+(Math.abs(mad.q2 - oq2) <= diff) +" "+(Math.abs(mad.q3 - oq3) <= diff));
+			
+			if( (Math.abs(mad.q0 - oq0) <= diff) && (Math.abs(mad.q1 - oq1) <= diff) &&(Math.abs(mad.q2 - oq2) <= diff) &&(Math.abs(mad.q3 - oq3) <= diff)){
+				isStabilized = true;
+			}
+			
+			oq0 = mad.q0;
+			oq1 = mad.q1;
+			oq2 = mad.q2;
+			oq3 = mad.q3;
 		}
 	}
 	@Override
