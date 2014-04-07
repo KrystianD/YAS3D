@@ -272,7 +272,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 
 			snakePos = newPt;
 			points.add (snakePos);
-			if (points.size () > 100)
+			if (points.size () > 10)
 				points.remove (0);
 		}
 
