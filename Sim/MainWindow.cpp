@@ -144,11 +144,11 @@ void MainWindow::draw()
 	// updateInfo();
 	// qDebug() << "A";
 	
-	ui->visAccel->repaint();
-	ui->visAccelMagnet->repaint();
-	ui->visGyroAccel->repaint();
-	ui->visGyro->repaint();
-	ui->visFull->repaint();
+	ui->visAccel->updateGL();
+	ui->visAccelMagnet->updateGL();
+	ui->visGyroAccel->updateGL();
+	ui->visGyro->updateGL();
+	ui->visFull->updateGL();
 }
 void MainWindow::updateInfo()
 {
