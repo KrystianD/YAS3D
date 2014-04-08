@@ -42,7 +42,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Timer;
 
-public class LevelScreen extends ScreenAdapter implements SensorEventListener, InputProcessor
+public class LevelScreen extends ScreenAdapter implements SensorEventListener,
+		InputProcessor
 {
 	public OrthographicCamera cam1;
 	public PerspectiveCamera cam;
@@ -63,9 +64,10 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 	private SensorManager mSensorManager;
 	private Sensor mAccel, mGyro, mMagnet;
 
-	private DatagramSocket udpSocket = null;
-	
-	float aX = 0, aY = 0, aZ = 0, gX = 0, gY = 0, gZ = 0, mX = 0, mY = 0, mZ = 0;
+	private Sender sender = new Sender ();
+
+	float aX = 0, aY = 0, aZ = 0, gX = 0, gY = 0, gZ = 0, mX = 0, mY = 0,
+			mZ = 0;
 	Boolean hasA = false, hasG = false, hasM = false;
 	Mad mad;
 
@@ -75,25 +77,21 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 		this.ctx = ctx;
 
 		mad = new Mad ();
-		//System.loadLibrary ("mad");
-		Gdx.input.setCatchBackKey(true);
-		
-		try {
-			udpSocket = new DatagramSocket(9999);
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			Log.e("KD", "==================================================================================================");
-			e.printStackTrace();
-		}
-		
-		mSensorManager = (SensorManager)ctx.getSystemService (Context.SENSOR_SERVICE);
+		// System.loadLibrary ("mad");
+		Gdx.input.setCatchBackKey (true);
+
+		mSensorManager = (SensorManager)ctx
+				.getSystemService (Context.SENSOR_SERVICE);
 		mAccel = mSensorManager.getDefaultSensor (Sensor.TYPE_ACCELEROMETER);
 		mGyro = mSensorManager.getDefaultSensor (Sensor.TYPE_GYROSCOPE);
 		mMagnet = mSensorManager.getDefaultSensor (Sensor.TYPE_MAGNETIC_FIELD);
 
-		mSensorManager.registerListener (this, mAccel, SensorManager.SENSOR_DELAY_FASTEST);
-		mSensorManager.registerListener (this, mGyro, SensorManager.SENSOR_DELAY_FASTEST);
-		mSensorManager.registerListener (this, mMagnet, SensorManager.SENSOR_DELAY_FASTEST);	
+		mSensorManager.registerListener (this, mAccel,
+				SensorManager.SENSOR_DELAY_FASTEST);
+		mSensorManager.registerListener (this, mGyro,
+				SensorManager.SENSOR_DELAY_FASTEST);
+		mSensorManager.registerListener (this, mMagnet,
+				SensorManager.SENSOR_DELAY_FASTEST);
 	}
 
 	Vector3 foodPoints[] = new Vector3[100];
@@ -108,7 +106,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 
 	@Override
 	public void show ()
-	{			
+	{
 		font = new BitmapFont ();
 		batch = new SpriteBatch ();
 		modelBatch = new ModelBatch ();
@@ -120,7 +118,8 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 		cam1.lookAt (0, 0, 0);
 		cam1.update ();
 
-		cam = new PerspectiveCamera (50, Gdx.graphics.getWidth (), Gdx.graphics.getHeight ());
+		cam = new PerspectiveCamera (50, Gdx.graphics.getWidth (),
+				Gdx.graphics.getHeight ());
 		cam.position.set (3f, 3f, 3f);
 		cam.position.set (0f, 0f, 30f);
 		cam.position.set (0f, 0f, 0f);
@@ -130,51 +129,62 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 		cam.update ();
 
 		camController = new CameraInputController (cam);
-		//Gdx.input.setInputProcessor (camController);
+		// Gdx.input.setInputProcessor (camController);
 		Gdx.input.setInputProcessor (this);
 
 		ModelBuilder modelBuilder = new ModelBuilder ();
-		model[0] = modelBuilder.createBox (1f, 1f, 5f, new Material (ColorAttribute.createDiffuse (Color.RED)), Usage.Position | Usage.Normal);
+		model[0] = modelBuilder.createBox (1f, 1f, 5f, new Material (
+				ColorAttribute.createDiffuse (Color.RED)), Usage.Position
+				| Usage.Normal);
 		instance[0] = new ModelInstance (model[0]);
 
-		model[1] = modelBuilder.createBox (1f, 5f, 1f, new Material (ColorAttribute.createDiffuse (Color.GREEN)), Usage.Position | Usage.Normal);
+		model[1] = modelBuilder.createBox (1f, 5f, 1f, new Material (
+				ColorAttribute.createDiffuse (Color.GREEN)), Usage.Position
+				| Usage.Normal);
 		instance[1] = new ModelInstance (model[1]);
 
-		model[2] = modelBuilder.createBox (5f, 1f, 1f, new Material (ColorAttribute.createDiffuse (Color.BLUE)), Usage.Position | Usage.Normal);
+		model[2] = modelBuilder.createBox (5f, 1f, 1f, new Material (
+				ColorAttribute.createDiffuse (Color.BLUE)), Usage.Position
+				| Usage.Normal);
 		instance[2] = new ModelInstance (model[2]);
 
-		//model2 = modelBuilder.createBox (2f, 2f, 2f, new Material (ColorAttribute.createDiffuse (Color.RED)), Usage.Position | Usage.Normal);
-		//instance2 = new ModelInstance (model2);
+		// model2 = modelBuilder.createBox (2f, 2f, 2f, new Material
+		// (ColorAttribute.createDiffuse (Color.RED)), Usage.Position |
+		// Usage.Normal);
+		// instance2 = new ModelInstance (model2);
 
-		model2 = modelBuilder.createSphere (
-				0.1f, 0.1f, 0.1f, 10, 10,
-				new Material (ColorAttribute.createDiffuse (Color.BLUE)), Usage.Position | Usage.Normal);
+		model2 = modelBuilder.createSphere (0.1f, 0.1f, 0.1f, 10, 10,
+				new Material (ColorAttribute.createDiffuse (Color.BLUE)),
+				Usage.Position | Usage.Normal);
 		instance2 = new ModelInstance (model2);
 
-		modelSnakePart = modelBuilder.createSphere (
-				snakeSphereSize, snakeSphereSize, snakeSphereSize, 10, 10,
-				new Material (ColorAttribute.createDiffuse (Color.GREEN)), Usage.Position | Usage.Normal);
+		modelSnakePart = modelBuilder.createSphere (snakeSphereSize,
+				snakeSphereSize, snakeSphereSize, 10, 10, new Material (
+						ColorAttribute.createDiffuse (Color.GREEN)),
+				Usage.Position | Usage.Normal);
 		instSnakePart = new ModelInstance (modelSnakePart);
 
-		modelFood = modelBuilder.createSphere (
-				foodSphereSize, foodSphereSize, foodSphereSize, 10, 10,
-				new Material (ColorAttribute.createDiffuse (Color.RED)), Usage.Position | Usage.Normal);
+		modelFood = modelBuilder.createSphere (foodSphereSize, foodSphereSize,
+				foodSphereSize, 10, 10,
+				new Material (ColorAttribute.createDiffuse (Color.RED)),
+				Usage.Position | Usage.Normal);
 		instFood = new ModelInstance (modelFood);
 
 		environment = new Environment ();
-		environment.set (new ColorAttribute (ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
-		//environment.add (new DirectionalLight ().set (0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
+		environment.set (new ColorAttribute (ColorAttribute.AmbientLight, 0.4f,
+				0.4f, 0.4f, 1f));
+		// environment.add (new DirectionalLight ().set (0.8f, 0.8f, 0.8f, -1f,
+		// -0.8f, -0.2f));
 		environment.add (light.set (0.8f, 0.8f, 0.8f, 2f, 0f, 0f, 5));
-
-
 
 		Random r = new Random ();
 
 		for (int i = 0; i < 100; i++)
 		{
-			foodPoints[i] = new Vector3 (r.nextFloat () * 2 - 1, r.nextFloat () * 2 - 1, r.nextFloat () * 2 - 1);
+			foodPoints[i] = new Vector3 (r.nextFloat () * 2 - 1,
+					r.nextFloat () * 2 - 1, r.nextFloat () * 2 - 1);
 			foodPoints[i] = foodPoints[i].nor ();
-			//foodPoints[i] = foodPoints[i].mul (20);
+			// foodPoints[i] = foodPoints[i].mul (20);
 		}
 
 		Timer.schedule (new Timer.Task ()
@@ -188,10 +198,11 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 			}
 		}, 0.02f, 0.02f);
 	}
+
 	@Override
 	public void dispose ()
 	{
-		udpSocket.close();
+		sender.close ();
 		modelBatch.dispose ();
 	}
 
@@ -209,20 +220,22 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 	}
 
 	float x = 0;
-	ArrayList<Vector3> points = new ArrayList<Vector3> ();
+	ArrayList<Vector3> snakeTailPoints = new ArrayList<Vector3> ();
 	float snakeAng = 0, snakeAngInc = 0;
 
 	@Override
 	public void render (float delta)
 	{
-		//mad (1, 1, 1, 2, 2, 2, 3, 3, 3);
-		Gdx.gl.glViewport (0, 0, Gdx.graphics.getWidth (), Gdx.graphics.getHeight ());
+		// mad (1, 1, 1, 2, 2, 2, 3, 3, 3);
+		Gdx.gl.glViewport (0, 0, Gdx.graphics.getWidth (),
+				Gdx.graphics.getHeight ());
 		Gdx.gl.glClear (GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 		quat.set (mad.q1, mad.q2, mad.q3, -mad.q0);
 
 		batch.begin ();
-		font.drawMultiLine (batch, getOrientationString (), 20, Gdx.graphics.getHeight () - 10);
+		font.drawMultiLine (batch, getOrientationString (), 20,
+				Gdx.graphics.getHeight () - 10);
 		batch.end ();
 
 		Vector3 lightPos = new Vector3 (2, 0, 0);
@@ -236,44 +249,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 			instance[i].transform.idt ();
 			instance[i].transform.scl (0.3f);
 			instance[i].transform.rotate (quat);
-			//modelBatch.render (instance[i], environment);
-		}
-
-		for (int i = 0; i < 1; i++)
-		{
-			Vector3 snakePosNorm = new Vector3 (snakePos);
-			snakePosNorm.nor ();
-
-			//Log.d ("KD", "st " + leftPressed + " " + rightPressed + " " + lastPressed);
-			if (leftPressed && rightPressed)
-			{
-				snakeAngInc = lastPressed * 0.02f;
-			}
-			else if (leftPressed || rightPressed)
-			{
-				if (leftPressed)
-					snakeAngInc = -0.02f;
-				if (rightPressed)
-					snakeAngInc = 0.02f;
-			}
-			else
-			{
-				snakeAngInc = 0;
-			}
-
-			dir.rotateRad (snakePosNorm, snakeAngInc * 5);
-
-			Vector3 dir2 = new Vector3 (dir).mul (0.01f);
-			Vector3 newPt = new Vector3 (snakePos).add (dir2);
-			newPt.nor ();
-
-			dir = new Vector3 (newPt).sub (snakePos);
-			dir.nor ();
-
-			snakePos = newPt;
-			points.add (snakePos);
-			if (points.size () > 10)
-				points.remove (0);
+			// modelBatch.render (instance[i], environment);
 		}
 
 		for (int i = 100 - 1; i >= 0; i--)
@@ -293,13 +269,13 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 			modelBatch.render (instFood, environment);
 		}
 
-		for (int i = 0; i < points.size (); i++)
+		for (int i = 0; i < snakeTailPoints.size (); i++)
 		{
 			instSnakePart.transform.idt ();
 			instSnakePart.transform.rotate (quat);
-			instSnakePart.transform.translate (points.get (i));
+			instSnakePart.transform.translate (snakeTailPoints.get (i));
 
-			//instSnakePart.transform.scale (1, 1.0f / 5.0f, 1);
+			// instSnakePart.transform.scale (1, 1.0f / 5.0f, 1);
 			modelBatch.render (instSnakePart, environment);
 		}
 
@@ -307,50 +283,47 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 		instance[1].transform.translate (-15f, 0, 0);
 		modelBatch.render (instance[1], environment);
 
-		/*Vector3 ang = latlongToMeters (new Vector2 (x, 0.3f));
+		/*
+		 * Vector3 ang = latlongToMeters (new Vector2 (x, 0.3f));
+		 * 
+		 * instance[1].transform.idt (); instance[1].transform.rotate (quat);
+		 * instance[1].transform.rotateRad (0, 0, -1, ang.x);
+		 * instance[1].transform.rotateRad (0, 1, 0, ang.y);
+		 * instance[1].transform.translate (-15f, 0, 0); modelBatch.render
+		 * (instance[1], environment);
+		 */
 
-		instance[1].transform.idt ();
-		instance[1].transform.rotate (quat);
-		instance[1].transform.rotateRad (0, 0, -1, ang.x);
-		instance[1].transform.rotateRad (0, 1, 0, ang.y);
-		instance[1].transform.translate (-15f, 0, 0);
-		modelBatch.render (instance[1], environment);*/
-
-		/*instance.transform.idt ();
-		instance.transform.rotate (quat);
-		modelBatch.render (instance, environment);
-		instance2.transform.idt ();
-		instance2.transform.rotate (quat);
-		instance2.transform.translate (0, 0, 1.5f);
-		modelBatch.render (instance2, environment);*/
+		/*
+		 * instance.transform.idt (); instance.transform.rotate (quat);
+		 * modelBatch.render (instance, environment); instance2.transform.idt
+		 * (); instance2.transform.rotate (quat); instance2.transform.translate
+		 * (0, 0, 1.5f); modelBatch.render (instance2, environment);
+		 */
 
 		modelBatch.end ();
 
 		modelBatch.begin (cam1);
 
-		/*Vector3 sn = new Vector3 (snakePos);
-		sn.mul (quat);
-
-		Vector3 sn2 = new Vector3 (sn);
-		//sn2.nor ();
-
-		float d = intersectPlane (new Vector3 (0, 1, 0), new Vector3 (0, 0.3f, 0), new Vector3 (0, 0, 0), sn2);
-
-		sn2.mul (d);
-
-		Log.d ("KD", "D " + d + " " + sn2);
-
-		sn.x = Math.min (1, Math.max (-1, sn.x));
-		sn.y = Math.min (1, Math.max (-1, sn.y));
-		//Log.d ("KD", "" + snakePos + " " + sn);
-
-		instance2.transform.idt ();
-		instance2.transform.translate (sn.x / 2f, sn.y / 2f, 0);
-		instance2.transform.translate (sn2.x, sn2.y, 0);
-		if (d != 999999 && sn2.z < 2)
-		{
-			modelBatch.render (instance2, environment);
-		}*/
+		/*
+		 * Vector3 sn = new Vector3 (snakePos); sn.mul (quat);
+		 * 
+		 * Vector3 sn2 = new Vector3 (sn); //sn2.nor ();
+		 * 
+		 * float d = intersectPlane (new Vector3 (0, 1, 0), new Vector3 (0,
+		 * 0.3f, 0), new Vector3 (0, 0, 0), sn2);
+		 * 
+		 * sn2.mul (d);
+		 * 
+		 * Log.d ("KD", "D " + d + " " + sn2);
+		 * 
+		 * sn.x = Math.min (1, Math.max (-1, sn.x)); sn.y = Math.min (1,
+		 * Math.max (-1, sn.y)); //Log.d ("KD", "" + snakePos + " " + sn);
+		 * 
+		 * instance2.transform.idt (); instance2.transform.translate (sn.x / 2f,
+		 * sn.y / 2f, 0); instance2.transform.translate (sn2.x, sn2.y, 0); if (d
+		 * != 999999 && sn2.z < 2) { modelBatch.render (instance2, environment);
+		 * }
+		 */
 
 		modelBatch.end ();
 
@@ -379,14 +352,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 	@Override
 	public void resume ()
 	{
-		if(udpSocket.isClosed()){
-			try {
-				udpSocket = new DatagramSocket(9999);
-			} catch (SocketException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+
 	}
 
 	private String getOrientationString ()
@@ -416,7 +382,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 	@Override
 	public void onSensorChanged (SensorEvent event)
 	{
-		Log.d("KD", "sensC");
+		Log.d ("KD", "sensC");
 		if (event.sensor.getType () == Sensor.TYPE_ACCELEROMETER)
 		{
 			aX = event.values[1];
@@ -438,11 +404,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 			mZ = event.values[2];
 			hasM = true;
 		}
-		
+
 	}
-	
-	private float oq0=0,oq1=0,oq2=0,oq3=0;
+
+	private float oq0 = 0, oq1 = 0, oq2 = 0, oq3 = 0;
 	private boolean isStabilized = false;
+
 	public void calc ()
 	{
 		if (hasA && hasM && isStabilized)
@@ -451,98 +418,149 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 			if (lastCalc == 0)
 				lastCalc = ticks;
 			float diff = (float)(ticks - lastCalc) / 1000.0f;
-			
-			if(diff < 0.015)
-				return;
-			//Log.d ("KD",
-			//		String.format ("ax %10f, ay %10f, az %10f, mx %10f, my %10f, mz %10f, gx %10f, gy %10f, gz %10f", aX, aY, aZ, mX, mY, mZ, gX, gY, gZ));
-			//Log.d("KD", ticks+"      "+diff);
-			
-			lastCalc = ticks;
-			
-			final ByteBuffer bArray = ByteBuffer.allocate(9*4 + 1*8);
-			bArray.order(ByteOrder.LITTLE_ENDIAN);
-			bArray.putFloat(aX);
-			bArray.putFloat(aY);
-			bArray.putFloat(aZ);
-			bArray.putFloat(gX);
-			bArray.putFloat(gY);
-			bArray.putFloat(gZ);
-			bArray.putFloat(mX);
-			bArray.putFloat(mY);
-			bArray.putFloat(mZ);
-			bArray.putLong(ticks);
-			
-				Thread t = new Thread(
-				new Runnable() {	
-					@Override
-					public void run() {
-						DatagramPacket dp = new DatagramPacket(bArray.array(), 9*4 + 1*8);
-						try {
-							if(udpSocket == null)
-								udpSocket = new DatagramSocket(9999);
-							udpSocket.setBroadcast(true);
-							dp.setSocketAddress(new InetSocketAddress("192.168.2.200", 9999));
-							udpSocket.send(dp);
-						} catch (SocketException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-				});
-				t.start();
-		
-				mad.MadgwickAHRSupdate (gX, gY, gZ, aX, aY, aZ, mX, mY, mZ, diff);
 
-				gX = gY = gZ = 0;
-			//Log.d("KD", mad.q0 + " " +mad.q1 + " " +mad.q2 + " " +mad.q3);
-			
-		} else if (hasA && hasM && !isStabilized){
+			if (diff < 0.015)
+				return;
+
+			lastCalc = ticks;
+
+			mad.MadgwickAHRSupdate (gX, gY, gZ, aX, aY, aZ, mX, mY, mZ, diff);
+
+			ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8);
+			bArray.order (ByteOrder.LITTLE_ENDIAN);
+
+			bArray.put (Sender.TYPE_SENSORS);
+			bArray.putFloat (aX);
+			bArray.putFloat (aY);
+			bArray.putFloat (aZ);
+			bArray.putFloat (gX);
+			bArray.putFloat (gY);
+			bArray.putFloat (gZ);
+			bArray.putFloat (mX);
+			bArray.putFloat (mY);
+			bArray.putFloat (mZ);
+			bArray.putFloat (mad.q0);
+			bArray.putFloat (mad.q1);
+			bArray.putFloat (mad.q2);
+			bArray.putFloat (mad.q3);
+			bArray.putLong (ticks);
+
+			sender.sendData (bArray.array ());
+
+			gX = gY = gZ = 0;
+
+		}
+		else if (hasA && hasM && !isStabilized)
+		{
 			float diff = 0.0005f;
-			mad.MadgwickAHRSupdate(0, 0, 0, aX, aY, aZ, mX, mY, mZ, 0.02f * 100);
-			
-			Log.d("KD", ""+ (Math.abs(mad.q0 - oq0) <= diff) +" "+ (Math.abs(mad.q1 - oq1) <= diff) +" "+(Math.abs(mad.q2 - oq2) <= diff) +" "+(Math.abs(mad.q3 - oq3) <= diff));
-			
-			if( (Math.abs(mad.q0 - oq0) <= diff) && (Math.abs(mad.q1 - oq1) <= diff) &&(Math.abs(mad.q2 - oq2) <= diff) &&(Math.abs(mad.q3 - oq3) <= diff)){
+			mad.MadgwickAHRSupdate (0, 0, 0, aX, aY, aZ, mX, mY, mZ, 0.02f * 100);
+
+			Log.d ("KD",
+					"" + (Math.abs (mad.q0 - oq0) <= diff) + " "
+							+ (Math.abs (mad.q1 - oq1) <= diff) + " "
+							+ (Math.abs (mad.q2 - oq2) <= diff) + " "
+							+ (Math.abs (mad.q3 - oq3) <= diff));
+
+			if ((Math.abs (mad.q0 - oq0) <= diff)
+					&& (Math.abs (mad.q1 - oq1) <= diff)
+					&& (Math.abs (mad.q2 - oq2) <= diff)
+					&& (Math.abs (mad.q3 - oq3) <= diff))
+			{
 				isStabilized = true;
 			}
-			
+
 			oq0 = mad.q0;
 			oq1 = mad.q1;
 			oq2 = mad.q2;
 			oq3 = mad.q3;
 		}
+
+		//for (int i = 0; i < 1; i++)
+		//{
+		Vector3 snakePosNorm = new Vector3 (snakePos);
+		snakePosNorm.nor ();
+
+		// Log.d ("KD", "st " + leftPressed + " " + rightPressed +
+		// " " + lastPressed);
+		if (leftPressed && rightPressed)
+		{
+			snakeAngInc = lastPressed * 0.02f;
+		}
+		else if (leftPressed || rightPressed)
+		{
+			if (leftPressed)
+				snakeAngInc = -0.02f;
+			if (rightPressed)
+				snakeAngInc = 0.02f;
+		}
+		else
+		{
+			snakeAngInc = 0;
+		}
+
+		dir.rotateRad (snakePosNorm, snakeAngInc * 5);
+
+		Vector3 dir2 = new Vector3 (dir).mul (0.01f);
+		Vector3 newPt = new Vector3 (snakePos).add (dir2);
+		newPt.nor ();
+
+		dir = new Vector3 (newPt).sub (snakePos);
+		dir.nor ();
+
+		snakePos = newPt;
+		snakeTailPoints.add (snakePos);
+		if (snakeTailPoints.size () > 10)
+			snakeTailPoints.remove (0);
+
+		ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 3 * 4 + 3 * 4 * snakeTailPoints.size ());
+		bArray.order (ByteOrder.LITTLE_ENDIAN);
+
+		bArray.put (Sender.TYPE_OBJ);
+		bArray.putFloat (snakePosNorm.x);
+		bArray.putFloat (snakePosNorm.y);
+		bArray.putFloat (snakePosNorm.z);
+		for (int i = 0; i < snakeTailPoints.size (); i++)
+		{
+			bArray.putFloat (snakeTailPoints.get (i).x);
+			bArray.putFloat (snakeTailPoints.get (i).y);
+			bArray.putFloat (snakeTailPoints.get (i).z);
+		}
+		sender.sendData (bArray.array ());
+		//}
 	}
+
 	@Override
 	public boolean keyDown (int keycode)
 	{
-		if(keycode == Keys.BACK){
-			Gdx.input.setCatchBackKey(false);
-			game.setScreen(new MainMenu(game));
+		if (keycode == Keys.BACK)
+		{
+			Gdx.input.setCatchBackKey (false);
+			game.setScreen (new MainMenu (game));
 		}
 		return true;
 	}
+
 	@Override
 	public boolean keyTyped (char arg0)
 	{
 		// TODO Auto-generated method stub
 		return false;
 	}
+
 	@Override
 	public boolean keyUp (int arg0)
 	{
 		// TODO Auto-generated method stub
 		return false;
 	}
+
 	@Override
 	public boolean mouseMoved (int arg0, int arg1)
 	{
 		// TODO Auto-generated method stub
 		return false;
 	}
+
 	@Override
 	public boolean scrolled (int arg0)
 	{
@@ -556,7 +574,8 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 	@Override
 	public boolean touchDown (int arg0, int arg1, int arg2, int arg3)
 	{
-		//Log.d ("KD", "do " + leftPressed + " " + rightPressed + " " + lastPressed);
+		// Log.d ("KD", "do " + leftPressed + " " + rightPressed + " " +
+		// lastPressed);
 		if (arg0 < Gdx.app.getGraphics ().getWidth () / 2)
 		{
 			leftPressed = true;
@@ -569,16 +588,19 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener, I
 		}
 		return false;
 	}
+
 	@Override
 	public boolean touchDragged (int arg0, int arg1, int arg2)
 	{
 		// TODO Auto-generated method stub
 		return false;
 	}
+
 	@Override
 	public boolean touchUp (int arg0, int arg1, int arg2, int arg3)
 	{
-		//Log.d ("KD", "up " + leftPressed + " " + rightPressed + " " + lastPressed);
+		// Log.d ("KD", "up " + leftPressed + " " + rightPressed + " " +
+		// lastPressed);
 		if (arg0 < Gdx.app.getGraphics ().getWidth () / 2)
 			leftPressed = false;
 		else
