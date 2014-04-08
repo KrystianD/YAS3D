@@ -26,7 +26,7 @@
    <string>KDcopter</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="RemoteGL" name="visAccel" native="true">
+   <widget class="QWidget" name="visAccel" native="true">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -131,7 +131,7 @@
      <string>Altitude</string>
     </property>
    </widget>
-   <widget class="RemoteGL" name="visGyro" native="true">
+   <widget class="QWidget" name="visGyro" native="true">
     <property name="geometry">
      <rect>
       <x>250</x>
@@ -141,7 +141,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="RemoteGL" name="visGyroAccel" native="true">
+   <widget class="QWidget" name="visGyroAccel" native="true">
     <property name="geometry">
      <rect>
       <x>490</x>
@@ -151,7 +151,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="RemoteGL" name="visFull" native="true">
+   <widget class="QWidget" name="visFull" native="true">
     <property name="geometry">
      <rect>
       <x>250</x>
@@ -161,7 +161,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="RemoteGL" name="visAccelMagnet" native="true">
+   <widget class="QWidget" name="visAccelMagnet" native="true">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -175,12 +175,6 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
-  <customwidget>
-   <class>RemoteGL</class>
-   <extends>QWidget</extends>
-   <header>RemoteGL.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>RawReadsWidget</class>
    <extends>QWidget</extends>

@@ -10,18 +10,23 @@
 #include <QDebug>
 #include <QUdpSocket>
 #include <QDateTime>
+#include <QLayout>
 
 #include "MadgwickAHRS.h"
 #include "kutils.h"
-// #include <QGLContext>
+#include <QOpenGLContext>
 
 #include "utils.h"
 #include "globals.h"
+#include "RemoteGL.h"
 
 QUdpSocket m_udp;
 float minX = 30000, minY = 30000, minZ = 30000;
 float maxX = -30000, maxY = -30000, maxZ = -30000;
-// QOpenGLContext glContext;
+QOpenGLContext *glContext;
+
+RemoteGL *visAccel, *visGyro, *visGyroAccel, *visAccelMagnet, *visFull;
+
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent), ui(new Ui::MainWindow)
@@ -43,8 +48,41 @@ MainWindow::MainWindow(QWidget *parent)
 	
 	connect(&m_udp, SIGNAL(readyRead()), this, SLOT(processData()));
 	
-	// ui->visFull = new RemoteGL(&glContext, ui->centralWidget);
-	// ui->visFull->setGeometry(QRect(250, 230, 231, 211));
+	glContext= new QOpenGLContext();
+	QSurfaceFormat f;
+	f.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+	glContext->setFormat(f);
+qDebug ()<<"ctx"<<	glContext->create();
+
+
+	visAccel = new RemoteGL(glContext);
+	visAccelMagnet = new RemoteGL(glContext);
+	visFull = new RemoteGL(glContext);
+	visGyro = new RemoteGL(glContext);
+	visGyroAccel = new RemoteGL(glContext);
+
+	ui->visAccel->setLayout(new QHBoxLayout());
+	ui->visAccelMagnet->setLayout(new QHBoxLayout());
+	ui->visFull->setLayout(new QHBoxLayout());
+	ui->visGyro->setLayout(new QHBoxLayout());
+	ui->visGyroAccel->setLayout(new QHBoxLayout());
+
+	ui->visAccel->layout()->addWidget(QWidget::createWindowContainer(visAccel));
+	ui->visAccelMagnet->layout()->addWidget(QWidget::createWindowContainer(visAccelMagnet));
+	ui->visFull->layout()->addWidget(QWidget::createWindowContainer(visFull));
+	ui->visGyro->layout()->addWidget(QWidget::createWindowContainer(visGyro));
+	ui->visGyroAccel->layout()->addWidget(QWidget::createWindowContainer(visGyroAccel));
+
+
+	//visAccel->m_ctx->makeCurrent(visAccel);
+	//visAccel->initializeGL();
+//rgl->initializeOpenGLFunctions();
+
+	/*ui->visAccel->setContext(glContext);
+	ui->visAccelMagnet->setContext(glContext);
+	ui->visFull->setContext(glContext);
+	ui->visGyro->setContext(glContext);
+	ui->visGyroAccel->setContext(glContext);*/
 }
 
 MainWindow::~MainWindow()
@@ -114,14 +152,14 @@ void MainWindow::processSensorsData(TUdpDataSENSORS* data)
 	MadgwickAHRSupdate(m_accelMagnetQuat, 0, 0, 0, m_pdaData.ax, m_pdaData.ay, m_pdaData.az, m_pdaData.mx, m_pdaData.my, m_pdaData.mz, (float)diff / 1000.0f);
 	MadgwickAHRSupdate(m_fullQuat, m_pdaData.gx, m_pdaData.gy, m_pdaData.gz, m_pdaData.ax, m_pdaData.ay, m_pdaData.az, m_pdaData.mx, m_pdaData.my, m_pdaData.mz, (float)diff / 1000.0f);
 	
-	ui->visAccel->rotationQuat = m_accelQuat;
-	ui->visGyro->rotationQuat = m_gyroQuat;
-	ui->visGyroAccel->rotationQuat = m_gyroAccelQuat;
+	visAccel->rotationQuat = m_accelQuat;
+	visGyro->rotationQuat = m_gyroQuat;
+	visGyroAccel->rotationQuat = m_gyroAccelQuat;
 	
-	ui->visAccelMagnet->rotationQuat = QQuaternion::fromAxisAndAngle(0, 0, 1, -90);
-	ui->visAccelMagnet->rotationQuat *= m_accelMagnetQuat;
-	ui->visFull->rotationQuat = QQuaternion::fromAxisAndAngle(0, 0, 1, -90);
-	ui->visFull->rotationQuat *= m_fullQuat;
+	visAccelMagnet->rotationQuat = QQuaternion::fromAxisAndAngle(0, 0, 1, -90);
+	visAccelMagnet->rotationQuat *= m_accelMagnetQuat;
+	visFull->rotationQuat = QQuaternion::fromAxisAndAngle(0, 0, 1, -90);
+	visFull->rotationQuat *= m_fullQuat;
 	
 	ui->rawReads->updateInfo(m_pdaData);
 }
@@ -143,12 +181,19 @@ void MainWindow::draw()
 	
 	// updateInfo();
 	// qDebug() << "A";
-	
-	ui->visAccel->repaint();
-	ui->visAccelMagnet->repaint();
-	ui->visGyroAccel->repaint();
-	ui->visGyro->repaint();
-	ui->visFull->repaint();
+
+	//qDebug () << "go";
+	QCoreApplication::postEvent(visAccel, new QEvent(QEvent::UpdateRequest));
+	QCoreApplication::postEvent(visGyro, new QEvent(QEvent::UpdateRequest));
+	QCoreApplication::postEvent(visGyroAccel, new QEvent(QEvent::UpdateRequest));
+	QCoreApplication::postEvent(visAccelMagnet, new QEvent(QEvent::UpdateRequest));
+	QCoreApplication::postEvent(visFull, new QEvent(QEvent::UpdateRequest));
+	//rgl->paintGL();
+	/*ui->visAccel->updateGL();
+	ui->visAccelMagnet->updateGL();
+	ui->visGyroAccel->updateGL();
+	ui->visGyro->updateGL();
+	ui->visFull->updateGL();*/
 }
 void MainWindow::updateInfo()
 {

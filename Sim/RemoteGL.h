@@ -4,23 +4,31 @@
 #include <QGLWidget>
 #include <QQuaternion>
 #include <QTimer>
+#include <QOpenGLFunctions>
+#include <QWindow>
+#include <QOpenGLContext>
+#include <QOpenGLPaintDevice>
 
-class RemoteGL : public QGLWidget
+class RemoteGL : public QWindow, public QOpenGLFunctions
 {
 public:
-	RemoteGL (QWidget *parent = 0);
+	RemoteGL (QOpenGLContext *ctx, QWindow *parent = 0);
 	virtual ~RemoteGL () { }
 
 	QQuaternion rotationQuat;
 
-protected:
+public:
 	void initializeGL ();
-	void paintGL ();
+	void renderNow ();
 	void resizeGL (int width, int height);
 	void keyPressEvent (QKeyEvent *);
 
-private:
+	void exposeEvent(QExposeEvent *event);
+	bool event(QEvent *event);
+public:
 	QTimer tm;
+	QOpenGLContext *m_ctx;
+	QOpenGLPaintDevice *m_device;
 };
 
 #endif // REMOTEGL_H

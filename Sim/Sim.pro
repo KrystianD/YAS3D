@@ -21,7 +21,6 @@ SOURCES += main.cpp\
     QuadroGL.cpp \
     ReferenceWidget.cpp \
     kutils.cpp \
-    Widgets/RawReadsVisWidget.cpp \
     globals.cpp \
     MadgwickAHRS.cpp \
     RawReadsWidget.cpp
@@ -34,7 +33,6 @@ HEADERS  += MainWindow.h \
     ReferenceWidget.h \
     kutils.h \
     classes.h \
-    Widgets/RawReadsVisWidget.h \
     globals.h \
     MadgwickAHRS.h \
     RawReadsWidget.h
