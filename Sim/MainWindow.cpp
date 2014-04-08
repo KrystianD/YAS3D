@@ -1,9 +1,6 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
 #include <stdio.h>
 #include <cmath>
 
@@ -17,6 +14,7 @@
 
 #include "utils.h"
 #include "globals.h"
+#include <QDataStream>
 
 QUdpSocket m_udp;
 float minX = 30000, minY = 30000, minZ = 30000;
@@ -32,8 +30,6 @@ MainWindow::MainWindow(QWidget *parent)
 	m_tm.setInterval(1);
 	m_tm.start();*/
 	
-	ui->widget->installEventFilter(this);
-	
 	QTimer *tm = new QTimer(this);
 	connect(tm, SIGNAL(timeout()), this, SLOT(draw()));
 	tm->setInterval(1000 / 60);
@@ -42,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent)
 	m_udp.bind(9998);
 	
 	connect(&m_udp, SIGNAL(readyRead()), this, SLOT(processData()));
+	
+	ui->visWorld->pdaData = &m_pdaData;
 	
 	// ui->visFull = new RemoteGL(&glContext, ui->centralWidget);
 	// ui->visFull->setGeometry(QRect(250, 230, 231, 211));
@@ -64,22 +62,58 @@ void MainWindow::processData()
 		
 		m_udp.readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
 		
-		uint8_t *udpData = (uint8_t*)datagram.data();
+		char *udpData = (char*)datagram.data();
 		
 		switch (udpData[0])
 		{
 		case TYPE_SENSORS:
 			processSensorsData((TUdpDataSENSORS*)udpData);
 			break;
+		case TYPE_OBJ:
+		{
+			TUdpDataOBJ *d = (TUdpDataOBJ*)udpData;
+			
+			QByteArray b(udpData + sizeof(TUdpDataOBJ), datagram.size());
+			QDataStream ds(b);
+			ds.setByteOrder(QDataStream::LittleEndian);
+			ds.setFloatingPointPrecision(QDataStream::SinglePrecision);
+			
+			m_pdaData.playerPoints.clear();
+			
+			for (int i = 0; i < d->playerSize; i++)
+			{
+				float x, y, z;
+				ds >> x >> y >> z;
+				
+				QVector3D p(x, y, z);
+				m_pdaData.playerPoints.append(p);
+			}
+			
+			m_pdaData.foodPoints.clear();
+			
+			for (int i = 0; i < d->foodSize; i++)
+			{
+				float x, y, z;
+				ds >> x >> y >> z;
+				
+				QVector3D p(x, y, z);
+				m_pdaData.foodPoints.append(p);
+			}
+			
+			break;
+		}
+		case TYPE_STAB:
+			m_pdaData.sphereEnabled = udpData[1];
+			break;
 		}
 		cnt++;
 	}
-	qDebug() << "WQE" << cnt;
 }
 void MainWindow::processSensorsData(TUdpDataSENSORS* data)
 {
 	int32_t time = data->ticks;
 	
+	m_pdaData.sphereEnabled = data->sphereEnabled;
 	m_pdaData.ax = -data->ax;
 	m_pdaData.ay = -data->ay;
 	m_pdaData.az = -data->az;
@@ -89,6 +123,9 @@ void MainWindow::processSensorsData(TUdpDataSENSORS* data)
 	m_pdaData.mx = -data->mx;
 	m_pdaData.my = -data->my;
 	m_pdaData.mz = -data->mz;
+	
+	m_pdaData.worldQuat = QQuaternion(data->q0, data->q1, data->q2, data->q3);
+	
 	
 	if (m_pdaData.mx < minX) minX = m_pdaData.mx;
 	if (m_pdaData.my < minY) minY = m_pdaData.my;
@@ -105,7 +142,6 @@ void MainWindow::processSensorsData(TUdpDataSENSORS* data)
 		last = time;
 	int64_t diff = time - last;
 	last = time;
-	// qDebug() << time << diff;
 	
 	MadgwickAHRSupdateIMU(m_accelQuat, 0, 0, 0, m_pdaData.ax, m_pdaData.ay, m_pdaData.az, (float)diff / 1000.0f);
 	MadgwickAHRSupdateIMU(m_gyroQuat, m_pdaData.gx, m_pdaData.gy, m_pdaData.gz, 0, 0, 0, (float)diff / 1000.0f);
@@ -122,6 +158,10 @@ void MainWindow::processSensorsData(TUdpDataSENSORS* data)
 	ui->visAccelMagnet->rotationQuat *= m_accelMagnetQuat;
 	ui->visFull->rotationQuat = QQuaternion::fromAxisAndAngle(0, 0, 1, -90);
 	ui->visFull->rotationQuat *= m_fullQuat;
+	
+	ui->visWorld->rotationQuat = m_pdaData.worldQuat.conjugate();
+	static float q=0;qDebug () << q;
+	ui->visWorld->rotationQuat *= QQuaternion::fromAxisAndAngle(0, 1, 1, q+=1);
 	
 	ui->rawReads->updateInfo(m_pdaData);
 }
@@ -144,12 +184,46 @@ void MainWindow::draw()
 	// updateInfo();
 	// qDebug() << "A";
 	
-	ui->visAccel->updateGL();
-	ui->visAccelMagnet->updateGL();
-	ui->visGyroAccel->updateGL();
-	ui->visGyro->updateGL();
-	ui->visFull->updateGL();
+	if (!m_pdaData.sphereEnabled)
+	{
+		ui->visAccel->setVisible(true);
+		ui->visAccelMagnet->setVisible(true);
+		ui->visGyroAccel->setVisible(true);
+		ui->visGyro->setVisible(true);
+		ui->visFull->setVisible(true);
+		ui->visWorld->setVisible(false);
+		ui->visAccel->updateGL();
+		ui->visAccelMagnet->updateGL();
+		ui->visGyroAccel->updateGL();
+		ui->visGyro->updateGL();
+		ui->visFull->updateGL();
+	}
+	else
+	{
+		ui->visAccel->setVisible(false);
+		ui->visAccelMagnet->setVisible(false);
+		ui->visGyroAccel->setVisible(false);
+		ui->visGyro->setVisible(false);
+		ui->visFull->setVisible(false);
+		ui->visWorld->setVisible(true);
+		ui->visWorld->updateGL();
+	}
 }
 void MainWindow::updateInfo()
+{
+}
+void MainWindow::on_pbAccel_clicked()
+{
+}
+void MainWindow::on_pbGyro_clicked()
+{
+}
+void MainWindow::on_pbGyroAccel_clicked()
+{
+}
+void MainWindow::on_pbAccelMagnet_clicked()
+{
+}
+void MainWindow::on_pbFull_clicked()
 {
 }

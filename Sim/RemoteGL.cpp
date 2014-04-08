@@ -12,7 +12,7 @@
 #include <GL/glu.h>
 #include <math.h>
 
-#include "/home/krystiand/prog/kdlibs/kutils.h"
+#include "kutils.h"
 #include "utils.h"
 
 const QVector3D offset(0.0f, -15.0f, -35.0f);

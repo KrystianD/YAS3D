@@ -14,7 +14,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-#include "/home/krystiand/prog/kdlibs/kutils.h"
+#include "kutils.h"
 #include "utils.h"
 
 //const QVector3D offset (2.0f, -10.0f, -40.0f);
@@ -45,7 +45,7 @@ void QuadroGL::paintGL ()
 	QMatrix4x4 mrot = realToOGL (quatToRotMatrix (rotationQuat));
 	glLoadIdentity ();
 	glTranslatef (offset.x (), offset.y (), offset.z ());
-	glMultTransposeMatrixd (mrot.constData ());
+	//glMultTransposeMatrixd (mrot.constData ());
 
 	QColor colors[] = { Qt::red, Qt::red, Qt::black, Qt::black, Qt::green, Qt::green };
 	drawBox (colors, 8.0, 1.0, 8.0, offset);
@@ -63,7 +63,7 @@ void QuadroGL::paintGL ()
 	QMatrix4x4 mrot2 = realToOGL (quatToRotMatrix (destRotationQuat));
 	glLoadIdentity ();
 	glTranslatef (offset.x (), offset.y (), offset.z ());
-	glMultTransposeMatrixd (mrot2.constData ());
+	//glMultTransposeMatrixd (mrot2.constData ());
 
 	QColor colors2[] = { Qt::red, Qt::red, Qt::black, Qt::black, Qt::green, Qt::green };
 	for (int i = 0; i < 6; i++) colors2[i].setAlpha (130);

@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = KDcopter
 TEMPLATE = app
 
-LIBS += -lusb-1.0 -lGLU
+LIBS += -lGLU32 -lfreeglut
 
 SOURCES += main.cpp\
         MainWindow.cpp \
@@ -21,10 +21,10 @@ SOURCES += main.cpp\
     QuadroGL.cpp \
     ReferenceWidget.cpp \
     kutils.cpp \
-    Widgets/RawReadsVisWidget.cpp \
     globals.cpp \
     MadgwickAHRS.cpp \
-    RawReadsWidget.cpp
+    RawReadsWidget.cpp \
+    WorldGL.cpp
 
 HEADERS  += MainWindow.h \
     RemoteGL.h \
@@ -34,10 +34,10 @@ HEADERS  += MainWindow.h \
     ReferenceWidget.h \
     kutils.h \
     classes.h \
-    Widgets/RawReadsVisWidget.h \
     globals.h \
     MadgwickAHRS.h \
-    RawReadsWidget.h
+    RawReadsWidget.h \
+    WorldGL.h
 
 FORMS    += MainWindow.ui \
     RawReadsWidget.ui

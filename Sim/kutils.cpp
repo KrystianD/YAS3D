@@ -27,9 +27,10 @@ uint32_t getTicksUS ()
 }
 std::string getErrnoString ()
 {
-  char buf[256];
+	/*char buf[256];
   char *str = strerror_r (errno, (char*)&buf, 256);
-  return str;
+	return str;*/
+	return "";
 }
 
 vector<std::string> explode (const std::string& str, const std::string& delim, size_t maxCount, size_t start)

@@ -6,7 +6,6 @@
 #include <QQuaternion>
 #include <QFile>
 
-#include <libusb-1.0/libusb.h>
 #include "globals.h"
 #include "classes.h"
 
@@ -27,6 +26,16 @@ private slots:
 	void processData();
 	void draw();
 	
+	void on_pbAccel_clicked();
+
+	void on_pbGyro_clicked();
+
+	void on_pbGyroAccel_clicked();
+
+	void on_pbAccelMagnet_clicked();
+
+	void on_pbFull_clicked();
+
 private:
 	Ui::MainWindow *ui;
 	
