@@ -1,14 +1,7 @@
 package pl.jakd.tg_project;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Random;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -50,35 +43,40 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	public ModelBatch modelBatch;
 	public Model model[] = new Model[10];
 	public ModelInstance instance[] = new ModelInstance[10];
-	public Model model2, modelSnakePart, modelFood;
-	public ModelInstance instance2, instSnakePart, instFood;
+	public ModelInstance worldInstance;
 	public Environment environment;
 	public CameraInputController camController;
 	public BitmapFont font;
 	public SpriteBatch batch;
 
-	private Quaternion quat = new Quaternion ();
-
+	private Quaternion worldQuat = new Quaternion ();
 	private GameSnake game;
-	private Context ctx;
 	private SensorManager mSensorManager;
 	private Sensor mAccel, mGyro, mMagnet;
 
-	private Sender sender = new Sender ();
+	private Timer calcTimer = new Timer ();
+
+	private Sender sender;
+	private Snake player;
+	private FoodManager foodManager;
+
+	private byte type;
 
 	float aX = 0, aY = 0, aZ = 0, gX = 0, gY = 0, gZ = 0, mX = 0, mY = 0,
 			mZ = 0;
 	Boolean hasA = false, hasG = false, hasM = false;
 	Mad mad;
 
-	public LevelScreen (GameSnake game, Context ctx)
+	public LevelScreen (GameSnake game, Context ctx, Sender sender, byte type)
 	{
 		this.game = game;
-		this.ctx = ctx;
 
 		mad = new Mad ();
 		// System.loadLibrary ("mad");
 		Gdx.input.setCatchBackKey (true);
+
+		this.sender = sender;
+		this.type = type;
 
 		mSensorManager = (SensorManager)ctx
 				.getSystemService (Context.SENSOR_SERVICE);
@@ -94,19 +92,14 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				SensorManager.SENSOR_DELAY_FASTEST);
 	}
 
-	Vector3 foodPoints[] = new Vector3[100];
-
-	Vector3 dir = new Vector3 (0, 0, 1);
-	Vector3 snakePos = new Vector3 (1, 0, 0.2f);
-
-	final float snakeSphereSize = 0.5f / 15f;
-	final float foodSphereSize = 0.5f / 15f;
-
 	PointLight light = new PointLight ();
 
 	@Override
 	public void show ()
 	{
+		Log.d ("KD", "SHOW!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		Log.d ("KD", this.toString ());
+
 		font = new BitmapFont ();
 		batch = new SpriteBatch ();
 		modelBatch = new ModelBatch ();
@@ -133,7 +126,9 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		Gdx.input.setInputProcessor (this);
 
 		ModelBuilder modelBuilder = new ModelBuilder ();
-		model[0] = modelBuilder.createBox (1f, 1f, 5f, new Material (
+
+		//cross
+		/*model[0] = modelBuilder.createBox (1f, 1f, 5f, new Material (
 				ColorAttribute.createDiffuse (Color.RED)), Usage.Position
 				| Usage.Normal);
 		instance[0] = new ModelInstance (model[0]);
@@ -147,28 +142,37 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				ColorAttribute.createDiffuse (Color.BLUE)), Usage.Position
 				| Usage.Normal);
 		instance[2] = new ModelInstance (model[2]);
+		 */
 
 		// model2 = modelBuilder.createBox (2f, 2f, 2f, new Material
 		// (ColorAttribute.createDiffuse (Color.RED)), Usage.Position |
 		// Usage.Normal);
 		// instance2 = new ModelInstance (model2);
 
-		model2 = modelBuilder.createSphere (0.1f, 0.1f, 0.1f, 10, 10,
+		//Create world
+
+		Model worldModel = modelBuilder.createSphere (0.1f, 0.1f, 0.1f, 10, 10,
 				new Material (ColorAttribute.createDiffuse (Color.BLUE)),
 				Usage.Position | Usage.Normal);
-		instance2 = new ModelInstance (model2);
+		worldInstance = new ModelInstance (worldModel);
 
-		modelSnakePart = modelBuilder.createSphere (snakeSphereSize,
-				snakeSphereSize, snakeSphereSize, 10, 10, new Material (
+		//Create player
+		Model modelPlayerSnakePart = modelBuilder.createSphere (Snake.SNAKE_SPHERE_SIZE,
+				Snake.SNAKE_SPHERE_SIZE, Snake.SNAKE_SPHERE_SIZE, 10, 10, new Material (
 						ColorAttribute.createDiffuse (Color.GREEN)),
 				Usage.Position | Usage.Normal);
-		instSnakePart = new ModelInstance (modelSnakePart);
+		ModelInstance instSnakePart = new ModelInstance (modelPlayerSnakePart);
+		player = new Snake (new Vector3 (1, 0, 0.2f), new Vector3 (0, 0, 1), instSnakePart);
 
-		modelFood = modelBuilder.createSphere (foodSphereSize, foodSphereSize,
-				foodSphereSize, 10, 10,
+		//TODO Create opponents
+
+		//Create food
+		Model foodModel = modelBuilder.createSphere (FoodManager.FOOD_SPHERE_SIZE, FoodManager.FOOD_SPHERE_SIZE,
+				FoodManager.FOOD_SPHERE_SIZE, 10, 10,
 				new Material (ColorAttribute.createDiffuse (Color.RED)),
 				Usage.Position | Usage.Normal);
-		instFood = new ModelInstance (modelFood);
+		ModelInstance foodInstance = new ModelInstance (foodModel);
+		foodManager = new FoodManager (100, foodInstance);
 
 		environment = new Environment ();
 		environment.set (new ColorAttribute (ColorAttribute.AmbientLight, 0.4f,
@@ -177,24 +181,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		// -0.8f, -0.2f));
 		environment.add (light.set (0.8f, 0.8f, 0.8f, 2f, 0f, 0f, 5));
 
-		Random r = new Random ();
-
-		for (int i = 0; i < 100; i++)
+		calcTimer.scheduleTask (new Timer.Task ()
 		{
-			foodPoints[i] = new Vector3 (r.nextFloat () * 2 - 1,
-					r.nextFloat () * 2 - 1, r.nextFloat () * 2 - 1);
-			foodPoints[i] = foodPoints[i].nor ();
-			// foodPoints[i] = foodPoints[i].mul (20);
-		}
-
-		Timer.schedule (new Timer.Task ()
-		{
-
 			@Override
 			public void run ()
 			{
 				calc ();
-
 			}
 		}, 0.02f, 0.02f);
 	}
@@ -202,14 +194,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public void dispose ()
 	{
-		sender.close ();
 		modelBatch.dispose ();
 	}
 
 	@Override
 	public void pause ()
 	{
-
 	}
 
 	Vector2 latlongToMeters (Vector2 pos)
@@ -220,8 +210,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	}
 
 	float x = 0;
-	ArrayList<Vector3> snakeTailPoints = new ArrayList<Vector3> ();
-	float snakeAng = 0, snakeAngInc = 0;
 
 	@Override
 	public void render (float delta)
@@ -231,57 +219,30 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				Gdx.graphics.getHeight ());
 		Gdx.gl.glClear (GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-		quat.set (mad.q1, mad.q2, mad.q3, -mad.q0);
-
-		batch.begin ();
-		font.drawMultiLine (batch, getOrientationString (), 20,
-				Gdx.graphics.getHeight () - 10);
-		batch.end ();
+		worldQuat.set (mad.q1, mad.q2, mad.q3, -mad.q0);
 
 		Vector3 lightPos = new Vector3 (2, 0, 0);
-		lightPos.mul (quat);
+		lightPos.mul (worldQuat);
 		light.position.set (lightPos);
 
 		modelBatch.begin (cam);
 
-		for (int i = 0; i < 3; i++)
+		/*for (int i = 0; i < 3; i++)
 		{
 			instance[i].transform.idt ();
 			instance[i].transform.scl (0.3f);
-			instance[i].transform.rotate (quat);
+			instance[i].transform.rotate (worldQuat);
 			// modelBatch.render (instance[i], environment);
-		}
+		}*/
 
-		for (int i = 100 - 1; i >= 0; i--)
-		{
-			float lensq = new Vector3 (snakePos).sub (foodPoints[i]).len2 ();
+		player.render (modelBatch, worldQuat, environment);
 
-			float maxDiff = foodSphereSize / 2f + snakeSphereSize / 2f;
-			if (lensq < maxDiff * maxDiff)
-			{
-				foodPoints[i].x = 10000;
+		foodManager.render (modelBatch, worldQuat, environment);
 
-				continue;
-			}
-			instFood.transform.idt ();
-			instFood.transform.rotate (quat);
-			instFood.transform.translate (foodPoints[i]);
-			modelBatch.render (instFood, environment);
-		}
-
-		for (int i = 0; i < snakeTailPoints.size (); i++)
-		{
-			instSnakePart.transform.idt ();
-			instSnakePart.transform.rotate (quat);
-			instSnakePart.transform.translate (snakeTailPoints.get (i));
-
-			// instSnakePart.transform.scale (1, 1.0f / 5.0f, 1);
-			modelBatch.render (instSnakePart, environment);
-		}
-
-		instance[1].transform.idt ();
+		/*instance[1].transform.idt ();
 		instance[1].transform.translate (-15f, 0, 0);
 		modelBatch.render (instance[1], environment);
+		 */
 
 		/*
 		 * Vector3 ang = latlongToMeters (new Vector2 (x, 0.3f));
@@ -355,22 +316,9 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 	}
 
-	private String getOrientationString ()
-	{
-		StringBuilder builder = new StringBuilder ();
-		builder.append ("\nazimuth: ");
-		builder.append ((int)Gdx.input.getAzimuth ());
-		builder.append ("\npitch: ");
-		builder.append ((int)Gdx.input.getPitch ());
-		builder.append ("\nroll: ");
-		builder.append ((int)Gdx.input.getRoll ());
-		return builder.toString ();
-	}
-
 	@Override
 	public void onAccuracyChanged (Sensor sensor, int accuracy)
 	{
-		// TODO Auto-generated method stub
 
 	}
 
@@ -382,7 +330,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public void onSensorChanged (SensorEvent event)
 	{
-		Log.d ("KD", "sensC");
 		if (event.sensor.getType () == Sensor.TYPE_ACCELEROMETER)
 		{
 			aX = event.values[1];
@@ -412,9 +359,10 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 	public void calc ()
 	{
+		long ticks = System.currentTimeMillis ();
+		//calc World orientation
 		if (hasA && hasM && isStabilized)
 		{
-			long ticks = System.currentTimeMillis ();
 			if (lastCalc == 0)
 				lastCalc = ticks;
 			float diff = (float)(ticks - lastCalc) / 1000.0f;
@@ -426,7 +374,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 			mad.MadgwickAHRSupdate (gX, gY, gZ, aX, aY, aZ, mX, mY, mZ, diff);
 
-			ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8);
+			ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2);
 			bArray.order (ByteOrder.LITTLE_ENDIAN);
 
 			bArray.put (Sender.TYPE_SENSORS);
@@ -444,22 +392,26 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			bArray.putFloat (mad.q2);
 			bArray.putFloat (mad.q3);
 			bArray.putLong (ticks);
+			bArray.put (type);
+			bArray.put (isStabilized ? (byte)1 : (byte)0);
 
 			sender.sendData (bArray.array ());
 
 			gX = gY = gZ = 0;
 
 		}
+		//stabilize World
 		else if (hasA && hasM && !isStabilized)
 		{
 			float diff = 0.0005f;
 			mad.MadgwickAHRSupdate (0, 0, 0, aX, aY, aZ, mX, mY, mZ, 0.02f * 100);
 
-			Log.d ("KD",
+			/*Log.d ("KD",
 					"" + (Math.abs (mad.q0 - oq0) <= diff) + " "
 							+ (Math.abs (mad.q1 - oq1) <= diff) + " "
 							+ (Math.abs (mad.q2 - oq2) <= diff) + " "
 							+ (Math.abs (mad.q3 - oq3) <= diff));
+			*/
 
 			if ((Math.abs (mad.q0 - oq0) <= diff)
 					&& (Math.abs (mad.q1 - oq1) <= diff)
@@ -473,60 +425,60 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			oq1 = mad.q1;
 			oq2 = mad.q2;
 			oq3 = mad.q3;
+			
+			ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2);
+			bArray.order (ByteOrder.LITTLE_ENDIAN);
+
+			bArray.put (Sender.TYPE_SENSORS);
+			bArray.putFloat (aX);
+			bArray.putFloat (aY);
+			bArray.putFloat (aZ);
+			bArray.putFloat (gX);
+			bArray.putFloat (gY);
+			bArray.putFloat (gZ);
+			bArray.putFloat (mX);
+			bArray.putFloat (mY);
+			bArray.putFloat (mZ);
+			bArray.putFloat (mad.q0);
+			bArray.putFloat (mad.q1);
+			bArray.putFloat (mad.q2);
+			bArray.putFloat (mad.q3);
+			bArray.putLong (ticks);
+			bArray.put (type);
+			bArray.put (isStabilized ? (byte)1 : (byte)0);
+
+			sender.sendData (bArray.array ());
 		}
 
-		//for (int i = 0; i < 1; i++)
-		//{
-		Vector3 snakePosNorm = new Vector3 (snakePos);
-		snakePosNorm.nor ();
+		// calculate player position
+		player.calc (lastPressed, leftPressed, rightPressed);
 
-		// Log.d ("KD", "st " + leftPressed + " " + rightPressed +
-		// " " + lastPressed);
-		if (leftPressed && rightPressed)
-		{
-			snakeAngInc = lastPressed * 0.02f;
-		}
-		else if (leftPressed || rightPressed)
-		{
-			if (leftPressed)
-				snakeAngInc = -0.02f;
-			if (rightPressed)
-				snakeAngInc = 0.02f;
-		}
-		else
-		{
-			snakeAngInc = 0;
-		}
+		//check food collision
 
-		dir.rotateRad (snakePosNorm, snakeAngInc * 5);
+		foodManager.checkCollison (player);
 
-		Vector3 dir2 = new Vector3 (dir).mul (0.01f);
-		Vector3 newPt = new Vector3 (snakePos).add (dir2);
-		newPt.nor ();
-
-		dir = new Vector3 (newPt).sub (snakePos);
-		dir.nor ();
-
-		snakePos = newPt;
-		snakeTailPoints.add (snakePos);
-		if (snakeTailPoints.size () > 10)
-			snakeTailPoints.remove (0);
-
-		ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 3 * 4 + 3 * 4 * snakeTailPoints.size ());
+		// send data 
+		ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 2 * 2 + 3 * 4 * player.tail.size () + 3 * 4 * foodManager.foodPositions.size ());
 		bArray.order (ByteOrder.LITTLE_ENDIAN);
 
 		bArray.put (Sender.TYPE_OBJ);
-		bArray.putFloat (snakePosNorm.x);
-		bArray.putFloat (snakePosNorm.y);
-		bArray.putFloat (snakePosNorm.z);
-		for (int i = 0; i < snakeTailPoints.size (); i++)
+		bArray.putShort ((short)player.tail.size ());
+		bArray.putShort ((short)foodManager.foodPositions.size ());
+		
+		for (int i = 0; i < player.tail.size (); i++)
 		{
-			bArray.putFloat (snakeTailPoints.get (i).x);
-			bArray.putFloat (snakeTailPoints.get (i).y);
-			bArray.putFloat (snakeTailPoints.get (i).z);
+			bArray.putFloat (player.tail.get (i).x);
+			bArray.putFloat (player.tail.get (i).y);
+			bArray.putFloat (player.tail.get (i).z);
+		}
+		for (int i = 0; i < foodManager.foodPositions.size (); i++)
+		{
+			bArray.putFloat (foodManager.foodPositions.get (i).x);
+			bArray.putFloat (foodManager.foodPositions.get (i).y);
+			bArray.putFloat (foodManager.foodPositions.get (i).z);
 		}
 		sender.sendData (bArray.array ());
-		//}
+
 	}
 
 	@Override
@@ -543,33 +495,33 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public boolean keyTyped (char arg0)
 	{
-		// TODO Auto-generated method stub
+
 		return false;
 	}
 
 	@Override
 	public boolean keyUp (int arg0)
 	{
-		// TODO Auto-generated method stub
+
 		return false;
 	}
 
 	@Override
 	public boolean mouseMoved (int arg0, int arg1)
 	{
-		// TODO Auto-generated method stub
+
 		return false;
 	}
 
 	@Override
 	public boolean scrolled (int arg0)
 	{
-		// TODO Auto-generated method stub
+
 		return false;
 	}
 
-	Boolean leftPressed = false, rightPressed = false;
-	int lastPressed = 0;
+	private boolean leftPressed = false, rightPressed = false;
+	private int lastPressed = 0;
 
 	@Override
 	public boolean touchDown (int arg0, int arg1, int arg2, int arg3)
@@ -592,7 +544,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public boolean touchDragged (int arg0, int arg1, int arg2)
 	{
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -606,5 +557,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		else
 			rightPressed = false;
 		return false;
+	}
+
+	@Override
+	public void hide ()
+	{
+		calcTimer.stop ();
+		calcTimer.clear ();
 	}
 }

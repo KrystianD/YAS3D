@@ -6,6 +6,8 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 
+import android.util.Log;
+
 public class Sender
 {
 	public static final int PORT = 9999;
@@ -13,8 +15,9 @@ public class Sender
 
 	public static final byte TYPE_SENSORS = 0;
 	public static final byte TYPE_OBJ = 1;
+	public static final byte TYPE_STABILIZING = 2;
 
-	private DatagramSocket udpSocket;
+	private DatagramSocket udpSocket = null;
 
 	public Sender ()
 	{
@@ -40,7 +43,7 @@ public class Sender
 						data.length);
 				try
 				{
-					if (udpSocket == null || udpSocket.isClosed ())
+					if (udpSocket == null)
 					{
 						udpSocket = new DatagramSocket (PORT);
 						udpSocket.setBroadcast (true);
@@ -66,7 +69,9 @@ public class Sender
 
 	public void close ()
 	{
+		udpSocket.disconnect ();
 		udpSocket.close ();
+		udpSocket = null;
 	}
 
 }
