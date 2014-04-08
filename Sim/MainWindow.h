@@ -12,7 +12,7 @@
 
 namespace Ui
 {
-	class MainWindow;
+class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -20,21 +20,26 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 	
 public:
-	explicit MainWindow (QWidget *parent = 0);
-	~MainWindow ();
-
+	explicit MainWindow(QWidget *parent = 0);
+	~MainWindow();
+	
 private slots:
-	void processData ();
-
+	void processData();
+	void draw();
+	
 private:
 	Ui::MainWindow *ui;
-
+	
 	QTimer m_tm;
+	TData m_pdaData;
 
-	bool eventFilter (QObject *sender, QEvent *event);
-
-	void draw ();
-	void updateInfo ();
+	QQuaternion m_accelQuat, m_gyroQuat, m_gyroAccelQuat, m_accelMagnetQuat, m_fullQuat;
+	
+	bool eventFilter(QObject *sender, QEvent *event);
+	
+	void updateInfo();
+	
+	void processSensorsData(TUdpDataSENSORS* data);
 };
 
 #endif // MAINWINDOW_H

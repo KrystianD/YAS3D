@@ -105,3 +105,29 @@ void drawBox (QColor colors[], float w, float h, float d, QVector3D offset)
 		glVertex3f (-w, -h, d);
 	glEnd();
 }
+
+QQuaternion FromEuler(float pitch, float yaw, float roll)
+{
+	// Basically we create 3 Quaternions, one for pitch, one for yaw, one for roll
+	// and multiply those together.
+	// the calculation below does the same, just shorter
+	
+	float p = pitch / 2.0;
+	float ya = yaw / 2.0;
+	float r = roll / 2.0;
+	
+	float sinp = sin(p);
+	float siny = sin(ya);
+	float sinr = sin(r);
+	float cosp = cos(p);
+	float cosy = cos(ya);
+	float cosr = cos(r);
+	
+	float x = sinr * cosp * cosy - cosr * sinp * siny;
+	float y = cosr * sinp * cosy + sinr * cosp * siny;
+	float z = cosr * cosp * siny - sinr * sinp * cosy;
+	float w = cosr * cosp * cosy + sinr * sinp * siny;
+	
+	return QQuaternion(w, x, y, z);
+}
+

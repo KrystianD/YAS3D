@@ -1,5 +1,5 @@
-#ifndef REMOTEWIDGET_H
-#define REMOTEWIDGET_H
+#ifndef RawReadsWidget_H
+#define RawReadsWidget_H
 
 #include <QWidget>
 
@@ -7,21 +7,21 @@
 
 namespace Ui
 {
-	class RemoteWidget;
+	class RawReadsWidget;
 }
 
-class RemoteWidget : public QWidget
+class RawReadsWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
-	explicit RemoteWidget (QWidget* parent = 0);
-	~RemoteWidget ();
+	explicit RawReadsWidget (QWidget* parent = 0);
+	~RawReadsWidget ();
 
 	void updateInfo (const TData& data);
 
 private:
-	Ui::RemoteWidget *ui;
+	Ui::RawReadsWidget *ui;
 
 	bool eventFilter (QObject* sender, QEvent* event);
 };

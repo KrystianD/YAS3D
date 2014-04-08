@@ -19,31 +19,28 @@ SOURCES += main.cpp\
     utils.cpp \
     UsbRFM70.cpp \
     QuadroGL.cpp \
-    MotorsWidget.cpp \
     ReferenceWidget.cpp \
     kutils.cpp \
-    RemoteWidget.cpp \
     Widgets/RawReadsVisWidget.cpp \
     globals.cpp \
-    MadgwickAHRS.cpp
+    MadgwickAHRS.cpp \
+    RawReadsWidget.cpp
 
 HEADERS  += MainWindow.h \
     RemoteGL.h \
     utils.h \
     UsbRFM70.h \
     QuadroGL.h \
-    MotorsWidget.h \
     ReferenceWidget.h \
     kutils.h \
-    RemoteWidget.h \
     classes.h \
     Widgets/RawReadsVisWidget.h \
     globals.h \
-    MadgwickAHRS.h
+    MadgwickAHRS.h \
+    RawReadsWidget.h
 
 FORMS    += MainWindow.ui \
-    RemoteWidget.ui \
-    Widgets/RawReadsVisWidget.ui
+    RawReadsWidget.ui
 
 OTHER_FILES += \
     old.txt
