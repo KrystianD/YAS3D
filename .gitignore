@@ -28,3 +28,4 @@ Makefile
 *-build-*
 *.dbm
 *.pem
+.settings/
