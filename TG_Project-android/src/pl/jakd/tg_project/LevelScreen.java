@@ -484,15 +484,25 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		player.calc (snakeAngInc);
 
 		//check player collision
-		foodManager.checkCollison (player);
+		if (foodManager.checkCollison (player))
+		{
+			player.grow();
+		}
 
 		//calc enemies
 		for (Enemy e : enemies)
 		{
-			if (foodManager.checkCollison (e) || e.currentTarget == null)
+			boolean collided = foodManager.checkCollison (e);
+
+			if (collided || e.currentTarget == null)
 			{
+				if (collided)
+				{
+					e.grow();
+				}
 				e.currentTarget = foodManager.foodPositions.get (rand.nextInt () % foodManager.foodPositions.size ());
 			}
+
 			if (e.currentTarget.dot (e.moveDir) > 0)
 			{
 				e.calc (0.02f);

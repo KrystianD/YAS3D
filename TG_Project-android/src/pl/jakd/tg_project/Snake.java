@@ -11,12 +11,13 @@ import com.badlogic.gdx.math.Vector3;
 public abstract class Snake
 {
 	public static final float SNAKE_SPHERE_SIZE = 0.5f / 15f;
-
+	
 	public ArrayList<Vector3> tail = new ArrayList<Vector3> ();
 
-	protected Vector3 moveDir;
+	public Vector3 moveDir;
 	private ModelInstance snakePartInstance;
-
+	private short length = 2; // start length
+	
 	public Snake (Vector3 startPos, Vector3 startDir, ModelInstance snakePartInstance)
 	{
 		tail.add (startPos);
@@ -56,13 +57,17 @@ public abstract class Snake
 		moveDir.nor ();
 
 		tail.add (0, newPt);
-		if (tail.size () > 50)
+		if (tail.size () > length)
 			tail.remove (tail.size () - 1);
 	}
-
+	
 	public Vector3 getCurrentPosition ()
 	{
 		return tail.get (0);
+	}
+	
+	public void grow(){
+		length+=5;
 	}
 
 }
