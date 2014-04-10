@@ -41,13 +41,13 @@ public class FoodManager
 		}
 	}
 
-	public void checkCollison (Snake snake)
+	public boolean checkCollison (Snake snake)
 	{
 		for (int i = 0; i < foodPositions.size (); i++)
 		{
 			float lensq = new Vector3 (snake.getCurrentPosition ()).sub (foodPositions.get (i)).len2 ();
 
-			float maxDiff = FOOD_SPHERE_SIZE / 2f + Snake.SNAKE_SPHERE_SIZE / 2f;
+			float maxDiff = FOOD_SPHERE_SIZE / 2f + PlayerSnake.SNAKE_SPHERE_SIZE / 2f;
 			maxDiff *= 1.1;
 			if (lensq < maxDiff * maxDiff)
 			{
@@ -56,8 +56,10 @@ public class FoodManager
 				food.y = rand.nextFloat () * 2 - 1;
 				food.z = rand.nextFloat () * 2 - 1;
 				food.nor ();
+				return true;
 			}
 		}
+		return false;
 	}
 
 }

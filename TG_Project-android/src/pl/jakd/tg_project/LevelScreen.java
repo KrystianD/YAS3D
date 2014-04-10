@@ -2,6 +2,8 @@ package pl.jakd.tg_project;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Random;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -55,10 +57,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	private Sensor mAccel, mGyro, mMagnet;
 
 	private Timer calcTimer = new Timer ();
+	private Random rand = new Random ();
 
 	private Sender sender;
-	private Snake player;
+	private PlayerSnake player;
 	private FoodManager foodManager;
+	private ArrayList<Enemy> enemies = new ArrayList<Enemy> ();
 
 	private byte type;
 
@@ -157,14 +161,23 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		worldInstance = new ModelInstance (worldModel);
 
 		//Create player
-		Model modelPlayerSnakePart = modelBuilder.createSphere (Snake.SNAKE_SPHERE_SIZE,
-				Snake.SNAKE_SPHERE_SIZE, Snake.SNAKE_SPHERE_SIZE, 10, 10, new Material (
+		Model modelPlayerSnakePart = modelBuilder.createSphere (PlayerSnake.SNAKE_SPHERE_SIZE,
+				PlayerSnake.SNAKE_SPHERE_SIZE, PlayerSnake.SNAKE_SPHERE_SIZE, 10, 10, new Material (
 						ColorAttribute.createDiffuse (Color.GREEN)),
 				Usage.Position | Usage.Normal);
 		ModelInstance instSnakePart = new ModelInstance (modelPlayerSnakePart);
-		player = new Snake (new Vector3 (1, 0, 0.2f), new Vector3 (0, 0, 1), instSnakePart);
+		player = new PlayerSnake (new Vector3 (1, 0, 0.2f), new Vector3 (0, 0, 1), instSnakePart);
 
-		//TODO Create opponents
+		//Create opponents
+		Model modelEnemySnakePart = modelBuilder.createSphere (PlayerSnake.SNAKE_SPHERE_SIZE,
+				PlayerSnake.SNAKE_SPHERE_SIZE, PlayerSnake.SNAKE_SPHERE_SIZE, 10, 10, new Material (
+						ColorAttribute.createDiffuse (Color.BLUE)),
+				Usage.Position | Usage.Normal);
+		ModelInstance instEnemySnakePart = new ModelInstance (modelEnemySnakePart);
+		for (int i = 0; i < 2; i++)
+		{
+			enemies.add (new Enemy (new Vector3 (1, i, 0.2f), new Vector3 (0, 0, 1), instEnemySnakePart));
+		}
 
 		//Create food
 		Model foodModel = modelBuilder.createSphere (FoodManager.FOOD_SPHERE_SIZE, FoodManager.FOOD_SPHERE_SIZE,
@@ -238,6 +251,11 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		player.render (modelBatch, worldQuat, environment);
 
 		foodManager.render (modelBatch, worldQuat, environment);
+
+		for (Enemy e : enemies)
+		{
+			e.render (modelBatch, worldQuat, environment);
+		}
 
 		/*instance[1].transform.idt ();
 		instance[1].transform.translate (-15f, 0, 0);
@@ -425,7 +443,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			oq1 = mad.q1;
 			oq2 = mad.q2;
 			oq3 = mad.q3;
-			
+
 			ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2);
 			bArray.order (ByteOrder.LITTLE_ENDIAN);
 
@@ -451,32 +469,87 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		}
 
 		// calculate player position
-		player.calc (lastPressed, leftPressed, rightPressed);
+		float snakeAngInc = 0f;
+		if (leftPressed && rightPressed)
+		{
+			snakeAngInc = lastPressed * 0.02f;
+		}
+		else if (leftPressed || rightPressed)
+		{
+			if (leftPressed)
+				snakeAngInc = -0.02f;
+			if (rightPressed)
+				snakeAngInc = 0.02f;
+		}
+		player.calc (snakeAngInc);
 
-		//check food collision
-
+		//check player collision
 		foodManager.checkCollison (player);
 
-		// send data 
-		ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 2 * 2 + 3 * 4 * player.tail.size () + 3 * 4 * foodManager.foodPositions.size ());
+		//calc enemies
+		for (Enemy e : enemies)
+		{
+			if (foodManager.checkCollison (e) || e.currentTarget == null)
+			{
+				e.currentTarget = foodManager.foodPositions.get (rand.nextInt () % foodManager.foodPositions.size ());
+			}
+			if (e.currentTarget.dot (e.moveDir) > 0)
+			{
+				e.calc (0.02f);
+			}
+			else
+			{
+				e.calc (-0.02f);
+			}
+
+		}
+
+		// send data
+		int type = Byte.SIZE * 1;
+		int lengths = Short.SIZE * 3;
+		int playerTailSize = 3 * Float.SIZE * player.tail.size ();
+		int foodSize = 3 * Float.SIZE * foodManager.foodPositions.size ();
+		int enemiesSize = 0;
+		for (Enemy e : enemies)
+		{
+			enemiesSize += Short.SIZE * 1 + 3 * Float.SIZE * e.tail.size (); // length + vectors
+		}
+
+		ByteBuffer bArray = ByteBuffer.allocate (type + lengths + playerTailSize + foodSize + enemiesSize);
 		bArray.order (ByteOrder.LITTLE_ENDIAN);
 
-		bArray.put (Sender.TYPE_OBJ);
-		bArray.putShort ((short)player.tail.size ());
-		bArray.putShort ((short)foodManager.foodPositions.size ());
-		
-		for (int i = 0; i < player.tail.size (); i++)
+		bArray.put (Sender.TYPE_OBJ); // type
+
+		bArray.putShort ((short)player.tail.size ()); // player size
+		bArray.putShort ((short)foodManager.foodPositions.size ()); // food size
+		bArray.putShort ((short)enemies.size ()); // enemies count
+
+		//put player
+		for (Vector3 v : player.tail)
 		{
-			bArray.putFloat (player.tail.get (i).x);
-			bArray.putFloat (player.tail.get (i).y);
-			bArray.putFloat (player.tail.get (i).z);
+			bArray.putFloat (v.x);
+			bArray.putFloat (v.y);
+			bArray.putFloat (v.z);
 		}
-		for (int i = 0; i < foodManager.foodPositions.size (); i++)
+		//put food
+		for (Vector3 v : foodManager.foodPositions)
 		{
-			bArray.putFloat (foodManager.foodPositions.get (i).x);
-			bArray.putFloat (foodManager.foodPositions.get (i).y);
-			bArray.putFloat (foodManager.foodPositions.get (i).z);
+			bArray.putFloat (v.x);
+			bArray.putFloat (v.y);
+			bArray.putFloat (v.z);
 		}
+		//put enemies
+		for (Enemy e : enemies)
+		{
+			bArray.putShort ((short)e.tail.size ()); //current enemy length
+			for (Vector3 v : e.tail)
+			{
+				bArray.putFloat (v.x);
+				bArray.putFloat (v.y);
+				bArray.putFloat (v.z);
+			}
+		}
+
 		sender.sendData (bArray.array ());
 
 	}
