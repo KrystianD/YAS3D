@@ -95,7 +95,21 @@ void WorldGL::paintGL()
 		
 		glPopMatrix();
 	}
-	
+
+    for (int i = 0; i < pdaData->enemyPoints.size(); i++)
+    {
+        QVector3D p = pdaData->enemyPoints[i];
+
+        glPushMatrix();
+
+        glTranslatef(p.x(), p.y(), p.z());
+
+        glColor4f(0, 0, 1, 1);
+        glutSolidSphere(0.5f / 15.0f, 5, 5);
+
+        glPopMatrix();
+    }
+
 	GLUquadric *quad =  gluNewQuadric();
 	glColor4f(0, 0, 0, 0.3);
 	gluSphere(quad, 1, 100, 100);

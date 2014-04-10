@@ -29,3 +29,4 @@ Makefile
 *.dbm
 *.pem
 .settings/
+.directory
