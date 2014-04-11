@@ -10,6 +10,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.sax.StartElementListener;
 import android.util.Log;
 
 import com.badlogic.gdx.Gdx;
@@ -29,6 +30,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -227,6 +229,8 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public void render (float delta)
 	{
+		long start = System.currentTimeMillis ();
+		
 		// mad (1, 1, 1, 2, 2, 2, 3, 3, 3);
 		Gdx.gl.glViewport (0, 0, Gdx.graphics.getWidth (),
 				Gdx.graphics.getHeight ());
@@ -281,7 +285,9 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 		modelBatch.end ();
 
-		modelBatch.begin (cam1);
+		Log.d ("KD", "RENDER TIME = " + (System.currentTimeMillis () - start));
+		
+		//modelBatch.begin (cam1);
 
 		/*
 		 * Vector3 sn = new Vector3 (snakePos); sn.mul (quat);
@@ -304,7 +310,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		 * }
 		 */
 
-		modelBatch.end ();
+		//modelBatch.end ();
 
 	}
 
@@ -377,6 +383,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 	public void calc ()
 	{
+		
 		long ticks = System.currentTimeMillis ();
 		//calc World orientation
 		if (hasA && hasM && isStabilized)
@@ -443,7 +450,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			oq1 = mad.q1;
 			oq2 = mad.q2;
 			oq3 = mad.q3;
-
+			
 			ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2);
 			bArray.order (ByteOrder.LITTLE_ENDIAN);
 
@@ -468,6 +475,8 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			sender.sendData (bArray.array ());
 		}
 
+		long start = System.currentTimeMillis ();
+		
 		// calculate player position
 		float snakeAngInc = 0f;
 		if (leftPressed && rightPressed)
@@ -562,6 +571,8 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 		sender.sendData (bArray.array ());
 
+		Log.d ("KD", "CALC TIME = " + (System.currentTimeMillis () - start));
+		
 	}
 
 	@Override

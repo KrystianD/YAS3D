@@ -32,11 +32,11 @@ public class FoodManager
 
 	public void render (ModelBatch modelBatch, Quaternion worldQuat, Environment env)
 	{
-		for (int i = 100 - 1; i >= 0; i--)
+		for (Vector3 v : foodPositions)
 		{
 			foodInstance.transform.idt ();
 			foodInstance.transform.rotate (worldQuat);
-			foodInstance.transform.translate (foodPositions.get (i));
+			foodInstance.transform.translate (v);
 			modelBatch.render (foodInstance, env);
 		}
 	}
