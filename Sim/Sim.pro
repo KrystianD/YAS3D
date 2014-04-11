@@ -11,7 +11,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = KDcopter
 TEMPLATE = app
 
-LIBS += -lGLU32 -lfreeglut
+win32 {
+    LIBS += -lGLU32 -lfreeglut
+}
+unix {
+    LIBS += -lGLU -lglut
+}
 
 SOURCES += main.cpp\
         MainWindow.cpp \
