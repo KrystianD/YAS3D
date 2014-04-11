@@ -15,7 +15,7 @@ struct TData
 	float ax, ay, az, gx, gy, gz, mx, my, mz;
 	float pitch, roll, yaw;
 
-	QVector<QVector3D> playerPoints, foodPoints;
+    QVector<QVector3D> playerPoints, foodPoints, enemyPoints;
 
 	uint8_t sphereEnabled;
 };
@@ -39,7 +39,7 @@ struct TUdpDataSENSORS
 struct TUdpDataOBJ
 {
 	uint8_t type;
-	uint16_t playerSize, foodSize;
+    uint16_t playerSize, foodSize, enemiesSize;
 };
 #pragma pack()
 

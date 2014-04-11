@@ -99,7 +99,24 @@ void MainWindow::processData()
 				QVector3D p(x, y, z);
 				m_pdaData.foodPoints.append(p);
 			}
-			
+
+            m_pdaData.enemyPoints.clear();
+
+            for(int i = 0 ; i < d->enemiesSize; i++)
+            {
+                u_int16_t n;
+                ds >> n;
+                for(int i = 0 ; i < n; i++)
+                {
+                    float x, y, z;
+                    ds >> x >> y >> z;
+
+                    QVector3D p(x, y, z);
+
+                    m_pdaData.enemyPoints.append(p);
+                }
+            }
+
 			break;
 		}
 		case TYPE_STAB:

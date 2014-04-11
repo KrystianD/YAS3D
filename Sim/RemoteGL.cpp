@@ -42,7 +42,7 @@ void RemoteGL::paintGL()
 	QMatrix4x4 mrot = realToOGL(quatToRotMatrix(rotationQuat));
 	glLoadIdentity();
 	glTranslatef(offset.x(), offset.y(), offset.z());
-	glMultMatrixd(mrot.transposed().constData());
+    glMultMatrixd((const double*)mrot.transposed().constData());
 	
 	QColor colors[] = { Qt::red, Qt::red, Qt::black, Qt::black, Qt::green, Qt::green };
 	drawBox(colors, 8.0, 1.0, 3.5, offset);
