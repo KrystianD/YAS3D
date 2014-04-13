@@ -36,11 +36,12 @@ struct TUdpDataSENSORS
 	uint64_t ticks;
 	uint8_t sphereEnabled, isStabilized;
 };
-struct TUdpDataOBJ
+struct TUdpDataPLAYER
 {
 	uint8_t type;
     uint16_t playerSize, foodSize, enemiesSize;
 };
+
 #pragma pack()
 
 #endif // CLASSES_H

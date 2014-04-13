@@ -3,7 +3,6 @@ package pl.jakd.tg_project;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 import android.content.Context;
@@ -11,8 +10,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.sax.StartElementListener;
-import android.util.Log;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -20,7 +17,6 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -31,7 +27,6 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -43,7 +38,6 @@ import com.badlogic.gdx.utils.Timer;
 public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		InputProcessor
 {
-	public OrthographicCamera cam1;
 	public PerspectiveCamera cam;
 	public ModelBatch modelBatch;
 	public Model model[] = new Model[10];
@@ -104,28 +98,20 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public void show ()
 	{
-		Log.d ("KD", "SHOW!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		Log.d ("KD", this.toString ());
+		//	Log.d ("KD", "SHOW!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		//	Log.d ("KD", this.toString ());
 
 		font = new BitmapFont ();
 		batch = new SpriteBatch ();
 		modelBatch = new ModelBatch ();
 
-		cam1 = new OrthographicCamera (1, 1);
-		cam1.near = -100f;
-		cam1.far = 300f;
-		cam1.position.set (0f, 0f, 1);
-		cam1.lookAt (0, 0, 0);
-		cam1.update ();
-
 		cam = new PerspectiveCamera (50, Gdx.graphics.getWidth (),
 				Gdx.graphics.getHeight ());
-		cam.position.set (3f, 3f, 3f);
-		cam.position.set (0f, 0f, 30f);
+
 		cam.position.set (0f, 0f, 0f);
 		cam.lookAt (0, 0, 0);
 		cam.near = 0.1f;
-		cam.far = 300f;
+		cam.far = 1.1f;
 		cam.update ();
 
 		camController = new CameraInputController (cam);
@@ -135,10 +121,10 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		ModelBuilder modelBuilder = new ModelBuilder ();
 
 		//cross
-		model[0] = modelBuilder.createBox (0.1f, 0.1f, 0.1f, new Material (
-				ColorAttribute.createDiffuse (Color.RED)), Usage.Position
-				| Usage.Normal);
-		instance[0] = new ModelInstance (model[0]);
+		//model[0] = modelBuilder.createBox (0.1f, 0.1f, 0.1f, new Material (
+		//		ColorAttribute.createDiffuse (Color.RED)), Usage.Position
+		//		| Usage.Normal);
+		//instance[0] = new ModelInstance (model[0]);
 
 		/*model[1] = modelBuilder.createBox (1f, 5f, 1f, new Material (
 				ColorAttribute.createDiffuse (Color.GREEN)), Usage.Position
@@ -258,28 +244,28 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 		//for (int i = 0; i < 3; i++)
 		//{
-		instance[0].transform.idt ();
-		instance[0].transform.rotate (worldQuat);
-		instance[0].transform.translate (0, -1, 0);
-		modelBatch.render (instance[0], environment);
+		//instance[0].transform.idt ();
+		//instance[0].transform.rotate (worldQuat);
+		//instance[0].transform.translate (0, -1, 0);
+		//modelBatch.render (instance[0], environment);
 
 		//}*/
 
 		long a;
 		a = System.currentTimeMillis ();
 		player.render (modelBatch, worldQuat, environment, cam.frustum);
-		Log.d ("KD", "PLAYER RENDER = " + (System.currentTimeMillis () - a));
+		//Log.d ("KD", "PLAYER RENDER = " + (System.currentTimeMillis () - a));
 
 		a = System.currentTimeMillis ();
 		foodManager.render (modelBatch, worldQuat, environment, cam.frustum);
-		Log.d ("KD", "FOOD RENDER = " + (System.currentTimeMillis () - a));
+		//Log.d ("KD", "FOOD RENDER = " + (System.currentTimeMillis () - a));
 
 		a = System.currentTimeMillis ();
 		for (Enemy e : enemies)
 		{
 			e.render (modelBatch, worldQuat, environment, cam.frustum);
 		}
-		Log.d ("KD", "ENEMIES RENDER = " + (System.currentTimeMillis () - a));
+		//Log.d ("KD", "ENEMIES RENDER = " + (System.currentTimeMillis () - a));
 
 		/*instance[1].transform.idt ();
 		instance[1].transform.translate (-15f, 0, 0);
@@ -304,9 +290,9 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		 */
 		a = System.currentTimeMillis ();
 		modelBatch.end ();
-		Log.d ("KD", "RENDER END TIME = " + (System.currentTimeMillis () - a));
+		//	Log.d ("KD", "RENDER END TIME = " + (System.currentTimeMillis () - a));
 
-		Log.d ("KD", "RENDER TIME = " + (System.currentTimeMillis () - start));
+		//	Log.d ("KD", "RENDER TIME = " + (System.currentTimeMillis () - start));
 
 		//modelBatch.begin (cam1);
 
@@ -400,7 +386,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 	private float oq0 = 0, oq1 = 0, oq2 = 0, oq3 = 0;
 	private boolean isStabilized = false;
-	private float iSum = 0;
+	private long lastSend = 0;
 
 	public void calc ()
 	{
@@ -420,10 +406,18 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 			mad.MadgwickAHRSupdate (gX, gY, gZ, aX, aY, aZ, mX, mY, mZ, diff);
 
-			ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2);
+			int frustrumSize = 8 * 3 * Float.SIZE;
+
+			ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2 + frustrumSize);
 			bArray.order (ByteOrder.LITTLE_ENDIAN);
 
 			bArray.put (Sender.TYPE_SENSORS);
+			for (int i = 0; i < 8; i++)
+			{
+				bArray.putFloat (cam.frustum.planePoints[i].x);
+				bArray.putFloat (cam.frustum.planePoints[i].y);
+				bArray.putFloat (cam.frustum.planePoints[i].z);
+			}
 			bArray.putFloat (aX);
 			bArray.putFloat (aY);
 			bArray.putFloat (aZ);
@@ -472,10 +466,19 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			oq2 = mad.q2;
 			oq3 = mad.q3;
 
-			ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2);
+			int frustrumSize = 8 * 3 * Float.SIZE;
+
+			ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2 + frustrumSize);
 			bArray.order (ByteOrder.LITTLE_ENDIAN);
 
 			bArray.put (Sender.TYPE_SENSORS);
+			for (int i = 0; i < 8; i++)
+			{
+				bArray.putFloat (cam.frustum.planePoints[i].x);
+				bArray.putFloat (cam.frustum.planePoints[i].y);
+				bArray.putFloat (cam.frustum.planePoints[i].z);
+			}
+
 			bArray.putFloat (aX);
 			bArray.putFloat (aY);
 			bArray.putFloat (aZ);
@@ -511,7 +514,8 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			if (rightPressed)
 				snakeAngInc = 0.02f;
 		}
-		player.calc (snakeAngInc);
+		player.setMoveAngle (snakeAngInc);
+		player.calc ();
 
 		//check player collision
 		if (foodManager.checkCollison (player))
@@ -522,6 +526,11 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		//calc enemies
 		for (Enemy e : enemies)
 		{
+			if (e.needNewFood == true)
+			{
+				e.currentTarget = foodManager.foodPositions.get (rand.nextInt (foodManager.foodPositions.size ()));
+			}
+
 			boolean collided = foodManager.checkCollison (e);
 
 			if (collided || e.currentTarget == null)
@@ -531,84 +540,87 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 					e.grow ();
 				}
 				e.currentTarget = foodManager.foodPositions.get (rand.nextInt (foodManager.foodPositions.size ()));
-				foodManager.hilightedFood = e.currentTarget;
 			}
 
 			Vector3 a = new Vector3 (e.currentTarget).sub (e.getCurrentPosition ()).nor ();
 			float ratio = 0.92f;
-			e.moveDir = new Vector3 (e.moveDir).mul (ratio).add (a.mul (1 - ratio));
 
-			e.calc (0);
+			e.setMoveDir (new Vector3 (e.getMoveDir ()).mul (ratio).add (a.mul (1 - ratio)));
+			e.calc ();
 		}
 
 		// sending data
-		int type = Byte.SIZE * 1;
-
-		// send player data
-		int playerSize = Short.SIZE * 1;
-		int playerTailSize = 3 * Float.SIZE * player.tail.size ();
-
-		ByteBuffer bBuff = ByteBuffer.allocate (type + playerSize + playerTailSize);
-		bBuff.order (ByteOrder.LITTLE_ENDIAN);
-
-		bBuff.put (Sender.TYPE_PLAYER); // type
-
-		bBuff.putShort ((short)player.tail.size ()); // player size
-
-		for (Vector3 v : player.tail)
+		if (System.currentTimeMillis () - lastSend > 1000 / 35)
 		{
-			bBuff.putFloat (v.x);
-			bBuff.putFloat (v.y);
-			bBuff.putFloat (v.z);
-		}
-		sender.sendData (bBuff.array ());
+			lastSend = System.currentTimeMillis ();
 
-		//send food data
-		int foodSize = Short.SIZE * 1;
-		int foodDataSize = 3 * Float.SIZE * foodManager.foodPositions.size ();
+			int type = Byte.SIZE * 1;
 
-		bBuff = ByteBuffer.allocate (type + foodSize + foodDataSize);
-		bBuff.order (ByteOrder.LITTLE_ENDIAN);
+			// send player data
+			int playerSize = Short.SIZE * 1;
+			int playerTailSize = 3 * Float.SIZE * player.tail.size ();
 
-		bBuff.put (Sender.TYPE_FOOD);
-		bBuff.putShort ((short)foodManager.foodPositions.size ());
-
-		for (Vector3 v : foodManager.foodPositions)
-		{
-			bBuff.putFloat (v.x);
-			bBuff.putFloat (v.y);
-			bBuff.putFloat (v.z);
-		}
-		sender.sendData (bBuff.array ());
-
-		//send enemies data
-		int enemyIdSize = Short.SIZE * 1;
-		int enemySize = Short.SIZE * 1;
-		int enemyTailSize;
-
-		for (Enemy e : enemies)
-		{
-			enemyTailSize = 3 * Float.SIZE * e.tail.size ();
-
-			bBuff = ByteBuffer.allocate (type + enemyIdSize + enemySize + enemyTailSize);
+			ByteBuffer bBuff = ByteBuffer.allocate (type + playerSize + playerTailSize);
 			bBuff.order (ByteOrder.LITTLE_ENDIAN);
 
-			bBuff.put (Sender.TYPE_ENEMY);
-			bBuff.putShort ((short)enemies.indexOf (e));
-			bBuff.putShort ((short)e.tail.size ());
+			bBuff.put (Sender.TYPE_PLAYER); // type
 
-			for (Vector3 v : e.tail)
+			bBuff.putShort ((short)player.tail.size ()); // player size
+
+			for (Vector3 v : player.tail)
 			{
 				bBuff.putFloat (v.x);
 				bBuff.putFloat (v.y);
 				bBuff.putFloat (v.z);
 			}
 			sender.sendData (bBuff.array ());
+
+			//send food data
+			int foodSize = Short.SIZE * 1;
+			int foodDataSize = 3 * Float.SIZE * foodManager.foodPositions.size ();
+
+			bBuff = ByteBuffer.allocate (type + foodSize + foodDataSize);
+			bBuff.order (ByteOrder.LITTLE_ENDIAN);
+
+			bBuff.put (Sender.TYPE_FOOD);
+			bBuff.putShort ((short)foodManager.foodPositions.size ());
+
+			for (Vector3 v : foodManager.foodPositions)
+			{
+				bBuff.putFloat (v.x);
+				bBuff.putFloat (v.y);
+				bBuff.putFloat (v.z);
+			}
+			sender.sendData (bBuff.array ());
+
+			//send enemies data
+			int enemyIdSize = Short.SIZE * 1;
+			int enemySize = Short.SIZE * 1;
+			int enemyTailSize;
+
+			for (Enemy e : enemies)
+			{
+				enemyTailSize = 3 * Float.SIZE * e.tail.size ();
+
+				bBuff = ByteBuffer.allocate (type + enemyIdSize + enemySize + enemyTailSize);
+				bBuff.order (ByteOrder.LITTLE_ENDIAN);
+
+				bBuff.put (Sender.TYPE_ENEMY);
+				bBuff.putShort ((short)enemies.indexOf (e));
+				bBuff.putShort ((short)e.tail.size ());
+
+				for (Vector3 v : e.tail)
+				{
+					bBuff.putFloat (v.x);
+					bBuff.putFloat (v.y);
+					bBuff.putFloat (v.z);
+				}
+				sender.sendData (bBuff.array ());
+			}
+
+			//	sender.sendData (bArray.array ());
 		}
-
-		//	sender.sendData (bArray.array ());
-
-		Log.d ("KD", "CALC TIME = " + (System.currentTimeMillis () - start));
+		//	Log.d ("KD", "CALC TIME = " + (System.currentTimeMillis () - start));
 
 	}
 
