@@ -11,7 +11,7 @@ import android.util.Log;
 public class Sender
 {
 	public static final int PORT = 9999;
-	public static final String host = "192.168.10.200";
+	public static final String host = "192.168.1.255";
 
 	//public static final int PORT = 9998;
 	//public static final String host = "192.168.1.100";

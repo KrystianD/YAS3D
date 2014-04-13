@@ -3,6 +3,7 @@ package pl.jakd.tg_project;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import android.content.Context;
@@ -134,12 +135,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		ModelBuilder modelBuilder = new ModelBuilder ();
 
 		//cross
-		/*model[0] = modelBuilder.createBox (1f, 1f, 5f, new Material (
+		model[0] = modelBuilder.createBox (0.1f, 0.1f, 0.1f, new Material (
 				ColorAttribute.createDiffuse (Color.RED)), Usage.Position
 				| Usage.Normal);
 		instance[0] = new ModelInstance (model[0]);
 
-		model[1] = modelBuilder.createBox (1f, 5f, 1f, new Material (
+		/*model[1] = modelBuilder.createBox (1f, 5f, 1f, new Material (
 				ColorAttribute.createDiffuse (Color.GREEN)), Usage.Position
 				| Usage.Normal);
 		instance[1] = new ModelInstance (model[1]);
@@ -176,7 +177,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 						ColorAttribute.createDiffuse (Color.BLUE)),
 				Usage.Position | Usage.Normal);
 		ModelInstance instEnemySnakePart = new ModelInstance (modelEnemySnakePart);
-		for (int i = 0; i < 2; i++)
+		for (int i = 0; i < 1; i++)
 		{
 			enemies.add (new Enemy (new Vector3 (1, i, 0.2f), new Vector3 (0, 0, 1), instEnemySnakePart));
 		}
@@ -187,7 +188,13 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				new Material (ColorAttribute.createDiffuse (Color.RED)),
 				Usage.Position | Usage.Normal);
 		ModelInstance foodInstance = new ModelInstance (foodModel);
-		foodManager = new FoodManager (100, foodInstance);
+
+		Model foodModelTarget = modelBuilder.createSphere (FoodManager.FOOD_SPHERE_SIZE, FoodManager.FOOD_SPHERE_SIZE,
+				FoodManager.FOOD_SPHERE_SIZE, 10, 10,
+				new Material (ColorAttribute.createDiffuse (Color.YELLOW)),
+				Usage.Position | Usage.Normal);
+		ModelInstance foodTargetInstance = new ModelInstance (foodModelTarget);
+		foodManager = new FoodManager (100, foodInstance, foodTargetInstance);
 
 		environment = new Environment ();
 		environment.set (new ColorAttribute (ColorAttribute.AmbientLight, 0.4f,
@@ -230,13 +237,26 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	public void render (float delta)
 	{
 		long start = System.currentTimeMillis ();
-		
+
 		// mad (1, 1, 1, 2, 2, 2, 3, 3, 3);
 		Gdx.gl.glViewport (0, 0, Gdx.graphics.getWidth (),
 				Gdx.graphics.getHeight ());
 		Gdx.gl.glClear (GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
+		Vector3 p = new Vector3 (0, 0, 0);
+		Vector3 d = new Vector3 (0, -1, 0);
+
+		Quaternion zeroQuat = new Quaternion (0.7f, 0.0f, 0.0f, 0.7f);
+
 		worldQuat.set (mad.q1, mad.q2, mad.q3, -mad.q0);
+		Quaternion worldQuatKD = new Quaternion (worldQuat).mul (zeroQuat.conjugate ());
+
+		//String s = String.format ("%5.2f %5.2f %5.2f %5.2f", worldQuat.w, worldQuat.x, worldQuat.y, worldQuat.z);
+		//Log.d ("KD3", s);
+
+		d = d.mul (new Quaternion (worldQuatKD));
+
+		//Log.d ("KD3", "cam = " + Arrays.toString (cam.frustum.planePoints));
 
 		Vector3 lightPos = new Vector3 (2, 0, 0);
 		lightPos.mul (worldQuat);
@@ -244,22 +264,30 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 		modelBatch.begin (cam);
 
-		/*for (int i = 0; i < 3; i++)
-		{
-			instance[i].transform.idt ();
-			instance[i].transform.scl (0.3f);
-			instance[i].transform.rotate (worldQuat);
-			// modelBatch.render (instance[i], environment);
-		}*/
+		//for (int i = 0; i < 3; i++)
+		//{
+		instance[0].transform.idt ();
+		instance[0].transform.rotate (worldQuat);
+		instance[0].transform.translate (0, -1, 0);
+		modelBatch.render (instance[0], environment);
 
-		player.render (modelBatch, worldQuat, environment);
+		//}*/
 
-		foodManager.render (modelBatch, worldQuat, environment);
+		long a;
+		a = System.currentTimeMillis ();
+		player.render (modelBatch, worldQuat, environment, cam.frustum);
+		Log.d ("KD", "PLAYER RENDER = " + (System.currentTimeMillis () - a));
 
+		a = System.currentTimeMillis ();
+		foodManager.render (modelBatch, worldQuat, environment, cam.frustum);
+		Log.d ("KD", "FOOD RENDER = " + (System.currentTimeMillis () - a));
+
+		a = System.currentTimeMillis ();
 		for (Enemy e : enemies)
 		{
-			e.render (modelBatch, worldQuat, environment);
+			e.render (modelBatch, worldQuat, environment, cam.frustum);
 		}
+		Log.d ("KD", "ENEMIES RENDER = " + (System.currentTimeMillis () - a));
 
 		/*instance[1].transform.idt ();
 		instance[1].transform.translate (-15f, 0, 0);
@@ -282,11 +310,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		 * (); instance2.transform.rotate (quat); instance2.transform.translate
 		 * (0, 0, 1.5f); modelBatch.render (instance2, environment);
 		 */
-
+		a = System.currentTimeMillis ();
 		modelBatch.end ();
+		Log.d ("KD", "RENDER END TIME = " + (System.currentTimeMillis () - a));
 
 		Log.d ("KD", "RENDER TIME = " + (System.currentTimeMillis () - start));
-		
+
 		//modelBatch.begin (cam1);
 
 		/*
@@ -313,7 +342,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		//modelBatch.end ();
 
 	}
-
 	float intersectPlane (Vector3 n, Vector3 p0, Vector3 l0, Vector3 l)
 	{
 		// assuming vectors are all normalized
@@ -380,10 +408,11 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 	private float oq0 = 0, oq1 = 0, oq2 = 0, oq3 = 0;
 	private boolean isStabilized = false;
+	private float iSum = 0;
 
 	public void calc ()
 	{
-		
+
 		long ticks = System.currentTimeMillis ();
 		//calc World orientation
 		if (hasA && hasM && isStabilized)
@@ -428,7 +457,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		//stabilize World
 		else if (hasA && hasM && !isStabilized)
 		{
-			float diff = 0.0005f;
+			float diff = 0.001f;
 			mad.MadgwickAHRSupdate (0, 0, 0, aX, aY, aZ, mX, mY, mZ, 0.02f * 100);
 
 			/*Log.d ("KD",
@@ -450,7 +479,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			oq1 = mad.q1;
 			oq2 = mad.q2;
 			oq3 = mad.q3;
-			
+
 			ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2);
 			bArray.order (ByteOrder.LITTLE_ENDIAN);
 
@@ -476,7 +505,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		}
 
 		long start = System.currentTimeMillis ();
-		
+
 		// calculate player position
 		float snakeAngInc = 0f;
 		if (leftPressed && rightPressed)
@@ -495,7 +524,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		//check player collision
 		if (foodManager.checkCollison (player))
 		{
-			player.grow();
+			player.grow ();
 		}
 
 		//calc enemies
@@ -507,20 +536,19 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			{
 				if (collided)
 				{
-					e.grow();
+					e.grow ();
 				}
-				e.currentTarget = foodManager.foodPositions.get (rand.nextInt () % foodManager.foodPositions.size ());
+				e.currentTarget = foodManager.foodPositions.get (rand.nextInt (foodManager.foodPositions.size ()));
+				foodManager.hilightedFood = e.currentTarget;
 			}
 
-			if (e.currentTarget.dot (e.moveDir) > 0)
-			{
-				e.calc (0.02f);
-			}
-			else
-			{
-				e.calc (-0.02f);
-			}
+			Vector3 a = new Vector3 (e.currentTarget).sub (e.getCurrentPosition ()).nor ();
 
+			float ratio = 0.92f;
+
+			e.moveDir = new Vector3 (e.moveDir).mul (ratio).add (a.mul (1 - ratio));
+
+			e.calc (0);
 		}
 
 		// send data
@@ -569,10 +597,10 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			}
 		}
 
-		sender.sendData (bArray.array ());
+		//	sender.sendData (bArray.array ());
 
 		Log.d ("KD", "CALC TIME = " + (System.currentTimeMillis () - start));
-		
+
 	}
 
 	@Override
