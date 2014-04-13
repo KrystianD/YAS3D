@@ -19,7 +19,7 @@ public abstract class Snake
 
 	public Vector3 moveDir;
 	private ModelInstance snakePartInstance;
-	private short length = 100; // start length
+	private short length = 5; // start length
 
 	public Snake (Vector3 startPos, Vector3 startDir, ModelInstance snakePartInstance)
 	{

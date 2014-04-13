@@ -42,7 +42,9 @@ public class FoodManager
 			foodInstance.transform.idt ();
 			foodInstance.transform.rotate (worldQuat);
 			foodInstance.transform.translate (v);
-			if (f.sphereInFrustum (v, FOOD_SPHERE_SIZE))
+			
+			Vector3 vq = new Vector3 (v).mul (worldQuat);
+			if (f.sphereInFrustum (vq, FOOD_SPHERE_SIZE))
 			{
 				modelBatch.render (foodInstance, env);
 			}

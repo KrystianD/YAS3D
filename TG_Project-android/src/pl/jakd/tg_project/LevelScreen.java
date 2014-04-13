@@ -104,7 +104,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public void show ()
 	{
-		Log.d ("KD", "SHOW!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		Log.d ("KD", "SHOW!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		Log.d ("KD", this.toString ());
 
 		font = new BitmapFont ();
@@ -177,7 +177,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 						ColorAttribute.createDiffuse (Color.BLUE)),
 				Usage.Position | Usage.Normal);
 		ModelInstance instEnemySnakePart = new ModelInstance (modelEnemySnakePart);
-		for (int i = 0; i < 1; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			enemies.add (new Enemy (new Vector3 (1, i, 0.2f), new Vector3 (0, 0, 1), instEnemySnakePart));
 		}
@@ -243,18 +243,10 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				Gdx.graphics.getHeight ());
 		Gdx.gl.glClear (GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-		Vector3 p = new Vector3 (0, 0, 0);
-		Vector3 d = new Vector3 (0, -1, 0);
-
-		Quaternion zeroQuat = new Quaternion (0.7f, 0.0f, 0.0f, 0.7f);
-
 		worldQuat.set (mad.q1, mad.q2, mad.q3, -mad.q0);
-		Quaternion worldQuatKD = new Quaternion (worldQuat).mul (zeroQuat.conjugate ());
 
 		//String s = String.format ("%5.2f %5.2f %5.2f %5.2f", worldQuat.w, worldQuat.x, worldQuat.y, worldQuat.z);
 		//Log.d ("KD3", s);
-
-		d = d.mul (new Quaternion (worldQuatKD));
 
 		//Log.d ("KD3", "cam = " + Arrays.toString (cam.frustum.planePoints));
 
@@ -543,58 +535,75 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			}
 
 			Vector3 a = new Vector3 (e.currentTarget).sub (e.getCurrentPosition ()).nor ();
-
 			float ratio = 0.92f;
-
 			e.moveDir = new Vector3 (e.moveDir).mul (ratio).add (a.mul (1 - ratio));
 
 			e.calc (0);
 		}
 
-		// send data
+		// sending data
 		int type = Byte.SIZE * 1;
-		int lengths = Short.SIZE * 3;
+
+		// send player data
+		int playerSize = Short.SIZE * 1;
 		int playerTailSize = 3 * Float.SIZE * player.tail.size ();
-		int foodSize = 3 * Float.SIZE * foodManager.foodPositions.size ();
-		int enemiesSize = 0;
-		for (Enemy e : enemies)
-		{
-			enemiesSize += Short.SIZE * 1 + 3 * Float.SIZE * e.tail.size (); // length + vectors
-		}
 
-		ByteBuffer bArray = ByteBuffer.allocate (type + lengths + playerTailSize + foodSize + enemiesSize);
-		bArray.order (ByteOrder.LITTLE_ENDIAN);
+		ByteBuffer bBuff = ByteBuffer.allocate (type + playerSize + playerTailSize);
+		bBuff.order (ByteOrder.LITTLE_ENDIAN);
 
-		bArray.put (Sender.TYPE_OBJ); // type
+		bBuff.put (Sender.TYPE_PLAYER); // type
 
-		bArray.putShort ((short)player.tail.size ()); // player size
-		bArray.putShort ((short)foodManager.foodPositions.size ()); // food size
-		bArray.putShort ((short)enemies.size ()); // enemies count
+		bBuff.putShort ((short)player.tail.size ()); // player size
 
-		//put player
 		for (Vector3 v : player.tail)
 		{
-			bArray.putFloat (v.x);
-			bArray.putFloat (v.y);
-			bArray.putFloat (v.z);
+			bBuff.putFloat (v.x);
+			bBuff.putFloat (v.y);
+			bBuff.putFloat (v.z);
 		}
-		//put food
+		sender.sendData (bBuff.array ());
+
+		//send food data
+		int foodSize = Short.SIZE * 1;
+		int foodDataSize = 3 * Float.SIZE * foodManager.foodPositions.size ();
+
+		bBuff = ByteBuffer.allocate (type + foodSize + foodDataSize);
+		bBuff.order (ByteOrder.LITTLE_ENDIAN);
+
+		bBuff.put (Sender.TYPE_FOOD);
+		bBuff.putShort ((short)foodManager.foodPositions.size ());
+
 		for (Vector3 v : foodManager.foodPositions)
 		{
-			bArray.putFloat (v.x);
-			bArray.putFloat (v.y);
-			bArray.putFloat (v.z);
+			bBuff.putFloat (v.x);
+			bBuff.putFloat (v.y);
+			bBuff.putFloat (v.z);
 		}
-		//put enemies
+		sender.sendData (bBuff.array ());
+
+		//send enemies data
+		int enemyIdSize = Short.SIZE * 1;
+		int enemySize = Short.SIZE * 1;
+		int enemyTailSize;
+
 		for (Enemy e : enemies)
 		{
-			bArray.putShort ((short)e.tail.size ()); //current enemy length
+			enemyTailSize = 3 * Float.SIZE * e.tail.size ();
+
+			bBuff = ByteBuffer.allocate (type + enemyIdSize + enemySize + enemyTailSize);
+			bBuff.order (ByteOrder.LITTLE_ENDIAN);
+
+			bBuff.put (Sender.TYPE_ENEMY);
+			bBuff.putShort ((short)enemies.indexOf (e));
+			bBuff.putShort ((short)e.tail.size ());
+
 			for (Vector3 v : e.tail)
 			{
-				bArray.putFloat (v.x);
-				bArray.putFloat (v.y);
-				bArray.putFloat (v.z);
+				bBuff.putFloat (v.x);
+				bBuff.putFloat (v.y);
+				bBuff.putFloat (v.z);
 			}
+			sender.sendData (bBuff.array ());
 		}
 
 		//	sender.sendData (bArray.array ());
