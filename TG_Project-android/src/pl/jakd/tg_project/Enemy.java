@@ -1,7 +1,5 @@
 package pl.jakd.tg_project;
 
-import android.util.Log;
-
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 
@@ -11,7 +9,7 @@ public class Enemy extends Snake
 	public Vector3 currentTarget = null;
 	public float lastDistanceToTarget;
 	public long timeNoChangeDist;
-	public boolean needNewFood = true;
+	public int needNewFood = 0;
 
 	public Enemy (Vector3 startPos, Vector3 startDir, ModelInstance snakePartInstance)
 	{
@@ -28,7 +26,11 @@ public class Enemy extends Snake
 			if (Math.abs (distance - lastDistanceToTarget) < DIFF)
 			{
 				//Log.d ("KD", "ENEMY DISTANCE =" + (distance - lastDistanceToTarget));
-				needNewFood = true;
+				needNewFood++;
+			}
+			else
+			{
+				needNewFood = 0;
 			}
 			lastDistanceToTarget = distance;
 		}

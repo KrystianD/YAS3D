@@ -19,7 +19,7 @@ public abstract class Snake
 	public ArrayList<Vector3> tail = new ArrayList<Vector3> ();
 
 	protected Vector3 moveDir;
-	protected short length = 100; // start length
+	protected short length = 5; // start length
 	
 	private ModelInstance snakePartInstance;
 	private boolean isDead = false;

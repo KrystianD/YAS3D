@@ -10,6 +10,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -526,8 +527,10 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		//calc enemies
 		for (Enemy e : enemies)
 		{
-			if (e.needNewFood == true)
+			if (e.needNewFood > 200)
 			{
+				Log.d ("KD", "need food " +e.needNewFood);
+				e.needNewFood = 0;
 				e.currentTarget = foodManager.foodPositions.get (rand.nextInt (foodManager.foodPositions.size ()));
 			}
 
