@@ -14,9 +14,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 public class MainMenu extends ScreenAdapter
 {
 	// setup the dimensions of the menu buttons
-	private static final float BUTTON_WIDTH = 300f;
-	private static final float BUTTON_HEIGHT = 60f;
-	private static final float BUTTON_SPACING = 10f;
+	private static final float BUTTON_WIDTH = 600f;
+	private static final float BUTTON_HEIGHT = 120f;
+	private static final float BUTTON_SPACING = 40f;
 
 	private GameSnake game;
 
@@ -39,7 +39,7 @@ public class MainMenu extends ScreenAdapter
 		stage.setViewport (width, height);
 
 		final float buttonX = (width - BUTTON_WIDTH) / 2;
-		float currentY = 280f;
+		float currentY = 480f;
 
 		// label "welcome"
 		Label welcomeLabel = new Label ("Welcome to YAS3D!", skin);

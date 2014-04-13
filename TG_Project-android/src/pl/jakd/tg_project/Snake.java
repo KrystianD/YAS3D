@@ -22,7 +22,9 @@ public abstract class Snake
 	protected short length = 100; // start length
 	
 	private ModelInstance snakePartInstance;
-
+	private boolean isDead = false;
+	
+	
 	public Snake (Vector3 startPos, Vector3 startDir, ModelInstance snakePartInstance)
 	{
 		tail.add (startPos);
