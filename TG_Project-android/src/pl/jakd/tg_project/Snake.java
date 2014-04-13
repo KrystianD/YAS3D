@@ -7,6 +7,7 @@ import android.util.Log;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 
@@ -18,7 +19,7 @@ public abstract class Snake
 
 	public Vector3 moveDir;
 	private ModelInstance snakePartInstance;
-	private short length = 2; // start length
+	private short length = 5; // start length
 
 	public Snake (Vector3 startPos, Vector3 startDir, ModelInstance snakePartInstance)
 	{
@@ -27,7 +28,7 @@ public abstract class Snake
 		this.snakePartInstance = snakePartInstance;
 	}
 
-	public void render (ModelBatch modelBatch, Quaternion worldQuat, Environment env)
+	public void render (ModelBatch modelBatch, Quaternion worldQuat, Environment env, Frustum f)
 	{
 		//long start = System.currentTimeMillis ();
 		for (Vector3 v : tail)
@@ -35,8 +36,12 @@ public abstract class Snake
 			snakePartInstance.transform.idt ();
 			snakePartInstance.transform.rotate (worldQuat);
 			snakePartInstance.transform.translate (v);
-			// instSnakePart.transform.scale (1, 1.0f / 5.0f, 1);
-			modelBatch.render (snakePartInstance, env);
+
+			Vector3 vq = new Vector3 (v).mul (worldQuat);
+			if (f.sphereInFrustum (vq, SNAKE_SPHERE_SIZE))
+			{
+				modelBatch.render (snakePartInstance, env);
+			}
 		}
 		//Log.d ("KD", "SNAKE RENDER TIME = " + (System.currentTimeMillis () - start));
 	}

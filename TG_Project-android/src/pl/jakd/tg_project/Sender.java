@@ -10,16 +10,17 @@ import android.util.Log;
 
 public class Sender
 {
-	public static final int PORT = 9999;
-	public static final String host = "192.168.10.200";
+	//public static final int PORT = 9999;
+	//public static final String host = "192.168.1.255";
 
-	//public static final int PORT = 9998;
-	//public static final String host = "192.168.1.100";
+	public static final int PORT = 9998;
+	public static final String host = "192.168.1.100";
 
-	
 	public static final byte TYPE_SENSORS = 0;
-	public static final byte TYPE_OBJ = 1;
+	public static final byte TYPE_PLAYER = 1;
 	public static final byte TYPE_STABILIZING = 2;
+	public static final byte TYPE_ENEMY = 3;
+	public static final byte TYPE_FOOD = 4;
 
 	private DatagramSocket udpSocket = null;
 
@@ -68,7 +69,6 @@ public class Sender
 			}
 		});
 		t.start ();
-
 	}
 
 	public void close ()

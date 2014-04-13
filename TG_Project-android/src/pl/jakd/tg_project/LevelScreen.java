@@ -3,6 +3,7 @@ package pl.jakd.tg_project;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import android.content.Context;
@@ -103,7 +104,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public void show ()
 	{
-		Log.d ("KD", "SHOW!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		Log.d ("KD", "SHOW!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		Log.d ("KD", this.toString ());
 
 		font = new BitmapFont ();
@@ -134,12 +135,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		ModelBuilder modelBuilder = new ModelBuilder ();
 
 		//cross
-		/*model[0] = modelBuilder.createBox (1f, 1f, 5f, new Material (
+		model[0] = modelBuilder.createBox (0.1f, 0.1f, 0.1f, new Material (
 				ColorAttribute.createDiffuse (Color.RED)), Usage.Position
 				| Usage.Normal);
 		instance[0] = new ModelInstance (model[0]);
 
-		model[1] = modelBuilder.createBox (1f, 5f, 1f, new Material (
+		/*model[1] = modelBuilder.createBox (1f, 5f, 1f, new Material (
 				ColorAttribute.createDiffuse (Color.GREEN)), Usage.Position
 				| Usage.Normal);
 		instance[1] = new ModelInstance (model[1]);
@@ -176,7 +177,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 						ColorAttribute.createDiffuse (Color.BLUE)),
 				Usage.Position | Usage.Normal);
 		ModelInstance instEnemySnakePart = new ModelInstance (modelEnemySnakePart);
-		for (int i = 0; i < 2; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			enemies.add (new Enemy (new Vector3 (1, i, 0.2f), new Vector3 (0, 0, 1), instEnemySnakePart));
 		}
@@ -187,7 +188,13 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				new Material (ColorAttribute.createDiffuse (Color.RED)),
 				Usage.Position | Usage.Normal);
 		ModelInstance foodInstance = new ModelInstance (foodModel);
-		foodManager = new FoodManager (100, foodInstance);
+
+		Model foodModelTarget = modelBuilder.createSphere (FoodManager.FOOD_SPHERE_SIZE, FoodManager.FOOD_SPHERE_SIZE,
+				FoodManager.FOOD_SPHERE_SIZE, 10, 10,
+				new Material (ColorAttribute.createDiffuse (Color.YELLOW)),
+				Usage.Position | Usage.Normal);
+		ModelInstance foodTargetInstance = new ModelInstance (foodModelTarget);
+		foodManager = new FoodManager (100, foodInstance, foodTargetInstance);
 
 		environment = new Environment ();
 		environment.set (new ColorAttribute (ColorAttribute.AmbientLight, 0.4f,
@@ -230,7 +237,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	public void render (float delta)
 	{
 		long start = System.currentTimeMillis ();
-		
+
 		// mad (1, 1, 1, 2, 2, 2, 3, 3, 3);
 		Gdx.gl.glViewport (0, 0, Gdx.graphics.getWidth (),
 				Gdx.graphics.getHeight ());
@@ -238,28 +245,41 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 		worldQuat.set (mad.q1, mad.q2, mad.q3, -mad.q0);
 
+		//String s = String.format ("%5.2f %5.2f %5.2f %5.2f", worldQuat.w, worldQuat.x, worldQuat.y, worldQuat.z);
+		//Log.d ("KD3", s);
+
+		//Log.d ("KD3", "cam = " + Arrays.toString (cam.frustum.planePoints));
+
 		Vector3 lightPos = new Vector3 (2, 0, 0);
 		lightPos.mul (worldQuat);
 		light.position.set (lightPos);
 
 		modelBatch.begin (cam);
 
-		/*for (int i = 0; i < 3; i++)
-		{
-			instance[i].transform.idt ();
-			instance[i].transform.scl (0.3f);
-			instance[i].transform.rotate (worldQuat);
-			// modelBatch.render (instance[i], environment);
-		}*/
+		//for (int i = 0; i < 3; i++)
+		//{
+		instance[0].transform.idt ();
+		instance[0].transform.rotate (worldQuat);
+		instance[0].transform.translate (0, -1, 0);
+		modelBatch.render (instance[0], environment);
 
-		player.render (modelBatch, worldQuat, environment);
+		//}*/
 
-		foodManager.render (modelBatch, worldQuat, environment);
+		long a;
+		a = System.currentTimeMillis ();
+		player.render (modelBatch, worldQuat, environment, cam.frustum);
+		Log.d ("KD", "PLAYER RENDER = " + (System.currentTimeMillis () - a));
 
+		a = System.currentTimeMillis ();
+		foodManager.render (modelBatch, worldQuat, environment, cam.frustum);
+		Log.d ("KD", "FOOD RENDER = " + (System.currentTimeMillis () - a));
+
+		a = System.currentTimeMillis ();
 		for (Enemy e : enemies)
 		{
-			e.render (modelBatch, worldQuat, environment);
+			e.render (modelBatch, worldQuat, environment, cam.frustum);
 		}
+		Log.d ("KD", "ENEMIES RENDER = " + (System.currentTimeMillis () - a));
 
 		/*instance[1].transform.idt ();
 		instance[1].transform.translate (-15f, 0, 0);
@@ -282,11 +302,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		 * (); instance2.transform.rotate (quat); instance2.transform.translate
 		 * (0, 0, 1.5f); modelBatch.render (instance2, environment);
 		 */
-
+		a = System.currentTimeMillis ();
 		modelBatch.end ();
+		Log.d ("KD", "RENDER END TIME = " + (System.currentTimeMillis () - a));
 
 		Log.d ("KD", "RENDER TIME = " + (System.currentTimeMillis () - start));
-		
+
 		//modelBatch.begin (cam1);
 
 		/*
@@ -313,7 +334,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		//modelBatch.end ();
 
 	}
-
 	float intersectPlane (Vector3 n, Vector3 p0, Vector3 l0, Vector3 l)
 	{
 		// assuming vectors are all normalized
@@ -380,10 +400,11 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 	private float oq0 = 0, oq1 = 0, oq2 = 0, oq3 = 0;
 	private boolean isStabilized = false;
+	private float iSum = 0;
 
 	public void calc ()
 	{
-		
+
 		long ticks = System.currentTimeMillis ();
 		//calc World orientation
 		if (hasA && hasM && isStabilized)
@@ -428,7 +449,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		//stabilize World
 		else if (hasA && hasM && !isStabilized)
 		{
-			float diff = 0.0005f;
+			float diff = 0.001f;
 			mad.MadgwickAHRSupdate (0, 0, 0, aX, aY, aZ, mX, mY, mZ, 0.02f * 100);
 
 			/*Log.d ("KD",
@@ -450,7 +471,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			oq1 = mad.q1;
 			oq2 = mad.q2;
 			oq3 = mad.q3;
-			
+
 			ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2);
 			bArray.order (ByteOrder.LITTLE_ENDIAN);
 
@@ -476,7 +497,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		}
 
 		long start = System.currentTimeMillis ();
-		
+
 		// calculate player position
 		float snakeAngInc = 0f;
 		if (leftPressed && rightPressed)
@@ -495,7 +516,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		//check player collision
 		if (foodManager.checkCollison (player))
 		{
-			player.grow();
+			player.grow ();
 		}
 
 		//calc enemies
@@ -507,72 +528,88 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			{
 				if (collided)
 				{
-					e.grow();
+					e.grow ();
 				}
-				e.currentTarget = foodManager.foodPositions.get (rand.nextInt () % foodManager.foodPositions.size ());
+				e.currentTarget = foodManager.foodPositions.get (rand.nextInt (foodManager.foodPositions.size ()));
+				foodManager.hilightedFood = e.currentTarget;
 			}
 
-			if (e.currentTarget.dot (e.moveDir) > 0)
-			{
-				e.calc (0.02f);
-			}
-			else
-			{
-				e.calc (-0.02f);
-			}
+			Vector3 a = new Vector3 (e.currentTarget).sub (e.getCurrentPosition ()).nor ();
+			float ratio = 0.92f;
+			e.moveDir = new Vector3 (e.moveDir).mul (ratio).add (a.mul (1 - ratio));
 
+			e.calc (0);
 		}
 
-		// send data
+		// sending data
 		int type = Byte.SIZE * 1;
-		int lengths = Short.SIZE * 3;
+
+		// send player data
+		int playerSize = Short.SIZE * 1;
 		int playerTailSize = 3 * Float.SIZE * player.tail.size ();
-		int foodSize = 3 * Float.SIZE * foodManager.foodPositions.size ();
-		int enemiesSize = 0;
-		for (Enemy e : enemies)
-		{
-			enemiesSize += Short.SIZE * 1 + 3 * Float.SIZE * e.tail.size (); // length + vectors
-		}
 
-		ByteBuffer bArray = ByteBuffer.allocate (type + lengths + playerTailSize + foodSize + enemiesSize);
-		bArray.order (ByteOrder.LITTLE_ENDIAN);
+		ByteBuffer bBuff = ByteBuffer.allocate (type + playerSize + playerTailSize);
+		bBuff.order (ByteOrder.LITTLE_ENDIAN);
 
-		bArray.put (Sender.TYPE_OBJ); // type
+		bBuff.put (Sender.TYPE_PLAYER); // type
 
-		bArray.putShort ((short)player.tail.size ()); // player size
-		bArray.putShort ((short)foodManager.foodPositions.size ()); // food size
-		bArray.putShort ((short)enemies.size ()); // enemies count
+		bBuff.putShort ((short)player.tail.size ()); // player size
 
-		//put player
 		for (Vector3 v : player.tail)
 		{
-			bArray.putFloat (v.x);
-			bArray.putFloat (v.y);
-			bArray.putFloat (v.z);
+			bBuff.putFloat (v.x);
+			bBuff.putFloat (v.y);
+			bBuff.putFloat (v.z);
 		}
-		//put food
+		sender.sendData (bBuff.array ());
+
+		//send food data
+		int foodSize = Short.SIZE * 1;
+		int foodDataSize = 3 * Float.SIZE * foodManager.foodPositions.size ();
+
+		bBuff = ByteBuffer.allocate (type + foodSize + foodDataSize);
+		bBuff.order (ByteOrder.LITTLE_ENDIAN);
+
+		bBuff.put (Sender.TYPE_FOOD);
+		bBuff.putShort ((short)foodManager.foodPositions.size ());
+
 		for (Vector3 v : foodManager.foodPositions)
 		{
-			bArray.putFloat (v.x);
-			bArray.putFloat (v.y);
-			bArray.putFloat (v.z);
+			bBuff.putFloat (v.x);
+			bBuff.putFloat (v.y);
+			bBuff.putFloat (v.z);
 		}
-		//put enemies
+		sender.sendData (bBuff.array ());
+
+		//send enemies data
+		int enemyIdSize = Short.SIZE * 1;
+		int enemySize = Short.SIZE * 1;
+		int enemyTailSize;
+
 		for (Enemy e : enemies)
 		{
-			bArray.putShort ((short)e.tail.size ()); //current enemy length
+			enemyTailSize = 3 * Float.SIZE * e.tail.size ();
+
+			bBuff = ByteBuffer.allocate (type + enemyIdSize + enemySize + enemyTailSize);
+			bBuff.order (ByteOrder.LITTLE_ENDIAN);
+
+			bBuff.put (Sender.TYPE_ENEMY);
+			bBuff.putShort ((short)enemies.indexOf (e));
+			bBuff.putShort ((short)e.tail.size ());
+
 			for (Vector3 v : e.tail)
 			{
-				bArray.putFloat (v.x);
-				bArray.putFloat (v.y);
-				bArray.putFloat (v.z);
+				bBuff.putFloat (v.x);
+				bBuff.putFloat (v.y);
+				bBuff.putFloat (v.z);
 			}
+			sender.sendData (bBuff.array ());
 		}
 
-		sender.sendData (bArray.array ());
+		//	sender.sendData (bArray.array ());
 
 		Log.d ("KD", "CALC TIME = " + (System.currentTimeMillis () - start));
-		
+
 	}
 
 	@Override
