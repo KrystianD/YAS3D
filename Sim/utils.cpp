@@ -59,8 +59,58 @@ void drawBoxAt (QColor colors[], float w, float h, float d, QVector3D v, QVector
 	glTranslatef (v.x (), v.z (), -v.y ());
 	drawBox (colors, w, h, d, offset);
 }
+void drawPhone(float w, float h, float d)
+{
+	glBegin(GL_QUADS);
+		// top
+	glColor4f (1, 1, 1,1);
+		glTexCoord2f(0,0); glVertex3f (-w, h, -d);
+		glTexCoord2f(1,0); glVertex3f (w, h, -d);
+		glTexCoord2f(1,1); glVertex3f (w, h, d);
+		glTexCoord2f(0,1); glVertex3f (-w, h, d);
+
+		// bottom
+		glColor4f (0, 0, 0,1);
+		glVertex3f (-w, -h, -d);
+		glVertex3f (w, -h, -d);
+		glVertex3f (w, -h, d);
+		glVertex3f (-w, -h, d);
+
+		// left
+		glColor4f (0, 0, 0,1);
+		glVertex3f (-w, h, -d);
+		glVertex3f (-w, h, d);
+		glVertex3f (-w, -h, d);
+		glVertex3f (-w, -h, -d);
+
+		// right
+		glColor4f (0, 0, 0,1);
+		glVertex3f (w, h, -d);
+		glVertex3f (w, h, d);
+		glVertex3f (w, -h, d);
+		glVertex3f (w, -h, -d);
+
+		// front
+		glColor4f (0, 0, 0,1);
+		glVertex3f (-w, h, -d);
+		glVertex3f (w, h, -d);
+		glVertex3f (w, -h, -d);
+		glVertex3f (-w, -h, -d);
+
+		// back
+		glColor4f (0, 0, 0,1);
+		glVertex3f (-w, h, d);
+		glVertex3f (w, h, d);
+		glVertex3f (w, -h, d);
+		glVertex3f (-w, -h, d);
+	glEnd();
+}
+
 void drawBox (QColor colors[], float w, float h, float d, QVector3D offset)
 {
+
+
+
 	glBegin(GL_QUADS);
 		// top
 		glColor4f (colors[0].redF (), colors[0].greenF (), colors[0].blueF (), colors[0].alphaF ());

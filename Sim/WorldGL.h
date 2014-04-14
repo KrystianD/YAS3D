@@ -15,6 +15,7 @@ public:
 
 	QQuaternion rotationQuat;
 	TData *pdaData;
+	bool stat;
 
 protected:
 	void initializeGL ();
@@ -24,6 +25,10 @@ protected:
 
 private:
 	QTimer tm;
+
+	void pt(int idx);
+	void ln(int idx, int idx2);
+	void plane(int idx1, int idx2, int idx3, int idx4);
 };
 
 #endif // WORLDGL_H

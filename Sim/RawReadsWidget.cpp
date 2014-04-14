@@ -32,9 +32,9 @@ void RawReadsWidget::updateInfo(const TData &data)
 	ui->lbMagY->setText(QString::number(data.my, 'f', 2));
 	ui->lbMagZ->setText(QString::number(data.mz, 'f', 2));
 	
-	ui->lbPitch->setText(QString::number(r2d(data.pitch), 'f', 1) + "°");
-	ui->lbRoll->setText(QString::number(r2d(data.roll), 'f', 1) + "°");
-	ui->lbYaw->setText(QString::number(r2d(data.yaw), 'f', 1) + "°");
+	ui->lbPitch->setText(QString::number(r2d(data.pitch), 'f', 1));
+	ui->lbRoll->setText(QString::number(r2d(data.roll), 'f', 1));
+	ui->lbYaw->setText(QString::number(r2d(data.yaw), 'f', 1));
 }
 
 bool RawReadsWidget::eventFilter(QObject* sender, QEvent* event)

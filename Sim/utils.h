@@ -22,6 +22,7 @@ QMatrix4x4 realToOGL (QMatrix4x4 m);
 void drawLine (QVector3D pt1, QVector3D pt2, QVector3D offset);
 void drawLineColor (QColor color, QVector3D pt1, QVector3D pt2, QVector3D offset);
 
+void drawPhone(float w, float h, float d);
 void drawBoxAt (QColor colors[], float w, float h, float d, QVector3D v, QVector3D offset);
 void drawBox (QColor colors[], float w, float h, float d, QVector3D offset);
 

@@ -10,8 +10,14 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = KDcopter
 TEMPLATE = app
+#DEFINES += KDMODE
 
-LIBS += -lGLU -lglut
+win32 {
+    LIBS += -lGLU32 -lfreeglut
+}
+unix {
+    LIBS += -lGLU -lglut
+}
 
 SOURCES += main.cpp\
         MainWindow.cpp \
@@ -24,7 +30,9 @@ SOURCES += main.cpp\
     globals.cpp \
     MadgwickAHRS.cpp \
     RawReadsWidget.cpp \
-    WorldGL.cpp
+    WorldGL.cpp \
+    objloader.cpp \
+    3ds.cpp
 
 HEADERS  += MainWindow.h \
     RemoteGL.h \
@@ -37,7 +45,11 @@ HEADERS  += MainWindow.h \
     globals.h \
     MadgwickAHRS.h \
     RawReadsWidget.h \
-    WorldGL.h
+    WorldGL.h \
+    objloader.hpp \
+    3ds.h \
+    settings.h \
+    model.h
 
 FORMS    += MainWindow.ui \
     RawReadsWidget.ui
