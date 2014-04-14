@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1157</width>
+    <width>1558</width>
     <height>565</height>
    </rect>
   </property>
@@ -275,7 +275,7 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>1101</width>
+      <width>1536</width>
       <height>541</height>
      </rect>
     </property>
@@ -298,11 +298,17 @@
        <height>500</height>
       </rect>
      </property>
-     <zorder>rawReads</zorder>
     </widget>
-    <zorder>visWorld</zorder>
-    <zorder>visWorld2</zorder>
-    <zorder>rawReads</zorder>
+    <widget class="ScreenGL" name="visScreen" native="true">
+     <property name="geometry">
+      <rect>
+       <x>1030</x>
+       <y>10</y>
+       <width>500</width>
+       <height>281</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
   </widget>
  </widget>
@@ -324,6 +330,12 @@
    <class>WorldGL</class>
    <extends>QWidget</extends>
    <header>WorldGL.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ScreenGL</class>
+   <extends>QWidget</extends>
+   <header>ScreenGL.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

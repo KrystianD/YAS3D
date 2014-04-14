@@ -49,4 +49,17 @@ public:
 	int getSize () const { return m_values.size (); }
 };
 
+static QVector3D latlonUtoVector(int16_t latU, int16_t lonU)
+{
+	float lat = (float)latU / 5000.0f;
+	float lon = (float)lonU / 5000.0f;
+
+	float x, y, z;
+	x = sin(lat) * cos(lon);
+	y = sin(lat) * sin(lon);
+	z = cos(lat);
+
+	return QVector3D(x, y, z);
+}
+
 #endif // UTILS_H

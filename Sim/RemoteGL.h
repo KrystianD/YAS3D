@@ -12,6 +12,7 @@ public:
 	virtual ~RemoteGL () { }
 
 	QQuaternion rotationQuat;
+	unsigned int m_texture;
 
 protected:
 	void initializeGL ();

@@ -1,5 +1,5 @@
-#ifndef WORLDGL_H
-#define WORLDGL_H
+#ifndef SCREENGL_H
+#define Screen
 
 #include <QGLWidget>
 #include <QQuaternion>
@@ -7,11 +7,11 @@
 
 #include "classes.h"
 
-class WorldGL : public QGLWidget
+class ScreenGL : public QGLWidget
 {
 public:
-	WorldGL (QWidget *parent = 0);
-	virtual ~WorldGL () { }
+	ScreenGL (QWidget *parent = 0);
+	virtual ~ScreenGL () { }
 
 	QQuaternion rotationQuat;
 	TData *pdaData;
@@ -26,10 +26,6 @@ protected:
 
 private:
 	QTimer tm;
-
-	void pt(int idx);
-	void ln(int idx, int idx2);
-	void plane(int idx1, int idx2, int idx3, int idx4);
 };
 
 #endif // WORLDGL_H

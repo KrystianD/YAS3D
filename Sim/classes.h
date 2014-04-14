@@ -42,7 +42,6 @@ struct TData
 struct TUdpDataSENSORS
 {
 	uint8_t type;
-	float frustumPoints[8][3];
 	float ax, ay, az, gx, gy, gz, mx, my, mz;
 	float q0, q1, q2, q3;
 	uint64_t ticks;
@@ -53,6 +52,7 @@ struct TUdpDataPLAYER
 {
 	uint8_t type;
 	uint16_t playerSize;
+	float frustumPoints[8][3];
 };
 struct TUdpDataENEMY
 {

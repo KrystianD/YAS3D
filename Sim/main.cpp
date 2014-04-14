@@ -9,7 +9,6 @@ extern "C" {
 
 int main(int argc, char *argv[])
 {
-	//libusb_init (0);
 	glutInit(&argc, argv);
 	
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf-8"));
@@ -21,8 +20,6 @@ int main(int argc, char *argv[])
 	w.show();
 	
 	int r = a.exec();
-	
-	//libusb_exit (0);
 	
 	return r;
 }
