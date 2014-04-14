@@ -20,19 +20,6 @@
    <string>KDcopter</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QSlider" name="slTime">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>590</y>
-      <width>1011</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
    <widget class="QWidget" name="widgetSensors" native="true">
     <property name="geometry">
      <rect>
