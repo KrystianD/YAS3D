@@ -24,7 +24,6 @@
 
 const QVector3D offset(0.0f, -15.0f, -35.0f);
 
-static unsigned int mTexture;
 
 #include "3ds.h"
 
@@ -46,47 +45,13 @@ void WorldGL::initializeGL()
 	glDepthFunc(GL_LEQUAL);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	
 
+	glGenTextures(1, &m_texture);
+	glBindTexture(GL_TEXTURE_2D, m_texture);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, gimp_image.width, gimp_image.height, GL_RGB, GL_UNSIGNED_BYTE, gimp_image.pixel_data);
 
-//	if (loaded == 0)
-	{
-		//loaded = 1;
-		// Generate a texture with the texture ID stored in the texture item
-		glGenTextures(1, &mTexture);
-
-		// Bind the texture to OpenGL and initalize the texture - GL_TEXTURE_2D tells it we are using a 2D texture
-		glBindTexture(GL_TEXTURE_2D, mTexture);
-
-		// Build Mipmaps - this builds different versions of the picture for distances to make the image look better at different distances
-		// gluBuild2DMipmaps Parameters: (2D texture, 3 channels (RGB), bitmap width, bitmap height, It is an RGB format, data is stored as unsigned bytes, the actuall pixel data);
-		/*qDebug () << gimp_image.width << gimp_image.height;
-		for(int i =0;i<gimp_image.width;i++)
-		{
-			for(int j =0;j<gimp_image.height;j++)
-			{
-				int idx = j * (gimp_image.width * 3) + 3 * i;
-
-				int c1 = gimp_image.pixel_data[idx + 0];
-				int c2 = gimp_image.pixel_data[idx + 1];
-				int c3 = gimp_image.pixel_data[idx + 2];
-				qDebug () << i << j << c1 << c2 << c3;
-			}
-		}*/
-
-		unsigned char *t = new unsigned char[gimp_image.width * gimp_image.height * 3 + 1];
-		memset(t, 255, gimp_image.width * gimp_image.height * 3);
-
-		//memset(t+gimp_image.width* gimp_image.height, gimp_image.width* gimp_image.height, 255);
-		//glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, gimp_image.width, gimp_image.height, 0,GL_RGB, GL_UNSIGNED_BYTE, gimp_image.pixel_data);
-		gluBuild2DMipmaps(GL_TEXTURE_2D, 3, gimp_image.width, gimp_image.height, GL_RGB, GL_UNSIGNED_BYTE, gimp_image.pixel_data);
-
-		// Tell OpenGL the quality of our texture map.
-		//		GL_LINEAR_MIPMAP_LINEAR is the smoothest.
-		//		GL_LINEAR_MIPMAP_NEAREST is faster than GL_LINEAR_MIPMAP_LINEAR, but looks blochy and pixilated.
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-		qDebug() << "LOAD";
-	}
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	qDebug() << "LOAD";
 }
 static int loaded = 0;
 void WorldGL::paintGL()
@@ -95,7 +60,7 @@ void WorldGL::paintGL()
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
-	glTranslatef(0, 0, -3);
+	glTranslatef(0, 0, -2.5);
 
 	if (stat)
 	{
@@ -164,7 +129,7 @@ void WorldGL::paintGL()
 		glTranslatef(p.x(), p.y(), p.z());
 		
 		glColor4f(0, 1, 0, 1);
-		glutSolidSphere(0.5f / 25.0f, 5, 5);
+		glutSolidSphere(0.5f / 25.0f, 10, 10);
 		
 		glPopMatrix();
 	}
@@ -178,7 +143,7 @@ void WorldGL::paintGL()
 		glTranslatef(p.x(), p.y(), p.z());
 		
 		glColor4f(1, 0, 0, 1);
-		glutSolidSphere(0.5f / 25.0f, 5, 5);
+		glutSolidSphere(0.5f / 25.0f, 10, 10);
 		
 		glPopMatrix();
 	}
@@ -196,7 +161,7 @@ void WorldGL::paintGL()
 			glTranslatef(p.x(), p.y(), p.z());
 			
 			glColor4f(0, 0, 1, 1);
-			glutSolidSphere(0.5f / 25.0f, 5, 5);
+			glutSolidSphere(0.5f / 25.0f, 10, 10);
 			
 			glPopMatrix();
 		}
@@ -249,8 +214,8 @@ void WorldGL::paintGL()
 
 
 	glEnable(GL_TEXTURE_2D);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mTexture);
+	//glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_texture);
 
 	float wi = 575;
 	float he = 1127;
@@ -321,7 +286,7 @@ void WorldGL::resizeGL(int width, int height)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	//glTranslatef(0, 0.6, 0);
-	gluPerspective(45.0f, (float)width / (float)height, 0.1f, 100.0f);
+	gluPerspective(60.0f, (float)width / (float)height, 0.1f, 100.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }

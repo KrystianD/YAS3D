@@ -16,6 +16,7 @@ public:
 	QQuaternion rotationQuat;
 	TData *pdaData;
 	bool stat;
+	unsigned int m_texture;
 
 protected:
 	void initializeGL ();

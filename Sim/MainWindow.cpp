@@ -49,6 +49,9 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->visWorld2->stat = 1;
 	ui->visWorld2->pdaData = &m_pdaData;
 
+	m_pdaData.sphereEnabled = 0;
+	ui->widgetSensors->setVisible(true);
+	ui->widgetSpheres->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -81,6 +84,14 @@ void MainWindow::processData()
 		case TYPE_PLAYER:
 		{
 			TUdpDataPLAYER *d = (TUdpDataPLAYER*)udpData;
+
+			for (int i = 0; i < 8; i++)
+			{
+				float x = d->frustumPoints[i][0];
+				float y = d->frustumPoints[i][1];
+				float z = d->frustumPoints[i][2];
+				m_pdaData.frustum[i] = QVector3D(x, y, z);
+			}
 			
 			QByteArray b(udpData + sizeof(TUdpDataPLAYER), data.size());
 			QDataStream ds(b);
@@ -91,11 +102,9 @@ void MainWindow::processData()
 			
 			for (int i = 0; i < d->playerSize; i++)
 			{
-				float x, y, z;
-				ds >> x >> y >> z;
-				
-				QVector3D p(x, y, z);
-				m_pdaData.playerPoints.append(p);
+				int16_t latU, lonU;
+				ds >> latU >> lonU;
+				m_pdaData.playerPoints.append(latlonUtoVector(latU, lonU));
 			}
 			
 			break;
@@ -119,12 +128,9 @@ void MainWindow::processData()
 			m_pdaData.enemies[d->idx].points.clear();
 			for (int i = 0 ; i < d->enemiesSize; i++)
 			{
-				float x, y, z;
-				ds >> x >> y >> z;
-				
-				QVector3D p(x, y, z);
-				
-				m_pdaData.enemies[d->idx].points.push_back(p);
+				int16_t latU, lonU;
+				ds >> latU >> lonU;
+				m_pdaData.enemies[d->idx].points.push_back(latlonUtoVector(latU, lonU));
 			}
 			break;
 		}
@@ -140,11 +146,9 @@ void MainWindow::processData()
 			
 			for (int i = 0; i < d->foodSize; i++)
 			{
-				float x, y, z;
-				ds >> x >> y >> z;
-				
-				QVector3D p(x, y, z);
-				m_pdaData.foodPoints.append(p);
+				int16_t latU, lonU;
+				ds >> latU >> lonU;
+				m_pdaData.foodPoints.append(latlonUtoVector(latU, lonU));
 			}
 			
 			break;
@@ -156,16 +160,7 @@ void MainWindow::processData()
 void MainWindow::processSensorsData(TUdpDataSENSORS* data)
 {
 	int32_t time = data->ticks;
-	
-	
-	for (int i = 0; i < 8; i++)
-	{
-		float x = data->frustumPoints[i][0];
-		float y = data->frustumPoints[i][1];
-		float z = data->frustumPoints[i][2];
-		// qDebug() << x << y << z;
-		m_pdaData.frustum[i] = QVector3D(x, y, z);
-	}
+
 	/*m_pdaData.frustum[0]*=10;
 	m_pdaData.frustum[1]*=10;
 	m_pdaData.frustum[2]*=10;

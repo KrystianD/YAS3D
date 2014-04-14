@@ -388,6 +388,43 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	private boolean isStabilized = false;
 	private long lastSend = 0;
 
+	private void sendSensorsPacket (long ticks)
+	{
+		ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2);
+		bArray.order (ByteOrder.LITTLE_ENDIAN);
+
+		bArray.put (Sender.TYPE_SENSORS);
+		bArray.putFloat (aX);
+		bArray.putFloat (aY);
+		bArray.putFloat (aZ);
+		bArray.putFloat (gX);
+		bArray.putFloat (gY);
+		bArray.putFloat (gZ);
+		bArray.putFloat (mX);
+		bArray.putFloat (mY);
+		bArray.putFloat (mZ);
+		bArray.putFloat (mad.q0);
+		bArray.putFloat (mad.q1);
+		bArray.putFloat (mad.q2);
+		bArray.putFloat (mad.q3);
+		bArray.putLong (ticks);
+		bArray.put (type);
+		bArray.put (isStabilized ? (byte)1 : (byte)0);
+		sender.sendData (bArray.array ());
+	}
+
+	private void buffAppendXYZ (ByteBuffer buff, Vector3 v)
+	{
+		float lat = (float)Math.acos (v.z);
+		float lon = (float)Math.atan2 (v.y, v.x);
+
+		short latU = (short)(lat * 5000.0f);
+		short lonU = (short)(lon * 5000.0f);
+
+		buff.putShort (latU);
+		buff.putShort (lonU);
+	}
+
 	public void calc ()
 	{
 
@@ -406,36 +443,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 			mad.MadgwickAHRSupdate (gX, gY, gZ, aX, aY, aZ, mX, mY, mZ, diff);
 
-			int frustrumSize = 8 * 3 * Float.SIZE;
-
-			ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2 + frustrumSize);
-			bArray.order (ByteOrder.LITTLE_ENDIAN);
-
-			bArray.put (Sender.TYPE_SENSORS);
-			for (int i = 0; i < 8; i++)
-			{
-				bArray.putFloat (cam.frustum.planePoints[i].x);
-				bArray.putFloat (cam.frustum.planePoints[i].y);
-				bArray.putFloat (cam.frustum.planePoints[i].z);
-			}
-			bArray.putFloat (aX);
-			bArray.putFloat (aY);
-			bArray.putFloat (aZ);
-			bArray.putFloat (gX);
-			bArray.putFloat (gY);
-			bArray.putFloat (gZ);
-			bArray.putFloat (mX);
-			bArray.putFloat (mY);
-			bArray.putFloat (mZ);
-			bArray.putFloat (mad.q0);
-			bArray.putFloat (mad.q1);
-			bArray.putFloat (mad.q2);
-			bArray.putFloat (mad.q3);
-			bArray.putLong (ticks);
-			bArray.put (type);
-			bArray.put (isStabilized ? (byte)1 : (byte)0);
-
-			sender.sendData (bArray.array ());
+			sendSensorsPacket (ticks);
 
 			gX = gY = gZ = 0;
 
@@ -466,37 +474,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			oq2 = mad.q2;
 			oq3 = mad.q3;
 
-			int frustrumSize = 8 * 3 * Float.SIZE;
-
-			ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2 + frustrumSize);
-			bArray.order (ByteOrder.LITTLE_ENDIAN);
-
-			bArray.put (Sender.TYPE_SENSORS);
-			for (int i = 0; i < 8; i++)
-			{
-				bArray.putFloat (cam.frustum.planePoints[i].x);
-				bArray.putFloat (cam.frustum.planePoints[i].y);
-				bArray.putFloat (cam.frustum.planePoints[i].z);
-			}
-
-			bArray.putFloat (aX);
-			bArray.putFloat (aY);
-			bArray.putFloat (aZ);
-			bArray.putFloat (gX);
-			bArray.putFloat (gY);
-			bArray.putFloat (gZ);
-			bArray.putFloat (mX);
-			bArray.putFloat (mY);
-			bArray.putFloat (mZ);
-			bArray.putFloat (mad.q0);
-			bArray.putFloat (mad.q1);
-			bArray.putFloat (mad.q2);
-			bArray.putFloat (mad.q3);
-			bArray.putLong (ticks);
-			bArray.put (type);
-			bArray.put (isStabilized ? (byte)1 : (byte)0);
-
-			sender.sendData (bArray.array ());
+			sendSensorsPacket (ticks);
 		}
 
 		long start = System.currentTimeMillis ();
@@ -558,26 +536,31 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 			// send player data
 			int playerSize = Short.SIZE * 1;
-			int playerTailSize = 3 * Float.SIZE * player.tail.size ();
+			int playerTailSize = 2 * Short.SIZE * player.tail.size ();
+			int frustrumSize = 8 * 3 * Float.SIZE;
 
-			ByteBuffer bBuff = ByteBuffer.allocate (type + playerSize + playerTailSize);
+			ByteBuffer bBuff = ByteBuffer.allocate (type + playerSize + frustrumSize + playerTailSize);
 			bBuff.order (ByteOrder.LITTLE_ENDIAN);
 
 			bBuff.put (Sender.TYPE_PLAYER); // type
 
 			bBuff.putShort ((short)player.tail.size ()); // player size
+			for (int i = 0; i < 8; i++)
+			{
+				bBuff.putFloat (cam.frustum.planePoints[i].x);
+				bBuff.putFloat (cam.frustum.planePoints[i].y);
+				bBuff.putFloat (cam.frustum.planePoints[i].z);
+			}
 
 			for (Vector3 v : player.tail)
 			{
-				bBuff.putFloat (v.x);
-				bBuff.putFloat (v.y);
-				bBuff.putFloat (v.z);
+				buffAppendXYZ (bBuff, v);
 			}
 			sender.sendData (bBuff.array ());
 
 			//send food data
 			int foodSize = Short.SIZE * 1;
-			int foodDataSize = 3 * Float.SIZE * foodManager.foodPositions.size ();
+			int foodDataSize = 2 * Short.SIZE * foodManager.foodPositions.size ();
 
 			bBuff = ByteBuffer.allocate (type + foodSize + foodDataSize);
 			bBuff.order (ByteOrder.LITTLE_ENDIAN);
@@ -587,9 +570,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 			for (Vector3 v : foodManager.foodPositions)
 			{
-				bBuff.putFloat (v.x);
-				bBuff.putFloat (v.y);
-				bBuff.putFloat (v.z);
+				buffAppendXYZ (bBuff, v);
 			}
 			sender.sendData (bBuff.array ());
 
@@ -600,7 +581,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 			for (Enemy e : enemies)
 			{
-				enemyTailSize = 3 * Float.SIZE * e.tail.size ();
+				enemyTailSize = 2 * Short.SIZE * e.tail.size ();
 
 				bBuff = ByteBuffer.allocate (type + enemyIdSize + enemySize + enemyTailSize);
 				bBuff.order (ByteOrder.LITTLE_ENDIAN);
@@ -611,9 +592,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 				for (Vector3 v : e.tail)
 				{
-					bBuff.putFloat (v.x);
-					bBuff.putFloat (v.y);
-					bBuff.putFloat (v.z);
+					buffAppendXYZ (bBuff, v);
 				}
 				sender.sendData (bBuff.array ());
 			}
