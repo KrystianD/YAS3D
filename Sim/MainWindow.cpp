@@ -49,6 +49,8 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->visWorld2->stat = 1;
 	ui->visWorld2->pdaData = &m_pdaData;
 
+	ui->visScreen->pdaData = &m_pdaData;
+
 	m_pdaData.sphereEnabled = 0;
 	ui->widgetSensors->setVisible(true);
 	ui->widgetSpheres->setVisible(false);
@@ -229,6 +231,7 @@ void MainWindow::processSensorsData(TUdpDataSENSORS* data)
 
 	ui->visWorld->rotationQuat = m_pdaData.worldQuat.conjugate();
 	ui->visWorld2->rotationQuat = m_pdaData.worldQuat.conjugate();
+	ui->visScreen->rotationQuat = m_pdaData.worldQuat.conjugate();
 	//static float q = 0;
 	//ui->visWorld->rotationQuat *= QQuaternion::fromAxisAndAngle(0, 1, 1, q += 1);
 	
@@ -276,6 +279,7 @@ void MainWindow::draw()
 		ui->widgetSpheres->setVisible(true);
 		ui->visWorld->updateGL();
 		ui->visWorld2->updateGL();
+		ui->visScreen->updateGL();
 	}
 }
 void MainWindow::updateInfo()

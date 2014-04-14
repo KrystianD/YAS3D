@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     RawReadsWidget.cpp \
     WorldGL.cpp \
     objloader.cpp \
-    3ds.cpp
+    3ds.cpp \
+    ScreenGL.cpp
 
 HEADERS  += MainWindow.h \
     RemoteGL.h \
@@ -49,7 +50,8 @@ HEADERS  += MainWindow.h \
     objloader.hpp \
     3ds.h \
     settings.h \
-    model.h
+    model.h \
+    ScreenGL.h
 
 FORMS    += MainWindow.ui \
     RawReadsWidget.ui

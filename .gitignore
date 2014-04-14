@@ -30,3 +30,5 @@ Makefile
 *.pem
 .settings/
 .directory
+*.pyc
+bin/
