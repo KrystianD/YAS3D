@@ -14,13 +14,17 @@ import com.badlogic.gdx.math.Vector3;
 public abstract class Snake
 {
 	public static final float SNAKE_SPHERE_SIZE = 0.5f / 15f;
+	public static final int SNAKE_MAX_SIZE = 100;
 
 	public ArrayList<Vector3> tail = new ArrayList<Vector3> ();
 
-	public Vector3 moveDir;
+	protected Vector3 moveDir;
+	protected short length = 100; // start length
+	
 	private ModelInstance snakePartInstance;
-	private short length = 5; // start length
-
+	private boolean isDead = false;
+	
+	
 	public Snake (Vector3 startPos, Vector3 startDir, ModelInstance snakePartInstance)
 	{
 		tail.add (startPos);
@@ -46,28 +50,7 @@ public abstract class Snake
 		//Log.d ("KD", "SNAKE RENDER TIME = " + (System.currentTimeMillis () - start));
 	}
 
-	public void calc (float snakeAngleInc)
-	{
-
-		//long start = System.currentTimeMillis ();
-
-		Vector3 currentSnakePosition = getCurrentPosition ();
-
-		moveDir.rotateRad (currentSnakePosition, snakeAngleInc * 5);
-
-		Vector3 dir2 = new Vector3 (moveDir).mul (0.01f);
-		Vector3 newPt = new Vector3 (currentSnakePosition).add (dir2);
-		newPt.nor ();
-
-		moveDir = new Vector3 (newPt).sub (currentSnakePosition);
-		moveDir.nor ();
-
-		tail.add (0, newPt);
-		if (tail.size () > length)
-			tail.remove (tail.size () - 1);
-
-		//Log.d ("KD", "SNAKE CALC TIME = " + (System.currentTimeMillis () - start));
-	}
+	public abstract void calc ();
 
 	public Vector3 getCurrentPosition ()
 	{
@@ -77,6 +60,8 @@ public abstract class Snake
 	public void grow ()
 	{
 		length += 5;
+		if (length > SNAKE_MAX_SIZE)
+			length = SNAKE_MAX_SIZE;
 	}
 
 }

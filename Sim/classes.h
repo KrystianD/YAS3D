@@ -65,6 +65,7 @@ struct TUdpDataFOOD
 	uint8_t type;
 	uint16_t foodSize;
 };
+
 #pragma pack()
 
 #endif // CLASSES_H
