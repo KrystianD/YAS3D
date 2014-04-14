@@ -31,7 +31,6 @@ SOURCES += main.cpp\
     MadgwickAHRS.cpp \
     RawReadsWidget.cpp \
     WorldGL.cpp \
-    model3DS.cpp \
     objloader.cpp \
     3ds.cpp
 
@@ -47,7 +46,6 @@ HEADERS  += MainWindow.h \
     MadgwickAHRS.h \
     RawReadsWidget.h \
     WorldGL.h \
-    model3DS.h \
     objloader.hpp \
     3ds.h \
     settings.h \
