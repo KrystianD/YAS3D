@@ -16,7 +16,7 @@ public class Enemy extends Snake
 		super (startPos, startDir, snakePartInstance);
 	}
 
-	public void calc ()
+	public ECalcResult calc ()
 	{
 
 		//long start = System.currentTimeMillis ();
@@ -35,20 +35,7 @@ public class Enemy extends Snake
 			lastDistanceToTarget = distance;
 		}
 
-		Vector3 currentSnakePosition = getCurrentPosition ();
-
-		Vector3 dir2 = new Vector3 (moveDir).mul (0.01f);
-		Vector3 newPt = new Vector3 (currentSnakePosition).add (dir2);
-		newPt.nor ();
-
-		moveDir = new Vector3 (newPt).sub (currentSnakePosition);
-		moveDir.nor ();
-
-		tail.add (0, newPt);
-		if (tail.size () > length)
-			tail.remove (tail.size () - 1);
-
-		//Log.d ("KD", "SNAKE CALC TIME = " + (System.currentTimeMillis () - start));
+		return advancePosition ();
 	}
 
 	public Vector3 getMoveDir ()

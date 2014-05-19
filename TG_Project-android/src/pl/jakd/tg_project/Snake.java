@@ -16,15 +16,20 @@ public abstract class Snake
 	public static final float SNAKE_SPHERE_SIZE = 0.5f / 15f;
 	public static final int SNAKE_MAX_SIZE = 100;
 
+	public enum ECalcResult
+	{
+		COLLIDED,
+		NOT_COLLIDED
+	}
+
 	public ArrayList<Vector3> tail = new ArrayList<Vector3> ();
 
 	protected Vector3 moveDir;
 	protected short length = 5; // start length
-	
+
 	private ModelInstance snakePartInstance;
 	private boolean isDead = false;
-	
-	
+
 	public Snake (Vector3 startPos, Vector3 startDir, ModelInstance snakePartInstance)
 	{
 		tail.add (startPos);
@@ -35,7 +40,7 @@ public abstract class Snake
 	public void render (ModelBatch modelBatch, Quaternion worldQuat, Environment env, Frustum f)
 	{
 		for (Vector3 v : tail)
-		{			
+		{
 			snakePartInstance.transform.idt ();
 			snakePartInstance.transform.rotate (worldQuat);
 			snakePartInstance.transform.translate (v);
@@ -48,7 +53,31 @@ public abstract class Snake
 		}
 	}
 
-	public abstract void calc ();
+	public abstract ECalcResult calc ();
+
+	protected ECalcResult advancePosition ()
+	{
+		Vector3 dir2 = new Vector3 (moveDir).mul (0.01f);
+		Vector3 newPt = new Vector3 (getCurrentPosition ()).add (dir2);
+		newPt.nor ();
+
+		moveDir = new Vector3 (newPt).sub (getCurrentPosition ());
+		moveDir.nor ();
+
+		tail.add (0, newPt);
+		if (tail.size () > length)
+			tail.remove (tail.size () - 1);
+
+		for (int i = 10; i < tail.size (); i++)
+		{
+			if (tail.get (i).dst2 (getCurrentPosition ()) < (SNAKE_SPHERE_SIZE * SNAKE_SPHERE_SIZE))
+			{
+				Log.d ("KD", "PLAYER COLLIDED WITH ITSELF!!");
+				return ECalcResult.COLLIDED;
+			}
+		}
+		return ECalcResult.NOT_COLLIDED;
+	}
 
 	public Vector3 getCurrentPosition ()
 	{

@@ -387,6 +387,8 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			player.grow ();
 		}
 
+		
+		
 		//calc enemies
 		for (Enemy e : enemies)
 		{
