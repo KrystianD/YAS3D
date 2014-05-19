@@ -17,7 +17,6 @@ public abstract class Snake
 	public static final float SNAKE_SPHERE_SIZE = 0.5f / 15f;
 	public static final int SNAKE_MAX_SIZE = 100;
 	public static final int SNAKE_START_LENGTH = 5;
-	
 
 	public enum ECalcResult
 	{
@@ -29,8 +28,8 @@ public abstract class Snake
 
 	protected Vector3 moveDir;
 	protected short length = SNAKE_START_LENGTH; // start length
-	protected Random rand = new Random();
-	
+	protected Random rand = new Random ();
+
 	private ModelInstance snakePartInstance;
 	private boolean isDead = false;
 
@@ -59,8 +58,17 @@ public abstract class Snake
 
 	public abstract ECalcResult calc ();
 
-	protected ECalcResult advancePosition ()
+	
+	class AdvancePositionResult
 	{
+		public ECalcResult result;
+		public int collidedIndex;
+	}
+
+	protected AdvancePositionResult advancePosition ()
+	{
+		AdvancePositionResult result = new AdvancePositionResult ();
+		
 		Vector3 dir2 = new Vector3 (moveDir).mul (0.01f);
 		Vector3 newPt = new Vector3 (getCurrentPosition ()).add (dir2);
 		newPt.nor ();
@@ -76,11 +84,14 @@ public abstract class Snake
 		{
 			if (tail.get (i).dst2 (getCurrentPosition ()) < (SNAKE_SPHERE_SIZE * SNAKE_SPHERE_SIZE))
 			{
-				Log.d ("KD", "PLAYER COLLIDED WITH ITSELF!!");
-				return ECalcResult.COLLIDED;
+				Log.d ("KD", "SNAKE COLLIDED WITH ITSELF!!");
+				result.collidedIndex = i;
+				result.result = ECalcResult.COLLIDED;
+				return result;
 			}
 		}
-		return ECalcResult.NOT_COLLIDED;
+		result.result = ECalcResult.NOT_COLLIDED;
+		return result;
 	}
 
 	public Vector3 getCurrentPosition ()

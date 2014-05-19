@@ -20,8 +20,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -92,6 +94,11 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				SensorManager.SENSOR_DELAY_FASTEST);
 		mSensorManager.registerListener (this, mMagnet,
 				SensorManager.SENSOR_DELAY_FASTEST);
+
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator (Gdx.files.internal ("fonts/arial.ttf"));
+		font = generator.generateFont(45);
+		generator.dispose ();
+
 	}
 
 	PointLight light = new PointLight ();
@@ -99,7 +106,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public void show ()
 	{
-		font = new BitmapFont ();
 		batch = new SpriteBatch ();
 		modelBatch = new ModelBatch ();
 
@@ -226,7 +232,16 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		//Log.d ("KD", "ENEMIES RENDER = " + (System.currentTimeMillis () - a));
 
 		a = System.currentTimeMillis ();
+
 		modelBatch.end ();
+
+		SpriteBatch spriteBatch = new SpriteBatch ();
+		spriteBatch.begin ();
+
+		String s = "hello world";
+		font.draw (spriteBatch, s, 10, (float)Gdx.app.getGraphics ().getHeight ());
+
+		spriteBatch.end ();
 	}
 
 	@Override
@@ -418,9 +433,8 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		}
 
 		//check all collision
-		Utils.ECollisionResult collisionResult = Utils.checkCollision(player,enemies);
-		
-		
+		//Utils.ECollisionResult collisionResult = Utils.checkCollision(player,enemies);
+
 		// sending data
 		if (System.currentTimeMillis () - lastSend > 1000 / 35)
 		{

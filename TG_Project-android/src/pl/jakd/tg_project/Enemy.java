@@ -1,5 +1,7 @@
 package pl.jakd.tg_project;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 
@@ -35,7 +37,13 @@ public class Enemy extends Snake
 			lastDistanceToTarget = distance;
 		}
 
-		return advancePosition ();
+		AdvancePositionResult apr = advancePosition ();
+		if (apr.result == ECalcResult.COLLIDED)
+		{
+			tail = new ArrayList<Vector3> (tail.subList (0, apr.collidedIndex));
+			length = (short)tail.size ();
+		}
+		return ECalcResult.NOT_COLLIDED;
 	}
 
 	public Vector3 getMoveDir ()
@@ -55,7 +63,7 @@ public class Enemy extends Snake
 
 		tail.clear ();
 		length = SNAKE_START_LENGTH;
-		
+
 		moveDir = startPos.crs (p).nor ();
 		tail.add (startPos);
 	}

@@ -1,12 +1,16 @@
 package pl.jakd.tg_project;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 
 public class PlayerSnake extends Snake
 {
+	public static final int STARTING_LIVES = 3;
 
 	private float snakeAngleInc;
+	private int lives = STARTING_LIVES;
 
 	public PlayerSnake (Vector3 startPos, Vector3 startDir, ModelInstance snakePartInstance)
 	{
@@ -16,7 +20,21 @@ public class PlayerSnake extends Snake
 	public ECalcResult calc ()
 	{
 		moveDir.rotateRad (getCurrentPosition (), snakeAngleInc * 5);
-		return advancePosition ();
+
+		AdvancePositionResult apr = advancePosition ();
+		if (apr.result == ECalcResult.COLLIDED)
+		{
+			if (lives-- > 0)
+			{
+				tail = new ArrayList<Vector3> (tail.subList (0, apr.collidedIndex));
+				length = (short)tail.size ();
+			}
+			else
+			{
+				return ECalcResult.COLLIDED;
+			}
+		}
+		return ECalcResult.NOT_COLLIDED;
 	}
 
 	public void setMoveAngle (float angle)
