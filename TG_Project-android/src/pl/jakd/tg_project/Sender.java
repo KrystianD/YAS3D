@@ -1,27 +1,17 @@
 package pl.jakd.tg_project;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.Deflater;
-
-import android.util.Log;
 
 public class Sender
 {
 	public static final int PORT = 9999;
 	public static final String host = "192.168.5.255";
-
-	//public static final int PORT = 9998;
-	//public static final String host = "192.168.1.100";
-
-	//public static final int PORT = 9999;
-	//public static final String host = "192.168.173.1";
 
 	public static final byte TYPE_SENSORS = 0;
 	public static final byte TYPE_PLAYER = 1;
@@ -76,7 +66,7 @@ public class Sender
 
 					int len = 700;
 					int size;
-					//compress
+					
 					Deflater deflater = new Deflater (Deflater.BEST_COMPRESSION);
 					byte[] buff = null;
 
@@ -110,7 +100,6 @@ public class Sender
 				}
 				catch (Exception e)
 				{
-					// TODO Auto-generated catch block
 					e.printStackTrace ();
 				}
 			}

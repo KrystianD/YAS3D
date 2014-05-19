@@ -99,9 +99,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public void show ()
 	{
-		//	Log.d ("KD", "SHOW!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		//	Log.d ("KD", this.toString ());
-
 		font = new BitmapFont ();
 		batch = new SpriteBatch ();
 		modelBatch = new ModelBatch ();
@@ -116,35 +113,11 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		cam.update ();
 
 		camController = new CameraInputController (cam);
-		// Gdx.input.setInputProcessor (camController);
 		Gdx.input.setInputProcessor (this);
 
 		ModelBuilder modelBuilder = new ModelBuilder ();
 
-		//cross
-		//model[0] = modelBuilder.createBox (0.1f, 0.1f, 0.1f, new Material (
-		//		ColorAttribute.createDiffuse (Color.RED)), Usage.Position
-		//		| Usage.Normal);
-		//instance[0] = new ModelInstance (model[0]);
-
-		/*model[1] = modelBuilder.createBox (1f, 5f, 1f, new Material (
-				ColorAttribute.createDiffuse (Color.GREEN)), Usage.Position
-				| Usage.Normal);
-		instance[1] = new ModelInstance (model[1]);
-
-		model[2] = modelBuilder.createBox (5f, 1f, 1f, new Material (
-				ColorAttribute.createDiffuse (Color.BLUE)), Usage.Position
-				| Usage.Normal);
-		instance[2] = new ModelInstance (model[2]);
-		 */
-
-		// model2 = modelBuilder.createBox (2f, 2f, 2f, new Material
-		// (ColorAttribute.createDiffuse (Color.RED)), Usage.Position |
-		// Usage.Normal);
-		// instance2 = new ModelInstance (model2);
-
 		//Create world
-
 		Model worldModel = modelBuilder.createSphere (0.1f, 0.1f, 0.1f, 10, 10,
 				new Material (ColorAttribute.createDiffuse (Color.BLUE)),
 				Usage.Position | Usage.Normal);
@@ -152,7 +125,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 		//Create player
 		Model modelPlayerSnakePart = modelBuilder.createSphere (PlayerSnake.SNAKE_SPHERE_SIZE,
-				PlayerSnake.SNAKE_SPHERE_SIZE, PlayerSnake.SNAKE_SPHERE_SIZE, 10, 10, new Material (
+				PlayerSnake.SNAKE_SPHERE_SIZE, PlayerSnake.SNAKE_SPHERE_SIZE, 9, 9, new Material (
 						ColorAttribute.createDiffuse (Color.GREEN)),
 				Usage.Position | Usage.Normal);
 		ModelInstance instSnakePart = new ModelInstance (modelPlayerSnakePart);
@@ -160,7 +133,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 		//Create opponents
 		Model modelEnemySnakePart = modelBuilder.createSphere (PlayerSnake.SNAKE_SPHERE_SIZE,
-				PlayerSnake.SNAKE_SPHERE_SIZE, PlayerSnake.SNAKE_SPHERE_SIZE, 10, 10, new Material (
+				PlayerSnake.SNAKE_SPHERE_SIZE, PlayerSnake.SNAKE_SPHERE_SIZE, 9, 9, new Material (
 						ColorAttribute.createDiffuse (Color.BLUE)),
 				Usage.Position | Usage.Normal);
 		ModelInstance instEnemySnakePart = new ModelInstance (modelEnemySnakePart);
@@ -176,18 +149,11 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				Usage.Position | Usage.Normal);
 		ModelInstance foodInstance = new ModelInstance (foodModel);
 
-		Model foodModelTarget = modelBuilder.createSphere (FoodManager.FOOD_SPHERE_SIZE, FoodManager.FOOD_SPHERE_SIZE,
-				FoodManager.FOOD_SPHERE_SIZE, 10, 10,
-				new Material (ColorAttribute.createDiffuse (Color.YELLOW)),
-				Usage.Position | Usage.Normal);
-		ModelInstance foodTargetInstance = new ModelInstance (foodModelTarget);
-		foodManager = new FoodManager (100, foodInstance, foodTargetInstance);
+		foodManager = new FoodManager (100, foodInstance);
 
 		environment = new Environment ();
 		environment.set (new ColorAttribute (ColorAttribute.AmbientLight, 0.4f,
 				0.4f, 0.4f, 1f));
-		// environment.add (new DirectionalLight ().set (0.8f, 0.8f, 0.8f, -1f,
-		// -0.8f, -0.2f));
 		environment.add (light.set (0.8f, 0.8f, 0.8f, 2f, 0f, 0f, 5));
 
 		calcTimer.scheduleTask (new Timer.Task ()
@@ -230,27 +196,16 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				Gdx.graphics.getHeight ());
 		Gdx.gl.glClear (GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
+		Gdx.gl.glEnable (GL20.GL_CULL_FACE);
+		Gdx.gl.glCullFace (GL20.GL_BACK);
+
 		worldQuat.set (mad.q1, mad.q2, mad.q3, -mad.q0);
-
-		//String s = String.format ("%5.2f %5.2f %5.2f %5.2f", worldQuat.w, worldQuat.x, worldQuat.y, worldQuat.z);
-		//Log.d ("KD3", s);
-
-		//Log.d ("KD3", "cam = " + Arrays.toString (cam.frustum.planePoints));
 
 		Vector3 lightPos = new Vector3 (2, 0, 0);
 		lightPos.mul (worldQuat);
 		light.position.set (lightPos);
 
 		modelBatch.begin (cam);
-
-		//for (int i = 0; i < 3; i++)
-		//{
-		//instance[0].transform.idt ();
-		//instance[0].transform.rotate (worldQuat);
-		//instance[0].transform.translate (0, -1, 0);
-		//modelBatch.render (instance[0], environment);
-
-		//}*/
 
 		long a;
 		a = System.currentTimeMillis ();
@@ -268,71 +223,8 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		}
 		//Log.d ("KD", "ENEMIES RENDER = " + (System.currentTimeMillis () - a));
 
-		/*instance[1].transform.idt ();
-		instance[1].transform.translate (-15f, 0, 0);
-		modelBatch.render (instance[1], environment);
-		 */
-
-		/*
-		 * Vector3 ang = latlongToMeters (new Vector2 (x, 0.3f));
-		 * 
-		 * instance[1].transform.idt (); instance[1].transform.rotate (quat);
-		 * instance[1].transform.rotateRad (0, 0, -1, ang.x);
-		 * instance[1].transform.rotateRad (0, 1, 0, ang.y);
-		 * instance[1].transform.translate (-15f, 0, 0); modelBatch.render
-		 * (instance[1], environment);
-		 */
-
-		/*
-		 * instance.transform.idt (); instance.transform.rotate (quat);
-		 * modelBatch.render (instance, environment); instance2.transform.idt
-		 * (); instance2.transform.rotate (quat); instance2.transform.translate
-		 * (0, 0, 1.5f); modelBatch.render (instance2, environment);
-		 */
 		a = System.currentTimeMillis ();
 		modelBatch.end ();
-		//	Log.d ("KD", "RENDER END TIME = " + (System.currentTimeMillis () - a));
-
-		//	Log.d ("KD", "RENDER TIME = " + (System.currentTimeMillis () - start));
-
-		//modelBatch.begin (cam1);
-
-		/*
-		 * Vector3 sn = new Vector3 (snakePos); sn.mul (quat);
-		 * 
-		 * Vector3 sn2 = new Vector3 (sn); //sn2.nor ();
-		 * 
-		 * float d = intersectPlane (new Vector3 (0, 1, 0), new Vector3 (0,
-		 * 0.3f, 0), new Vector3 (0, 0, 0), sn2);
-		 * 
-		 * sn2.mul (d);
-		 * 
-		 * Log.d ("KD", "D " + d + " " + sn2);
-		 * 
-		 * sn.x = Math.min (1, Math.max (-1, sn.x)); sn.y = Math.min (1,
-		 * Math.max (-1, sn.y)); //Log.d ("KD", "" + snakePos + " " + sn);
-		 * 
-		 * instance2.transform.idt (); instance2.transform.translate (sn.x / 2f,
-		 * sn.y / 2f, 0); instance2.transform.translate (sn2.x, sn2.y, 0); if (d
-		 * != 999999 && sn2.z < 2) { modelBatch.render (instance2, environment);
-		 * }
-		 */
-
-		//modelBatch.end ();
-
-	}
-	float intersectPlane (Vector3 n, Vector3 p0, Vector3 l0, Vector3 l)
-	{
-		// assuming vectors are all normalized
-		float denom = n.dot (l);
-		if (denom > 1e-6)
-		{
-			Vector3 p0l0 = new Vector3 (p0);
-			p0l0.sub (l0);
-			float d = p0l0.dot (n) / denom;
-			return d;
-		}
-		return 999999;
 	}
 
 	@Override
@@ -455,13 +347,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			float diff = 0.001f;
 			mad.MadgwickAHRSupdate (0, 0, 0, aX, aY, aZ, mX, mY, mZ, 0.02f * 100);
 
-			/*Log.d ("KD",
-					"" + (Math.abs (mad.q0 - oq0) <= diff) + " "
-							+ (Math.abs (mad.q1 - oq1) <= diff) + " "
-							+ (Math.abs (mad.q2 - oq2) <= diff) + " "
-							+ (Math.abs (mad.q3 - oq3) <= diff));
-			*/
-
 			if ((Math.abs (mad.q0 - oq0) <= diff)
 					&& (Math.abs (mad.q1 - oq1) <= diff)
 					&& (Math.abs (mad.q2 - oq2) <= diff)
@@ -507,7 +392,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		{
 			if (e.needNewFood > 200)
 			{
-				Log.d ("KD", "need food " +e.needNewFood);
+				Log.d ("KD", "need food " + e.needNewFood);
 				e.needNewFood = 0;
 				e.currentTarget = foodManager.foodPositions.get (rand.nextInt (foodManager.foodPositions.size ()));
 			}
@@ -599,11 +484,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				}
 				sender.sendData (bBuff.array ());
 			}
-
-			//	sender.sendData (bArray.array ());
 		}
-		//	Log.d ("KD", "CALC TIME = " + (System.currentTimeMillis () - start));
-
 	}
 
 	@Override
@@ -620,28 +501,24 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public boolean keyTyped (char arg0)
 	{
-
 		return false;
 	}
 
 	@Override
 	public boolean keyUp (int arg0)
 	{
-
 		return false;
 	}
 
 	@Override
 	public boolean mouseMoved (int arg0, int arg1)
 	{
-
 		return false;
 	}
 
 	@Override
 	public boolean scrolled (int arg0)
 	{
-
 		return false;
 	}
 
@@ -651,8 +528,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public boolean touchDown (int arg0, int arg1, int arg2, int arg3)
 	{
-		// Log.d ("KD", "do " + leftPressed + " " + rightPressed + " " +
-		// lastPressed);
 		if (arg0 < Gdx.app.getGraphics ().getWidth () / 2)
 		{
 			leftPressed = true;
@@ -675,8 +550,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public boolean touchUp (int arg0, int arg1, int arg2, int arg3)
 	{
-		// Log.d ("KD", "up " + leftPressed + " " + rightPressed + " " +
-		// lastPressed);
 		if (arg0 < Gdx.app.getGraphics ().getWidth () / 2)
 			leftPressed = false;
 		else

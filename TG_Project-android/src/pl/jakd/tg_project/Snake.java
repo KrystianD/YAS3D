@@ -34,9 +34,8 @@ public abstract class Snake
 
 	public void render (ModelBatch modelBatch, Quaternion worldQuat, Environment env, Frustum f)
 	{
-		//long start = System.currentTimeMillis ();
 		for (Vector3 v : tail)
-		{
+		{			
 			snakePartInstance.transform.idt ();
 			snakePartInstance.transform.rotate (worldQuat);
 			snakePartInstance.transform.translate (v);
@@ -47,7 +46,6 @@ public abstract class Snake
 				modelBatch.render (snakePartInstance, env);
 			}
 		}
-		//Log.d ("KD", "SNAKE RENDER TIME = " + (System.currentTimeMillis () - start));
 	}
 
 	public abstract void calc ();
@@ -63,5 +61,4 @@ public abstract class Snake
 		if (length > SNAKE_MAX_SIZE)
 			length = SNAKE_MAX_SIZE;
 	}
-
 }

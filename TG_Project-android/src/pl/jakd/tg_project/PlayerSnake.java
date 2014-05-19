@@ -14,9 +14,6 @@ public class PlayerSnake extends Snake
 
 	public void calc ()
 	{
-
-		//long start = System.currentTimeMillis ();
-
 		Vector3 currentSnakePosition = getCurrentPosition ();
 
 		moveDir.rotateRad (currentSnakePosition, snakeAngleInc * 5);
@@ -31,8 +28,6 @@ public class PlayerSnake extends Snake
 		tail.add (0, newPt);
 		if (tail.size () > length)
 			tail.remove (tail.size () - 1);
-
-		//Log.d ("KD", "SNAKE CALC TIME = " + (System.currentTimeMillis () - start));
 	}
 
 	public void setMoveAngle (float angle)

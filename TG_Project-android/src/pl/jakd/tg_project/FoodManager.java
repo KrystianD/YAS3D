@@ -17,16 +17,14 @@ public class FoodManager
 	public ArrayList<Vector3> foodPositions = new ArrayList<Vector3> ();
 
 	private ModelInstance foodInstance;
-	private ModelInstance foodInstanceAsTarget;
 	private Random rand = new Random ();
 	public Vector3 hilightedFood = null;
 
 	public boolean isTarget = false;
 
-	public FoodManager (int count, ModelInstance foodInstance, ModelInstance foodInstanceAsTarget)
+	public FoodManager (int count, ModelInstance foodInstance)
 	{
 		this.foodInstance = foodInstance;
-		this.foodInstanceAsTarget = foodInstanceAsTarget;
 		//create food
 		for (int i = 0; i < count; i++)
 		{
@@ -71,5 +69,4 @@ public class FoodManager
 		}
 		return false;
 	}
-
 }
