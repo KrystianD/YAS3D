@@ -25,8 +25,8 @@ public class Sender
 
 	public Sender ()
 	{
-		t = new Thread (new SendWorker ());
-		t.start ();
+		//t = new Thread (new SendWorker ());
+		/*t.start ();
 		try
 		{
 			udpSocket = new DatagramSocket (PORT);
@@ -35,19 +35,22 @@ public class Sender
 		catch (SocketException e)
 		{
 			e.printStackTrace ();
-		}
+		}*/
 	}
 
 	public void sendData (final byte[] data)
 	{
-		queue.add (data);
+		//queue.add (data);
 	}
 
 	public void close ()
 	{
-		udpSocket.disconnect ();
-		udpSocket.close ();
-		udpSocket = null;
+		if (udpSocket != null)
+		{
+			udpSocket.disconnect ();
+			udpSocket.close ();
+			udpSocket = null;
+		}
 	}
 
 	private class SendWorker implements Runnable
@@ -55,7 +58,7 @@ public class Sender
 		@Override
 		public void run ()
 		{
-			while (true)
+			/*while (true)
 			{
 				try
 				{
@@ -102,7 +105,7 @@ public class Sender
 				{
 					e.printStackTrace ();
 				}
-			}
+			}*/
 		}
 	}
 }
