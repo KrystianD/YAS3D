@@ -11,9 +11,9 @@ public class Enemy extends Snake
 	public long timeNoChangeDist;
 	public int needNewFood = 0;
 
-	public Enemy (Vector3 startPos, Vector3 startDir, ModelInstance snakePartInstance)
+	public Enemy (ModelInstance snakePartInstance)
 	{
-		super (startPos, startDir, snakePartInstance);
+		super (new Vector3 (), new Vector3 (), snakePartInstance);
 	}
 
 	public ECalcResult calc ()
@@ -46,6 +46,18 @@ public class Enemy extends Snake
 	public void setMoveDir (Vector3 moveDir)
 	{
 		this.moveDir = moveDir;
+	}
+
+	public void reset ()
+	{
+		Vector3 startPos = Utils.randSpherePoint ();
+		Vector3 p = Utils.randSpherePoint ();
+
+		tail.clear ();
+		length = SNAKE_START_LENGTH;
+		
+		moveDir = startPos.crs (p).nor ();
+		tail.add (startPos);
 	}
 
 }

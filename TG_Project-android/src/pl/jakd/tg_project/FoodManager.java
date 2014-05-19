@@ -28,8 +28,7 @@ public class FoodManager
 		//create food
 		for (int i = 0; i < count; i++)
 		{
-			foodPositions.add (new Vector3 (rand.nextFloat () * 2 - 1,
-					rand.nextFloat () * 2 - 1, rand.nextFloat () * 2 - 1).nor ());
+			foodPositions.add (Utils.randSpherePoint ());
 		}
 	}
 

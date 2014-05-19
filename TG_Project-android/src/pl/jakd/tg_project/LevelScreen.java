@@ -139,7 +139,9 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		ModelInstance instEnemySnakePart = new ModelInstance (modelEnemySnakePart);
 		for (int i = 0; i < 3; i++)
 		{
-			enemies.add (new Enemy (new Vector3 (1, i, 0.2f), new Vector3 (0, 0, 1), instEnemySnakePart));
+			Enemy e = new Enemy (instEnemySnakePart);
+			e.reset ();
+			enemies.add (e);
 		}
 
 		//Create food
@@ -344,7 +346,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		//stabilize World
 		else if (hasA && hasM && !isStabilized)
 		{
-			float diff = 0.001f;
+			float diff = 0.005f;
 			mad.MadgwickAHRSupdate (0, 0, 0, aX, aY, aZ, mX, mY, mZ, 0.02f * 100);
 
 			if ((Math.abs (mad.q0 - oq0) <= diff)
@@ -387,8 +389,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			player.grow ();
 		}
 
-		
-		
 		//calc enemies
 		for (Enemy e : enemies)
 		{
@@ -417,6 +417,10 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			e.calc ();
 		}
 
+		//check all collision
+		Utils.ECollisionResult collisionResult = Utils.checkCollision(player,enemies);
+		
+		
 		// sending data
 		if (System.currentTimeMillis () - lastSend > 1000 / 35)
 		{

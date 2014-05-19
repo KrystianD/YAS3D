@@ -1,6 +1,7 @@
 package pl.jakd.tg_project;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import android.util.Log;
 
@@ -15,6 +16,8 @@ public abstract class Snake
 {
 	public static final float SNAKE_SPHERE_SIZE = 0.5f / 15f;
 	public static final int SNAKE_MAX_SIZE = 100;
+	public static final int SNAKE_START_LENGTH = 5;
+	
 
 	public enum ECalcResult
 	{
@@ -25,8 +28,9 @@ public abstract class Snake
 	public ArrayList<Vector3> tail = new ArrayList<Vector3> ();
 
 	protected Vector3 moveDir;
-	protected short length = 5; // start length
-
+	protected short length = SNAKE_START_LENGTH; // start length
+	protected Random rand = new Random();
+	
 	private ModelInstance snakePartInstance;
 	private boolean isDead = false;
 
@@ -89,5 +93,13 @@ public abstract class Snake
 		length += 5;
 		if (length > SNAKE_MAX_SIZE)
 			length = SNAKE_MAX_SIZE;
+	}
+
+	public boolean collideWithPoint (Vector3 point)
+	{
+		for (Vector3 v : tail)
+			if (point.dst2 (v) < SNAKE_SPHERE_SIZE * SNAKE_SPHERE_SIZE)
+				return true;
+		return false;
 	}
 }
