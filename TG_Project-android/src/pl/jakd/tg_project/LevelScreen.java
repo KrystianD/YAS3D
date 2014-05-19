@@ -96,7 +96,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				SensorManager.SENSOR_DELAY_FASTEST);
 
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator (Gdx.files.internal ("fonts/arial.ttf"));
-		font = generator.generateFont(45);
+		font = generator.generateFont (45);
 		generator.dispose ();
 
 	}
@@ -238,8 +238,8 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		SpriteBatch spriteBatch = new SpriteBatch ();
 		spriteBatch.begin ();
 
-		String s = "hello world";
-		font.draw (spriteBatch, s, 10, (float)Gdx.app.getGraphics ().getHeight ());
+		String status = "Points: " + player.getScore () + "\nLives: " + player.getLives ();
+		font.drawMultiLine (spriteBatch, status, 10, (float)Gdx.app.getGraphics ().getHeight ());
 
 		spriteBatch.end ();
 	}

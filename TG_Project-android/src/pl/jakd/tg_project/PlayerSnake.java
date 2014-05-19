@@ -11,7 +11,9 @@ public class PlayerSnake extends Snake
 
 	private float snakeAngleInc;
 	private int lives = STARTING_LIVES;
-
+	private int score = 0;
+	
+	
 	public PlayerSnake (Vector3 startPos, Vector3 startDir, ModelInstance snakePartInstance)
 	{
 		super (startPos, startDir, snakePartInstance);
@@ -40,5 +42,15 @@ public class PlayerSnake extends Snake
 	public void setMoveAngle (float angle)
 	{
 		this.snakeAngleInc = angle;
+	}
+
+	public int getScore(){
+		score = tail.size () - SNAKE_START_LENGTH;
+		return score;
+	}
+	
+	public int getLives ()
+	{
+		return lives;
 	}
 }
