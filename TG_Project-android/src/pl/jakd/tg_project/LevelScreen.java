@@ -49,7 +49,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	public Environment environment;
 	public CameraInputController camController;
 	public BitmapFont font;
-	public SpriteBatch batch;
+	public SpriteBatch spriteBatch;
 
 	private Quaternion worldQuat = new Quaternion ();
 	private GameSnake game;
@@ -106,7 +106,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public void show ()
 	{
-		batch = new SpriteBatch ();
+		spriteBatch = new SpriteBatch ();
 		modelBatch = new ModelBatch ();
 
 		cam = new PerspectiveCamera (50, Gdx.graphics.getWidth (),
@@ -197,56 +197,38 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public void render (float delta)
 	{
-		Log.e ("KD", "renderStart");
-		long start = System.currentTimeMillis ();
-
-		// mad (1, 1, 1, 2, 2, 2, 3, 3, 3);
 		Gdx.gl.glViewport (0, 0, Gdx.graphics.getWidth (),
 				Gdx.graphics.getHeight ());
 		Gdx.gl.glClear (GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 		Gdx.gl.glEnable (GL20.GL_CULL_FACE);
 		Gdx.gl.glCullFace (GL20.GL_BACK);
-		Log.e ("KD", "render1");
+
 		worldQuat.set (mad.q1, mad.q2, mad.q3, -mad.q0);
 
 		Vector3 lightPos = new Vector3 (2, 0, 0);
 		lightPos.mul (worldQuat);
 		light.position.set (lightPos);
-		Log.e ("KD", "render2");
+
 		modelBatch.begin (cam);
 
-		long a;
-		a = System.currentTimeMillis ();
 		player.render (modelBatch, worldQuat, environment, cam.frustum);
-		//Log.e ("KD", "PLAYER RENDER = " + (System.currentTimeMillis () - a));
-		Log.e ("KD", "render3 " + player.tail.size ());
-		a = System.currentTimeMillis ();
+		
 		foodManager.render (modelBatch, worldQuat, environment, cam.frustum);
-		//Log.e ("KD", "FOOD RENDER = " + (System.currentTimeMillis () - a));
-		Log.e ("KD", "render4");
-		a = System.currentTimeMillis ();
+		
 		for (Enemy e : enemies)
 		{
-			Log.e ("KD", "render4.1 " + e.tail.size ());
 			e.render (modelBatch, worldQuat, environment, cam.frustum);
 		}
-		Log.e ("KD", "render5");
-		//Log.e ("KD", "ENEMIES RENDER = " + (System.currentTimeMillis () - a));
-
-		a = System.currentTimeMillis ();
-
+		
 		modelBatch.end ();
 
-		Log.e ("KD", "render6");
-		SpriteBatch spriteBatch = new SpriteBatch ();
 		spriteBatch.begin ();
 
 		String status = "Points: " + player.getScore () + "\nLives: " + player.getLives ();
 		font.drawMultiLine (spriteBatch, status, 10, (float)Gdx.app.getGraphics ().getHeight ());
 
 		spriteBatch.end ();
-		Log.e ("KD", "renderEnd");
 	}
 
 	@Override
@@ -342,7 +324,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 	public void calc ()
 	{
-		Log.e ("KD", "calcIn");
 		long ticks = System.currentTimeMillis ();
 		//calc World orientation
 		if (hasA && hasM && isStabilized)
@@ -401,24 +382,19 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		player.calc ();
 
 		//check player collision
-		Log.e ("KD", "1");
 		if (foodManager.checkCollison (player))
 		{
 			player.grow ();
 		}
-		Log.e ("KD", "2");
 		//calc enemies
 		for (Enemy e : enemies)
 		{
 			if (e.needNewFood > 200)
 			{
-				Log.e ("KD", "need food " + e.needNewFood);
 				e.needNewFood = 0;
 				e.currentTarget = foodManager.foodPositions.get (rand.nextInt (foodManager.foodPositions.size ()));
 			}
-			Log.e ("KD", "3");
 			boolean collided = foodManager.checkCollison (e);
-			Log.e ("KD", "4");
 			if (collided || e.currentTarget == null)
 			{
 				if (collided)
@@ -430,12 +406,9 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 			Vector3 a = new Vector3 (e.currentTarget).sub (e.getCurrentPosition ()).nor ();
 			float ratio = 0.92f;
-			Log.e ("KD", "5");
 			e.setMoveDir (new Vector3 (e.getMoveDir ()).mul (ratio).add (a.mul (1 - ratio)));
 			e.calc ();
-			Log.e ("KD", "6");
 		}
-		Log.e ("KD", "7");
 		//check all collision
 		//Utils.ECollisionResult collisionResult = Utils.checkCollision(player,enemies);
 
@@ -509,7 +482,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				sender.sendData (bBuff.array ());
 			}
 		}*/
-		Log.e ("KD", "calcOut");
 	}
 
 	@Override

@@ -16,7 +16,7 @@ public abstract class Snake
 {
 	public static final float SNAKE_SPHERE_SIZE = 0.5f / 15f;
 	public static final int SNAKE_MAX_SIZE = 100;
-	public static final int SNAKE_START_LENGTH = 5;
+	public static final int SNAKE_START_LENGTH = 100;
 
 	public enum ECalcResult
 	{
