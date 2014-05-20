@@ -17,7 +17,7 @@ public abstract class Snake
 	public static final float SNAKE_SPHERE_SIZE = 0.5f / 15f;
 	public static final int SNAKE_MAX_SIZE = 100;
 	public static final int SNAKE_START_LENGTH = 5;
-	
+
 	protected static final float SPHERES_DISTANCE = 0.01f;
 
 	public enum ECalcResult
@@ -69,7 +69,7 @@ public abstract class Snake
 	protected AdvancePositionResult advancePosition ()
 	{
 		AdvancePositionResult result = new AdvancePositionResult ();
-		
+
 		Vector3 dir2 = new Vector3 (moveDir).mul (SPHERES_DISTANCE);
 		Vector3 newPt = new Vector3 (getCurrentPosition ()).add (dir2);
 		newPt.nor ();
@@ -107,11 +107,19 @@ public abstract class Snake
 			length = SNAKE_MAX_SIZE;
 	}
 
-	public boolean collideWithPoint (Vector3 point)
+	public int collideWithPoint (Vector3 point)
 	{
 		for (Vector3 v : tail)
 			if (point.dst2 (v) < SNAKE_SPHERE_SIZE * SNAKE_SPHERE_SIZE)
-				return true;
-		return false;
+				return tail.indexOf (v);
+		return -1;
+	}
+
+	public void cutTo (int colsPos)
+	{
+		if (colsPos < SNAKE_START_LENGTH)
+			colsPos = SNAKE_START_LENGTH;
+		tail = new ArrayList<Vector3> (tail.subList (0, colsPos));
+		length = (short)tail.size ();
 	}
 }

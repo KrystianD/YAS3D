@@ -37,7 +37,7 @@ public class Utils
 			{
 				if (e == ec)
 					continue;
-				if (ec.collideWithPoint (e.getCurrentPosition ()))
+				if (ec.collideWithPoint (e.getCurrentPosition ()) != -1)
 				{
 					e.reset ();
 				}
@@ -46,11 +46,11 @@ public class Utils
 
 		for (Enemy e : enemies)
 		{
-			if (player.collideWithPoint (e.getCurrentPosition ()))
+			if (player.collideWithPoint (e.getCurrentPosition ()) != -1)
 			{
 				e.reset ();
 			}
-			else if (e.collideWithPoint (player.getCurrentPosition ()))
+			else if (e.collideWithPoint (player.getCurrentPosition ()) != -1)
 			{
 				return ECollisionResult.PLAYER_COLLIDED;
 			}
@@ -58,12 +58,12 @@ public class Utils
 
 		for (Wall w : walls)
 		{
-			if (w.collideWithPoint (player.getCurrentPosition ()))
+			if (w.collideWithPoint (player.getCurrentPosition ()) != -1)
 			{
 				if (player.getLives () > 0)
 				{
 					player.shrink ();
-					while (w.collideWithPoint (player.getCurrentPosition ()))
+					while (w.collideWithPoint (player.getCurrentPosition ()) != -1)
 					{
 						player.calc ();
 					}
@@ -74,17 +74,24 @@ public class Utils
 					return ECollisionResult.PLAYER_COLLIDED;
 				}
 			}
-			
-			if(player.collideWithPoint (w.getCurrentPosition ())){
-				
+
+			int colsPos = player.collideWithPoint (w.getCurrentPosition ());
+			if (colsPos != -1)
+			{
+				player.cutTo(colsPos);
 			}
-			
 
 			for (Enemy e : enemies)
 			{
-				if (w.collideWithPoint (e.getCurrentPosition ()))
+				if (w.collideWithPoint (e.getCurrentPosition ()) != -1)
 				{
 					e.reset ();
+				}
+				
+				colsPos = e.collideWithPoint (w.getCurrentPosition ());
+				if (colsPos != -1)
+				{
+					e.cutTo(colsPos);
 				}
 			}
 		}
