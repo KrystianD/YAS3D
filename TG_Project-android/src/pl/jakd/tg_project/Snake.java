@@ -16,7 +16,9 @@ public abstract class Snake
 {
 	public static final float SNAKE_SPHERE_SIZE = 0.5f / 15f;
 	public static final int SNAKE_MAX_SIZE = 100;
-	public static final int SNAKE_START_LENGTH = 100;
+	public static final int SNAKE_START_LENGTH = 5;
+	
+	protected static final float SPHERES_DISTANCE = 0.01f;
 
 	public enum ECalcResult
 	{
@@ -58,7 +60,6 @@ public abstract class Snake
 
 	public abstract ECalcResult calc ();
 
-	
 	class AdvancePositionResult
 	{
 		public ECalcResult result;
@@ -69,7 +70,7 @@ public abstract class Snake
 	{
 		AdvancePositionResult result = new AdvancePositionResult ();
 		
-		Vector3 dir2 = new Vector3 (moveDir).mul (0.01f);
+		Vector3 dir2 = new Vector3 (moveDir).mul (SPHERES_DISTANCE);
 		Vector3 newPt = new Vector3 (getCurrentPosition ()).add (dir2);
 		newPt.nor ();
 

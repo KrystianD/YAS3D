@@ -5,6 +5,9 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Random;
 
+import pl.jakd.tg_project.Snake.ECalcResult;
+import pl.jakd.tg_project.Utils.ECollisionResult;
+
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -62,6 +65,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	private PlayerSnake player;
 	private FoodManager foodManager;
 	private ArrayList<Enemy> enemies = new ArrayList<Enemy> ();
+	private ArrayList<Wall> walls = new ArrayList<Wall> ();
 
 	private byte type;
 
@@ -148,6 +152,18 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			enemies.add (e);
 		}
 
+		//Create Walls
+		Model modelWallPart = modelBuilder.createSphere (PlayerSnake.SNAKE_SPHERE_SIZE,
+				PlayerSnake.SNAKE_SPHERE_SIZE, PlayerSnake.SNAKE_SPHERE_SIZE, 9, 9, new Material (
+						ColorAttribute.createDiffuse (Color.GRAY)),
+				Usage.Position | Usage.Normal);
+		ModelInstance instWallPart = new ModelInstance (modelWallPart);
+		for (int i = 0; i < 10; i++)
+		{
+			Wall w = new Wall (Utils.randSpherePoint (), Utils.randSpherePoint ().nor (), 0, 3.14f / 6, 30, instWallPart);
+			walls.add (w);
+		}
+
 		//Create food
 		Model foodModel = modelBuilder.createSphere (FoodManager.FOOD_SPHERE_SIZE, FoodManager.FOOD_SPHERE_SIZE,
 				FoodManager.FOOD_SPHERE_SIZE, 10, 10,
@@ -211,14 +227,19 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		modelBatch.begin (cam);
 
 		player.render (modelBatch, worldQuat, environment, cam.frustum);
-		
+
 		foodManager.render (modelBatch, worldQuat, environment, cam.frustum);
-		
+
+		for (Wall w : walls)
+		{
+			w.render (modelBatch, worldQuat, environment, cam.frustum);
+		}
+
 		for (Enemy e : enemies)
 		{
 			e.render (modelBatch, worldQuat, environment, cam.frustum);
 		}
-		
+
 		modelBatch.end ();
 
 		spriteBatch.begin ();
@@ -333,7 +354,10 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				snakeAngInc = 0.02f;
 		}
 		player.setMoveAngle (snakeAngInc);
-		player.calc ();
+		if (player.calc () == ECalcResult.COLLIDED)
+		{
+			Log.d ("KD", "gjam ovah");
+		}
 
 		//check player collision
 		if (foodManager.checkCollison (player))
@@ -363,8 +387,18 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			e.setMoveDir (new Vector3 (e.getMoveDir ()).mul (ratio).add (a.mul (1 - ratio)));
 			e.calc ();
 		}
+
+		//calc walls
+		for (Wall w : walls)
+		{
+			w.calc ();
+		}
+
 		//check all collision
-		//Utils.ECollisionResult collisionResult = Utils.checkCollision(player,enemies);
+		Utils.ECollisionResult collisionResult = Utils.checkCollision (player, enemies, walls);
+		//TODO
+		if (collisionResult == ECollisionResult.PLAYER_COLLIDED)
+			Log.d ("KD", "gjam ovah");
 	}
 
 	@Override

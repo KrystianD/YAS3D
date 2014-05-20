@@ -8,12 +8,11 @@ import com.badlogic.gdx.math.Vector3;
 public class PlayerSnake extends Snake
 {
 	public static final int STARTING_LIVES = 3;
-
+	
 	private float snakeAngleInc;
 	private int lives = STARTING_LIVES;
 	private int score = 0;
-	
-	
+
 	public PlayerSnake (Vector3 startPos, Vector3 startDir, ModelInstance snakePartInstance)
 	{
 		super (startPos, startDir, snakePartInstance);
@@ -44,13 +43,21 @@ public class PlayerSnake extends Snake
 		this.snakeAngleInc = angle;
 	}
 
-	public int getScore(){
+	public int getScore ()
+	{
 		score = tail.size () - SNAKE_START_LENGTH;
 		return score;
 	}
-	
+
 	public int getLives ()
 	{
 		return lives;
+	}
+
+	public void shrink ()
+	{
+		lives--;
+		tail = new ArrayList<Vector3> (tail.subList (0, SNAKE_START_LENGTH));
+		length = (short)tail.size ();
 	}
 }

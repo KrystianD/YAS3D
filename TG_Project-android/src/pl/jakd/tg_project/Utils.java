@@ -29,7 +29,7 @@ public class Utils
 		return 999999;
 	}
 
-	public static ECollisionResult checkCollision (PlayerSnake player, ArrayList<Enemy> enemies)
+	public static ECollisionResult checkCollision (PlayerSnake player, ArrayList<Enemy> enemies, ArrayList<Wall> walls)
 	{
 		for (Enemy e : enemies)
 		{
@@ -43,10 +43,54 @@ public class Utils
 				}
 			}
 		}
-		//TODO
-		return null;
-	}
 
+		for (Enemy e : enemies)
+		{
+			if (player.collideWithPoint (e.getCurrentPosition ()))
+			{
+				e.reset ();
+			}
+			else if (e.collideWithPoint (player.getCurrentPosition ()))
+			{
+				return ECollisionResult.PLAYER_COLLIDED;
+			}
+		}
+
+		for (Wall w : walls)
+		{
+			if (w.collideWithPoint (player.getCurrentPosition ()))
+			{
+				if (player.getLives () > 0)
+				{
+					player.shrink ();
+					while (w.collideWithPoint (player.getCurrentPosition ()))
+					{
+						player.calc ();
+					}
+					return ECollisionResult.PLAYER_NOT_COLLIDED;
+				}
+				else
+				{
+					return ECollisionResult.PLAYER_COLLIDED;
+				}
+			}
+			
+			if(player.collideWithPoint (w.getCurrentPosition ())){
+				
+			}
+			
+
+			for (Enemy e : enemies)
+			{
+				if (w.collideWithPoint (e.getCurrentPosition ()))
+				{
+					e.reset ();
+				}
+			}
+		}
+
+		return ECollisionResult.PLAYER_NOT_COLLIDED;
+	}
 	public static Vector3 randSpherePoint ()
 	{
 		return new Vector3 (rand.nextFloat () * 2 - 1,
