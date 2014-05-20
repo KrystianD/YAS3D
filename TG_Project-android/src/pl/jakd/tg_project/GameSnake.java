@@ -13,12 +13,10 @@ public class GameSnake extends Game
 
 	private Context context;
 	private FPSLogger fpsLogger;
-	private Sender sender;
 
-	public GameSnake (Context context, Sender sender)
+	public GameSnake (Context context)
 	{
 		this.context = context;
-		this.sender = sender;
 	}
 
 	public MainMenu getMainMenu ()
@@ -28,7 +26,7 @@ public class GameSnake extends Game
 
 	public LevelScreen getLevelScreen (byte type)
 	{
-		return new LevelScreen (this, context, sender, type);
+		return new LevelScreen (this, context, type);
 	}
 
 	@Override
