@@ -1,4 +1,0 @@
-
-
-// u KD
-//#define KDMODE
