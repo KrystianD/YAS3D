@@ -11,7 +11,7 @@ import java.util.zip.Deflater;
 public class Sender
 {
 	public static final int PORT = 9999;
-	public static final String host = "192.168.5.255";
+	public static final String host = "192.168.1.2";
 
 	public static final byte TYPE_SENSORS = 0;
 	public static final byte TYPE_PLAYER = 1;
@@ -25,8 +25,8 @@ public class Sender
 
 	public Sender ()
 	{
-		//t = new Thread (new SendWorker ());
-		/*t.start ();
+		t = new Thread (new SendWorker ());
+		t.start ();
 		try
 		{
 			udpSocket = new DatagramSocket (PORT);
@@ -35,12 +35,12 @@ public class Sender
 		catch (SocketException e)
 		{
 			e.printStackTrace ();
-		}*/
+		}
 	}
 
 	public void sendData (final byte[] data)
 	{
-		//queue.add (data);
+		queue.add (data);
 	}
 
 	public void close ()
@@ -58,7 +58,7 @@ public class Sender
 		@Override
 		public void run ()
 		{
-			/*while (true)
+			while (true)
 			{
 				try
 				{
@@ -69,7 +69,7 @@ public class Sender
 
 					int len = 700;
 					int size;
-					
+
 					Deflater deflater = new Deflater (Deflater.BEST_COMPRESSION);
 					byte[] buff = null;
 
@@ -105,7 +105,7 @@ public class Sender
 				{
 					e.printStackTrace ();
 				}
-			}*/
+			}
 		}
 	}
 }

@@ -20,7 +20,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -337,7 +336,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				lastCalc = ticks;
 				mad.MadgwickAHRSupdate (gX, gY, gZ, aX, aY, aZ, mX, mY, mZ, diff);
 				gX = gY = gZ = 0;
-				//sendSensorsPacket (ticks);
+				sendSensorsPacket (ticks);
 			}
 
 		}
@@ -360,7 +359,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			oq2 = mad.q2;
 			oq3 = mad.q3;
 
-			//sendSensorsPacket (ticks);
+			sendSensorsPacket (ticks);
 		}
 
 		long start = System.currentTimeMillis ();
@@ -413,7 +412,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		//Utils.ECollisionResult collisionResult = Utils.checkCollision(player,enemies);
 
 		// sending data
-		/*if (System.currentTimeMillis () - lastSend > 1000 / 35)
+		if (System.currentTimeMillis () - lastSend > 1000 / 35)
 		{
 			lastSend = System.currentTimeMillis ();
 
@@ -481,7 +480,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				}
 				sender.sendData (bBuff.array ());
 			}
-		}*/
+		}
 	}
 
 	@Override
