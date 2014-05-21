@@ -1,13 +1,10 @@
 package pl.jakd.tg_project;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Random;
 
 import pl.jakd.tg_project.Snake.ECalcResult;
 import pl.jakd.tg_project.Utils.ECollisionResult;
-
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -23,7 +20,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -37,7 +33,6 @@ import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Quaternion;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Timer;
 
@@ -53,7 +48,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	public CameraInputController camController;
 	public BitmapFont font;
 	public SpriteBatch spriteBatch;
-
+	
 	private Quaternion worldQuat = new Quaternion ();
 	private GameSnake game;
 	private SensorManager mSensorManager;
@@ -67,22 +62,18 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	private ArrayList<Enemy> enemies = new ArrayList<Enemy> ();
 	private ArrayList<Wall> walls = new ArrayList<Wall> ();
 
-	private byte type;
-
 	float aX = 0, aY = 0, aZ = 0, gX = 0, gY = 0, gZ = 0, mX = 0, mY = 0,
 			mZ = 0;
 	Boolean hasA = false, hasG = false, hasM = false;
 	Mad mad;
 
-	public LevelScreen (GameSnake game, Context ctx, byte type)
+	public LevelScreen (GameSnake game, Context ctx)
 	{
 		this.game = game;
 
 		mad = new Mad ();
 		// System.loadLibrary ("mad");
 		Gdx.input.setCatchBackKey (true);
-
-		this.type = type;
 
 		mSensorManager = (SensorManager)ctx
 				.getSystemService (Context.SENSOR_SERVICE);
@@ -192,18 +183,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	public void dispose ()
 	{
 		modelBatch.dispose ();
+		spriteBatch.dispose ();
 	}
 
 	@Override
 	public void pause ()
 	{
-	}
-
-	Vector2 latlongToMeters (Vector2 pos)
-	{
-		float longtitude = pos.y;
-		float latitude = pos.x / (float)Math.cos (longtitude);
-		return new Vector2 (latitude, longtitude);
 	}
 
 	float x = 0;

@@ -3,6 +3,7 @@ package pl.jakd.tg_project;
 import java.util.ArrayList;
 import java.util.Random;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 public class Utils
@@ -102,5 +103,12 @@ public class Utils
 	{
 		return new Vector3 (rand.nextFloat () * 2 - 1,
 				rand.nextFloat () * 2 - 1, rand.nextFloat () * 2 - 1).nor ();
+	}
+	
+	public static Vector2 latlongToMeters (Vector2 pos)
+	{
+		float longtitude = pos.y;
+		float latitude = pos.x / (float)Math.cos (longtitude);
+		return new Vector2 (latitude, longtitude);
 	}
 }

@@ -8,9 +8,6 @@ import com.badlogic.gdx.graphics.FPSLogger;
 
 public class GameSnake extends Game
 {
-	public static final byte NO_SPHERE = 0;
-	public static final byte SPHERE = 1;
-
 	private Context context;
 	private FPSLogger fpsLogger;
 
@@ -24,9 +21,14 @@ public class GameSnake extends Game
 		return new MainMenu (this);
 	}
 
-	public LevelScreen getLevelScreen (byte type)
+	public LevelScreen getLevelScreen ()
 	{
-		return new LevelScreen (this, context, type);
+		return new LevelScreen (this, context);
+	}
+	
+	public HighscoresScreen getHigscoresScreen()
+	{
+		return new HighscoresScreen(this);
 	}
 
 	@Override

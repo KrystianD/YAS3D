@@ -48,7 +48,7 @@ public class MainMenu extends ScreenAdapter
 		stage.addActor (welcomeLabel);
 
 		// button "start game"
-		TextButton startGameButton = new TextButton ("Start no sphere", skin);
+		TextButton startGameButton = new TextButton ("Start Game", skin);
 		startGameButton.setX (buttonX);
 		startGameButton.setY (currentY);
 		startGameButton.setWidth (BUTTON_WIDTH);
@@ -58,36 +58,36 @@ public class MainMenu extends ScreenAdapter
 			@Override
 			public boolean handle (Event event)
 			{
-				game.setScreen (game.getLevelScreen (GameSnake.NO_SPHERE));
+				game.setScreen (game.getLevelScreen ());
 				return true;
 			}
 		});
 		stage.addActor (startGameButton);
 
-		// button "options"
-		TextButton optionsButton = new TextButton ("Start sphere", skin);
-		optionsButton.setX (buttonX);
-		optionsButton.setY (currentY -= BUTTON_HEIGHT + BUTTON_SPACING);
-		optionsButton.setWidth (BUTTON_WIDTH);
-		optionsButton.setHeight (BUTTON_HEIGHT);
-		optionsButton.addListener (new InputListener ()
+		
+		TextButton highscoresButton = new TextButton ("Highscores", skin);
+		highscoresButton.setX (buttonX);
+		highscoresButton.setY (currentY -= BUTTON_HEIGHT + BUTTON_SPACING);
+		highscoresButton.setWidth (BUTTON_WIDTH);
+		highscoresButton.setHeight (BUTTON_HEIGHT);
+		highscoresButton.addListener (new InputListener ()
 		{
 			@Override
 			public boolean handle (Event event)
 			{
-				game.setScreen (game.getLevelScreen (GameSnake.SPHERE));
+				game.setScreen (game.getHigscoresScreen ());
 				return true;
 			}
 		});
-		stage.addActor (optionsButton);
+		stage.addActor (highscoresButton);
 
-		// button "hall of fame"
-		TextButton hallOfFameButton = new TextButton ("Hall of Fame", skin);
+		/*// button "hall of fame"
+		TextButton hallOfFameButton = new TextButton ("Highscores", skin);
 		hallOfFameButton.setX (buttonX);
 		hallOfFameButton.setY (currentY -= BUTTON_HEIGHT + BUTTON_SPACING);
 		hallOfFameButton.setWidth (BUTTON_WIDTH);
 		hallOfFameButton.setHeight (BUTTON_HEIGHT);
-		stage.addActor (hallOfFameButton);
+		stage.addActor (hallOfFameButton);*/
 	}
 
 	@Override
@@ -105,5 +105,11 @@ public class MainMenu extends ScreenAdapter
 		Gdx.gl.glClear (GL20.GL_COLOR_BUFFER_BIT);
 
 		stage.draw ();
+	}
+	@Override
+	public void dispose ()
+	{
+		super.dispose ();
+		stage.dispose ();
 	}
 }
