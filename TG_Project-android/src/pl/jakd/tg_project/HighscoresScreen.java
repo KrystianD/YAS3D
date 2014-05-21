@@ -19,6 +19,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -120,10 +121,7 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 		stage.addActor (welcomeLabel);
 
 		highscoreLabel = new Label ("", skin);
-		highscoreLabel.setWidth (300);
 
-		highscoreLabel.setX ((width - highscoreLabel.getWidth ()) / 2);
-		highscoreLabel.setY (currentY -= 100);
 		stage.addActor (highscoreLabel);
 
 		setNewHighscores ();
@@ -244,10 +242,17 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 		String highscores = "";
 		for (MyPair p : highscoreList)
 		{
-			String highscore = String.format ("%d. %s %15d\n", highscoreList.indexOf (p) + 1, p.name, p.score);
+			String highscore = String.format ("%d. %s %15d\n\n", highscoreList.indexOf (p) + 1, p.name, p.score);
 			highscores += highscore;
 		}
 		highscoreLabel.setText (highscores);
+
+		TextBounds bounds = highscoreLabel.getTextBounds ();
+		float labelX = (Gdx.app.getGraphics ().getWidth () / 2) - (bounds.width / 2);
+		float labelY = (Gdx.app.getGraphics ().getHeight () / 2) + (bounds.height / 2);
+
+		highscoreLabel.setX (labelX);
+		highscoreLabel.setY (labelY - 150);
 	}
 	@Override
 	public boolean keyTyped (char arg0)

@@ -21,6 +21,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -242,7 +243,10 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			if (gameOverFontScale < 1)
 				gameOverFontScale += 0.005f;
 			font.setScale (gameOverFontScale);
-			font.draw (spriteBatch, "GAME OVER", 10, (float)Gdx.app.getGraphics ().getHeight () / 2);
+			TextBounds bounds = font.getBounds ("GAME OVER");
+			float fontX = (Gdx.app.getGraphics ().getWidth () / 2) - (bounds.width / 2);
+			float fontY = (Gdx.app.getGraphics ().getHeight () / 2) + (bounds.height / 2);
+			font.draw (spriteBatch, "GAME OVER", fontX, fontY);
 		}
 		spriteBatch.end ();
 	}
