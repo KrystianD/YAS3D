@@ -28,7 +28,7 @@ public class GameSnake extends Game
 	
 	public HighscoresScreen getHigscoresScreen()
 	{
-		return new HighscoresScreen(this);
+		return new HighscoresScreen(this, Integer.MIN_VALUE);
 	}
 
 	@Override

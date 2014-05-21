@@ -48,7 +48,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	public CameraInputController camController;
 	public BitmapFont font;
 	public SpriteBatch spriteBatch;
-	
+
 	private Quaternion worldQuat = new Quaternion ();
 	private GameSnake game;
 	private SensorManager mSensorManager;
@@ -61,6 +61,9 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	private FoodManager foodManager;
 	private ArrayList<Enemy> enemies = new ArrayList<Enemy> ();
 	private ArrayList<Wall> walls = new ArrayList<Wall> ();
+
+	private boolean gameOver = false;
+	private float gameOverFontScale = 0.001f;
 
 	float aX = 0, aY = 0, aZ = 0, gX = 0, gY = 0, gZ = 0, mX = 0, mY = 0,
 			mZ = 0;
@@ -89,7 +92,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				SensorManager.SENSOR_DELAY_FASTEST);
 
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator (Gdx.files.internal ("fonts/arial.ttf"));
-		font = generator.generateFont (45);
+		font = generator.generateFont (90);
 		generator.dispose ();
 
 	}
@@ -230,8 +233,17 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		spriteBatch.begin ();
 
 		String status = "Points: " + player.getScore () + "\nLives: " + player.getLives ();
+		font.setScale (0.5f);
 		font.drawMultiLine (spriteBatch, status, 10, (float)Gdx.app.getGraphics ().getHeight ());
 
+		if (gameOver)
+		{
+			Log.d ("KD", "gameover font");
+			if (gameOverFontScale < 1)
+				gameOverFontScale += 0.005f;
+			font.setScale (gameOverFontScale);
+			font.draw (spriteBatch, "GAME OVER", 10, (float)Gdx.app.getGraphics ().getHeight () / 2);
+		}
 		spriteBatch.end ();
 	}
 
@@ -339,9 +351,11 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				snakeAngInc = 0.02f;
 		}
 		player.setMoveAngle (snakeAngInc);
-		if (player.calc () == ECalcResult.COLLIDED)
+
+		if (!gameOver && player.calc () == ECalcResult.COLLIDED)
 		{
 			Log.d ("KD", "gjam ovah");
+			gameOver = true;
 		}
 
 		//check player collision
@@ -381,9 +395,11 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 		//check all collision
 		Utils.ECollisionResult collisionResult = Utils.checkCollision (player, enemies, walls);
-		//TODO
-		if (collisionResult == ECollisionResult.PLAYER_COLLIDED)
+		if (!gameOver && collisionResult == ECollisionResult.PLAYER_COLLIDED)
+		{
 			Log.d ("KD", "gjam ovah");
+			gameOver = true;
+		}
 	}
 
 	@Override
@@ -427,6 +443,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public boolean touchDown (int arg0, int arg1, int arg2, int arg3)
 	{
+		if (gameOver)
+		{
+			Gdx.input.setCatchBackKey (false);
+			game.setScreen (new HighscoresScreen (game, player.getScore ()));
+		}
+
 		if (arg0 < Gdx.app.getGraphics ().getWidth () / 2)
 		{
 			leftPressed = true;
