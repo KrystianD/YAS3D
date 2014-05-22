@@ -56,6 +56,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	private Sensor mAccel, mGyro, mMagnet;
 
 	private Timer calcTimer = new Timer ();
+	private Timer countdownTimer = new Timer ();
 	private Random rand = new Random ();
 
 	private PlayerSnake player;
@@ -65,6 +66,8 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 	private boolean gameOver = false;
 	private float gameOverFontScale = 0.001f;
+
+	private long secondsCounter;
 
 	float aX = 0, aY = 0, aZ = 0, gX = 0, gY = 0, gZ = 0, mX = 0, mY = 0,
 			mZ = 0;
@@ -95,6 +98,9 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator (Gdx.files.internal ("fonts/arial.ttf"));
 		font = generator.generateFont (90);
 		generator.dispose ();
+
+		//TODO przekazać czas
+		secondsCounter = 30;
 
 	}
 
@@ -181,6 +187,16 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				calc ();
 			}
 		}, 0.02f, 0.02f);
+
+		countdownTimer.scheduleTask (new Timer.Task ()
+		{
+			@Override
+			public void run ()
+			{
+				countdown ();
+			}
+		}, 0, 1);
+
 	}
 
 	@Override
@@ -233,9 +249,16 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 		spriteBatch.begin ();
 
-		String status = "Points: " + player.getScore () + "\nLives: " + player.getLives ();
 		font.setScale (0.5f);
-		font.drawMultiLine (spriteBatch, status, 10, (float)Gdx.app.getGraphics ().getHeight ());
+
+		String status = "Points: " + player.getScore () + "\nLives: " + player.getLives ();
+		font.drawMultiLine (spriteBatch, status, 0, (float)Gdx.app.getGraphics ().getHeight ());
+
+		String time = String.format ("TIME LEFT: %02d:%02d", secondsCounter / 60, secondsCounter % 60);
+		TextBounds bounds = font.getBounds (time);
+		float fontX = Gdx.app.getGraphics ().getWidth () - bounds.width;
+		float fontY = Gdx.app.getGraphics ().getHeight ();
+		font.draw (spriteBatch, time, fontX, fontY);
 
 		if (gameOver)
 		{
@@ -243,14 +266,13 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			if (gameOverFontScale < 1)
 				gameOverFontScale += 0.005f;
 			font.setScale (gameOverFontScale);
-			TextBounds bounds = font.getBounds ("GAME OVER");
-			float fontX = (Gdx.app.getGraphics ().getWidth () / 2) - (bounds.width / 2);
-			float fontY = (Gdx.app.getGraphics ().getHeight () / 2) + (bounds.height / 2);
+			bounds = font.getBounds ("GAME OVER");
+			fontX = (Gdx.app.getGraphics ().getWidth () / 2) - (bounds.width / 2);
+			fontY = (Gdx.app.getGraphics ().getHeight () / 2) + (bounds.height / 2);
 			font.draw (spriteBatch, "GAME OVER", fontX, fontY);
 		}
 		spriteBatch.end ();
 	}
-
 	@Override
 	public void resize (int width, int height)
 	{
@@ -341,6 +363,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			oq3 = mad.q3;
 		}
 
+		//check couter
+		if (!gameOver && secondsCounter <= 0)
+		{
+			gameOver ();
+		}
+
 		// calculate player position
 		float snakeAngInc = 0f;
 		if (leftPressed && rightPressed)
@@ -359,7 +387,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		if (!gameOver && player.calc () == ECalcResult.COLLIDED)
 		{
 			Log.d ("KD", "gjam ovah");
-			gameOver = true;
+			gameOver ();
 		}
 
 		//check player collision
@@ -402,8 +430,15 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		if (!gameOver && collisionResult == ECollisionResult.PLAYER_COLLIDED)
 		{
 			Log.d ("KD", "gjam ovah");
-			gameOver = true;
+			gameOver ();
 		}
+	}
+
+	private void gameOver ()
+	{
+		gameOver = true;
+		countdownTimer.stop ();
+		player.kill ();
 	}
 
 	@Override
@@ -482,9 +517,17 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		return false;
 	}
 
+	public void countdown ()
+	{
+		secondsCounter--;
+	}
+
 	@Override
 	public void hide ()
 	{
+		countdownTimer.stop ();
+		countdownTimer.clear ();
+
 		calcTimer.stop ();
 		calcTimer.clear ();
 	}

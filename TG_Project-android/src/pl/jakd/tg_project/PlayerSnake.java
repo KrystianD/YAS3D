@@ -54,6 +54,11 @@ public class PlayerSnake extends Snake
 		return lives;
 	}
 
+	public void kill ()
+	{
+		lives = 0;
+	}
+
 	public void shrink ()
 	{
 		lives--;
