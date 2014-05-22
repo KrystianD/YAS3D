@@ -1,6 +1,8 @@
-package pl.jakd.tg_project;
+package pl.jakd.tg_project.objects;
 
 import java.util.ArrayList;
+
+import pl.jakd.tg_project.objects.Snake.ECalcResult;
 
 import android.util.Log;
 

@@ -1,5 +1,9 @@
 package pl.jakd.tg_project;
 
+import pl.jakd.tg_project.screens.HighscoresScreen;
+import pl.jakd.tg_project.screens.LevelScreen;
+import pl.jakd.tg_project.screens.LevelSelectScreen;
+import pl.jakd.tg_project.screens.MainMenu;
 import android.content.Context;
 import android.util.Log;
 

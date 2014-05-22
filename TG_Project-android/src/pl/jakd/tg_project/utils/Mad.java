@@ -1,4 +1,4 @@
-package pl.jakd.tg_project;
+package pl.jakd.tg_project.utils;
 
 public class Mad
 {

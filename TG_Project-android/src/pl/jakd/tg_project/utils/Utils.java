@@ -1,7 +1,11 @@
-package pl.jakd.tg_project;
+package pl.jakd.tg_project.utils;
 
 import java.util.ArrayList;
 import java.util.Random;
+
+import pl.jakd.tg_project.objects.Enemy;
+import pl.jakd.tg_project.objects.PlayerSnake;
+import pl.jakd.tg_project.objects.Wall;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;

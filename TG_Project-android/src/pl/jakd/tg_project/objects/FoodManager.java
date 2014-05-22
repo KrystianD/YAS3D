@@ -1,7 +1,9 @@
-package pl.jakd.tg_project;
+package pl.jakd.tg_project.objects;
 
 import java.util.ArrayList;
 import java.util.Random;
+
+import pl.jakd.tg_project.utils.Utils;
 
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;

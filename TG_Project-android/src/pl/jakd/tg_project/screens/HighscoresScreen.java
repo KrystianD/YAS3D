@@ -1,4 +1,4 @@
-package pl.jakd.tg_project;
+package pl.jakd.tg_project.screens;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+
+import pl.jakd.tg_project.GameSnake;
 
 import android.util.Log;
 

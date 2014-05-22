@@ -1,4 +1,4 @@
-package pl.jakd.tg_project;
+package pl.jakd.tg_project.objects;
 
 import java.util.ArrayList;
 import java.util.Random;

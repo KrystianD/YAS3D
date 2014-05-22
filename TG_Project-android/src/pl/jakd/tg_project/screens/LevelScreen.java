@@ -1,10 +1,17 @@
-package pl.jakd.tg_project;
+package pl.jakd.tg_project.screens;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-import pl.jakd.tg_project.Snake.ECalcResult;
-import pl.jakd.tg_project.Utils.ECollisionResult;
+import pl.jakd.tg_project.GameSnake;
+import pl.jakd.tg_project.objects.Enemy;
+import pl.jakd.tg_project.objects.FoodManager;
+import pl.jakd.tg_project.objects.PlayerSnake;
+import pl.jakd.tg_project.objects.Wall;
+import pl.jakd.tg_project.objects.Snake.ECalcResult;
+import pl.jakd.tg_project.utils.Mad;
+import pl.jakd.tg_project.utils.Utils;
+import pl.jakd.tg_project.utils.Utils.ECollisionResult;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
