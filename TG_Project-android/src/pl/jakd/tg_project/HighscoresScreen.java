@@ -20,14 +20,21 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
+import com.badlogic.gdx.scenes.scene2d.Event;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
-public class HighscoresScreen extends ScreenAdapter implements InputProcessor
+public class HighscoresScreen extends ScreenAdapter
 {
 	public static final int HIGHSCORE_LIST_SIZE = 10;
 	public static final String HIGHSCORE_FILE = "highscores.txt";
+
+	private static final float BUTTON_WIDTH = 200f;
+	private static final float BUTTON_HEIGHT = 60f;
+	private static final float BUTTON_SPACING = 20f;
 
 	public String playerName = "player";
 	public int newScore = Integer.MIN_VALUE;
@@ -52,12 +59,24 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 		FileHandle skinFile = Gdx.files.internal ("uiskin.json");
 		skin = new Skin (skinFile);
 
-		Gdx.input.setInputProcessor (this);
+		Gdx.input.setInputProcessor (stage);
 		Gdx.input.setCatchBackKey (true);
 
 		highscoreList = new ArrayList<MyPair> ();
 
-		file = new File (game.getContext ().getFilesDir (), HIGHSCORE_FILE);
+		openHighscoresFile (levelNumber);
+
+		readHighscores ();
+		if (score != Integer.MIN_VALUE)
+		{
+			this.newScore = score;
+			addNewHighscore (score);
+		}
+	}
+
+	private void openHighscoresFile (int level)
+	{
+		file = new File (game.getContext ().getFilesDir (), HIGHSCORE_FILE + level);
 		try
 		{
 			Log.d ("KD", "filexists" + file.exists ());
@@ -66,20 +85,13 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 				file.createNewFile ();
 			fos = new FileOutputStream (file, true);
 			bw = new BufferedWriter (new OutputStreamWriter (fos));
-
-			readHighscores ();
-
-			//if (score != Integer.MIN_VALUE)
-			{
-				this.newScore = score;
-				addNewHighscore (score);
-			}
 		}
 		catch (Exception e)
 		{
 			Log.d ("KD", "cannot access highscore file");
 		}
 	}
+
 	@Override
 	public void show ()
 	{
@@ -101,6 +113,13 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 	@Override
 	public void render (float delta)
 	{
+		if (Gdx.input.isKeyPressed (Keys.BACK))
+		{
+			while (Gdx.input.isKeyPressed (Keys.BACK))
+				; // hack
+			game.setScreen (game.getMainMenu ());
+		}
+
 		stage.act (delta);
 
 		Gdx.gl.glClearColor (0f, 0f, 0f, 1f);
@@ -115,6 +134,7 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 		super.resize (width, height);
 		stage.setViewport (width, height);
 
+		final float buttonX = (width - BUTTON_WIDTH * 3 - BUTTON_SPACING * 2) / 2;
 		float currentY = height;
 
 		Label welcomeLabel = new Label ("Highscores", skin);
@@ -122,10 +142,78 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 		welcomeLabel.setY (currentY -= 100);
 		stage.addActor (welcomeLabel);
 
+		currentY -= BUTTON_HEIGHT;
+		// easy
+		TextButton level1TextButton = new TextButton ("EASY", skin);
+		level1TextButton.setX (buttonX);
+		level1TextButton.setY (currentY);
+		level1TextButton.setWidth (BUTTON_WIDTH);
+		level1TextButton.setHeight (BUTTON_HEIGHT);
+		level1TextButton.addListener (new InputListener ()
+		{
+			@Override
+			public boolean handle (Event event)
+			{
+				changeLevel (1);
+				return true;
+			}
+		});
+		stage.addActor (level1TextButton);
+
+		// medium
+		TextButton level2TextButton = new TextButton ("MEDIUM", skin);
+		level2TextButton.setX (buttonX + BUTTON_SPACING + BUTTON_WIDTH);
+		level2TextButton.setY (currentY);
+		level2TextButton.setWidth (BUTTON_WIDTH);
+		level2TextButton.setHeight (BUTTON_HEIGHT);
+		level2TextButton.addListener (new InputListener ()
+		{
+			@Override
+			public boolean handle (Event event)
+			{
+				changeLevel (2);
+				return true;
+			}
+		});
+		stage.addActor (level2TextButton);
+
+		// hard
+		TextButton level3TextButton = new TextButton ("HARD", skin);
+		level3TextButton.setX (buttonX + 2 * (BUTTON_SPACING + BUTTON_WIDTH));
+		level3TextButton.setY (currentY);
+		level3TextButton.setWidth (BUTTON_WIDTH);
+		level3TextButton.setHeight (BUTTON_HEIGHT);
+		level3TextButton.addListener (new InputListener ()
+		{
+			@Override
+			public boolean handle (Event event)
+			{
+				changeLevel (3);
+				return true;
+			}
+		});
+		stage.addActor (level3TextButton);
+
 		highscoreLabel = new Label ("", skin);
 
 		stage.addActor (highscoreLabel);
 
+		changeLevel (levelNumber);
+	}
+	public void changeLevel (int level)
+	{
+
+		this.levelNumber = level;
+		try
+		{
+			bw.close ();
+			fos.close ();
+		}
+		catch (IOException e)
+		{
+		}
+		openHighscoresFile (level);
+		readHighscores ();
 		setNewHighscores ();
 	}
 
@@ -147,13 +235,6 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 		}
 	}
 
-	@Override
-	public boolean keyDown (int keycode)
-	{
-
-		return false;
-	}
-
 	private void readHighscores ()
 	{
 		String line = null;
@@ -166,7 +247,13 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 			{
 				Log.d ("KD", line);
 				String[] tmp = line.split (" ");
-				highscoreList.add (new MyPair (tmp[0], Integer.valueOf (tmp[1])));
+				String name = "";
+				for (int i = 0; i < tmp.length - 1; i++)
+				{
+					name += tmp[i]+" ";
+				}
+				name.trim ();
+				highscoreList.add (new MyPair (name, Integer.valueOf (tmp[tmp.length - 1])));
 			}
 			br.close ();
 			Collections.sort (highscoreList);
@@ -252,57 +339,6 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 		highscoreLabel.setX (labelX);
 		highscoreLabel.setY (labelY - 150);
 	}
-	@Override
-	public boolean keyTyped (char arg0)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean keyUp (int arg0)
-	{
-		if (arg0 == Keys.BACK)
-		{
-			game.setScreen (game.getMainMenu ());
-		}
-		return true;
-	}
-
-	@Override
-	public boolean mouseMoved (int arg0, int arg1)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean scrolled (int arg0)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean touchDown (int arg0, int arg1, int arg2, int arg3)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean touchDragged (int arg0, int arg1, int arg2)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean touchUp (int arg0, int arg1, int arg2, int arg3)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
 
 	private class MyTextInputListener implements TextInputListener
 	{
@@ -327,6 +363,7 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 			screen.writeHighscores ();
 		}
 	}
+
 }
 
 class MyPair implements Comparable<MyPair>
