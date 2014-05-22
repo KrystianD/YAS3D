@@ -7,6 +7,12 @@ import pl.jakd.tg_project.objects.Enemy;
 import pl.jakd.tg_project.objects.PlayerSnake;
 import pl.jakd.tg_project.objects.Wall;
 
+import android.util.Log;
+
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes.Usage;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
@@ -83,7 +89,7 @@ public class Utils
 			int colsPos = player.collideWithPoint (w.getCurrentPosition ());
 			if (colsPos != -1)
 			{
-				player.cutTo(colsPos);
+				player.cutTo (colsPos);
 			}
 
 			for (Enemy e : enemies)
@@ -92,11 +98,11 @@ public class Utils
 				{
 					e.reset ();
 				}
-				
+
 				colsPos = e.collideWithPoint (w.getCurrentPosition ());
 				if (colsPos != -1)
 				{
-					e.cutTo(colsPos);
+					e.cutTo (colsPos);
 				}
 			}
 		}
@@ -108,11 +114,72 @@ public class Utils
 		return new Vector3 (rand.nextFloat () * 2 - 1,
 				rand.nextFloat () * 2 - 1, rand.nextFloat () * 2 - 1).nor ();
 	}
-	
+
 	public static Vector2 latlongToMeters (Vector2 pos)
 	{
 		float longtitude = pos.y;
 		float latitude = pos.x / (float)Math.cos (longtitude);
 		return new Vector2 (latitude, longtitude);
+	}
+
+	public static Mesh createUniverse ()
+	{
+		double a, b;
+		double R = 10;
+		double space = 40;
+		int n = 0;
+		short ni = 0;
+		double PI = Math.PI;
+		float[] vert = new float[(int)((180.0 / space) * (360.0 / space) * 4.0) * 5];
+		short[] indices = new short[(int)((180.0 / space) * (360.0 / space) * 4.0)];
+		float D = 5;
+
+		for (b = 0; b <= 180 - space; b += space)
+		{
+			for (a = 0; a <= 360 - space; a += space)
+			{
+				vert[n++] = (float)(R * Math.sin ((a) / 180 * Math.PI) * Math.sin ((b) / 180 * PI));
+				vert[n++] = (float)(R * Math.cos ((a) / 180 * Math.PI) * Math.sin ((b) / 180 * PI));
+				vert[n++] = (float)(R * Math.cos ((b) / 180 * Math.PI));
+				vert[n++] = (float)((2 * b) / 360) * D;
+				vert[n++] = (float)((a) / 360) * D;
+				indices[ni] = ni;
+				ni++;
+
+				vert[n++] = (float)(R * Math.sin ((a) / 180 * Math.PI) * Math.sin ((b + space) / 180 * PI));
+				vert[n++] = (float)(R * Math.cos ((a) / 180 * Math.PI) * Math.sin ((b + space) / 180 * PI));
+				vert[n++] = (float)(R * Math.cos ((b + space) / 180 * Math.PI));
+				vert[n++] = (float)((2 * (b + space)) / 360) * D;
+				vert[n++] = (float)((a) / 360) * D;
+				indices[ni] = ni;
+				ni++;
+
+				vert[n++] = (float)(R * Math.sin ((a + space) / 180 * Math.PI) * Math.sin ((b) / 180 * PI));
+				vert[n++] = (float)(R * Math.cos ((a + space) / 180 * Math.PI) * Math.sin ((b) / 180 * PI));
+				vert[n++] = (float)(R * Math.cos ((b) / 180 * Math.PI));
+				vert[n++] = (float)((2 * b) / 360) * D;
+				vert[n++] = (float)((a + space) / 360) * D;
+				indices[ni] = ni;
+				ni++;
+
+				vert[n++] = (float)(R * Math.sin ((a + space) / 180 * Math.PI) * Math.sin ((b + space) / 180 * PI));
+				vert[n++] = (float)(R * Math.cos ((a + space) / 180 * Math.PI) * Math.sin ((b + space) / 180 * PI));
+				vert[n++] = (float)(R * Math.cos ((b + space) / 180 * Math.PI));
+				vert[n++] = (float)((2 * (b + space)) / 360) * D;
+				vert[n++] = (float)((a + space) / 360) * D;
+				indices[ni] = ni;
+				ni++;
+			}
+		}
+
+		Log.d("KD", "cnt: " + vert.length/5);
+		Mesh mesh = new Mesh (true, vert.length / 5, indices.length,
+				new VertexAttribute (Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
+				new VertexAttribute (Usage.TextureCoordinates, 2, ShaderProgram.TEXCOORD_ATTRIBUTE + "0"));
+
+		mesh.setIndices(indices);
+		mesh.setVertices (vert);
+
+		return mesh;
 	}
 }

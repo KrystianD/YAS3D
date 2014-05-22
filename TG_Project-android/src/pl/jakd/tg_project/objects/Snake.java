@@ -85,7 +85,6 @@ public abstract class Snake
 		{
 			if (tail.get (i).dst2 (getCurrentPosition ()) < (SNAKE_SPHERE_SIZE * SNAKE_SPHERE_SIZE))
 			{
-				Log.d ("KD", "SNAKE COLLIDED WITH ITSELF!!");
 				result.collidedIndex = i;
 				result.result = ECalcResult.COLLIDED;
 				return result;

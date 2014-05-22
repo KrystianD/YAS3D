@@ -38,10 +38,7 @@ public class Wall extends Snake
 				tail.add (0, newPt);
 				moveDirs.add (0, moveDir);
 			}
-
 			startPos = newPt;
-
-			Log.d ("KD", newPt.toString ());
 		}
 	}
 	public ECalcResult calc ()

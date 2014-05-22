@@ -3,12 +3,14 @@ package pl.jakd.tg_project.screens;
 import java.util.ArrayList;
 import java.util.Random;
 
+import javax.microedition.khronos.opengles.GL10;
+
 import pl.jakd.tg_project.GameSnake;
 import pl.jakd.tg_project.objects.Enemy;
 import pl.jakd.tg_project.objects.FoodManager;
 import pl.jakd.tg_project.objects.PlayerSnake;
-import pl.jakd.tg_project.objects.Wall;
 import pl.jakd.tg_project.objects.Snake.ECalcResult;
+import pl.jakd.tg_project.objects.Wall;
 import pl.jakd.tg_project.utils.Mad;
 import pl.jakd.tg_project.utils.Utils;
 import pl.jakd.tg_project.utils.Utils.ECollisionResult;
@@ -26,6 +28,8 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureWrap;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
@@ -37,6 +41,8 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -128,6 +134,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		cam.lookAt (0, 0, 0);
 		cam.near = 0.1f;
 		cam.far = 1.1f;
+		cam.far = 100.1f;
 		cam.update ();
 
 		camController = new CameraInputController (cam);
@@ -135,11 +142,22 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 		ModelBuilder modelBuilder = new ModelBuilder ();
 
+		Material m = new Material (
+				ColorAttribute.createDiffuse (Color.WHITE));
+
 		//Create world
-		Model worldModel = modelBuilder.createSphere (0.1f, 0.1f, 0.1f, 10, 10,
-				new Material (ColorAttribute.createDiffuse (Color.BLUE)),
-				Usage.Position | Usage.Normal);
+		modelBuilder.begin ();
+		modelBuilder.part ("0", Utils.createUniverse (), GL20.GL_TRIANGLE_STRIP, m);
+		Model worldModel = modelBuilder.end ();
+
+		Log.d ("KD", worldModel.meshes.get (0).getVertexAttributes ().toString ());
+		Texture tex = new Texture (Gdx.files.internal ("universe.jpg"));
+		tex.setWrap (TextureWrap.Repeat, TextureWrap.Repeat);
+		TextureAttribute texat = new TextureAttribute (TextureAttribute.Diffuse, tex);
+
 		worldInstance = new ModelInstance (worldModel);
+		worldInstance.materials.get (0).set (texat);
+		worldInstance.materials.get (0).set (new IntAttribute (IntAttribute.CullFace, 0));
 
 		//Create player
 		Model modelPlayerSnakePart = modelBuilder.createSphere (PlayerSnake.SNAKE_SPHERE_SIZE,
@@ -234,11 +252,16 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 		worldQuat.set (mad.q1, mad.q2, mad.q3, -mad.q0);
 
+		Gdx.gl.glDisable (GL10.GL_LIGHTING);
 		Vector3 lightPos = new Vector3 (2, 0, 0);
 		lightPos.mul (worldQuat);
 		light.position.set (lightPos);
 
 		modelBatch.begin (cam);
+
+		worldInstance.transform.idt ();
+		worldInstance.transform.rotate (worldQuat);
+		modelBatch.render (worldInstance);
 
 		player.render (modelBatch, worldQuat, environment, cam.frustum);
 
@@ -271,7 +294,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 		if (gameOver)
 		{
-			Log.d ("KD", "gameover font");
 			if (gameOverFontScale < 1)
 				gameOverFontScale += 0.005f;
 			font.setScale (gameOverFontScale);
