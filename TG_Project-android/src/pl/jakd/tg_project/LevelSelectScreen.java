@@ -12,7 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
-public class MainMenu extends ScreenAdapter
+public class LevelSelectScreen extends ScreenAdapter
 {
 	// setup the dimensions of the menu buttons
 	private static final float BUTTON_WIDTH = 600f;
@@ -24,7 +24,7 @@ public class MainMenu extends ScreenAdapter
 	private Skin skin;
 	private Stage stage;
 
-	public MainMenu (GameSnake game)
+	public LevelSelectScreen (GameSnake game)
 	{
 		this.game = game;
 		FileHandle skinFile = Gdx.files.internal ("uiskin.json");
@@ -45,51 +45,61 @@ public class MainMenu extends ScreenAdapter
 		float currentY = 480f;
 
 		// label "welcome"
-		Label welcomeLabel = new Label ("Welcome to YAS3D!", skin);
+		Label welcomeLabel = new Label ("SELECT LEVEL", skin);
 		welcomeLabel.setX ((width - welcomeLabel.getWidth ()) / 2);
 		welcomeLabel.setY (currentY + 100);
 		stage.addActor (welcomeLabel);
 
-		// button "start game"
-		TextButton startGameButton = new TextButton ("Start Game", skin);
-		startGameButton.setX (buttonX);
-		startGameButton.setY (currentY);
-		startGameButton.setWidth (BUTTON_WIDTH);
-		startGameButton.setHeight (BUTTON_HEIGHT);
-		startGameButton.addListener (new InputListener ()
+		// easy
+		TextButton level1TextButton = new TextButton ("EASY", skin);
+		level1TextButton.setX (buttonX);
+		level1TextButton.setY (currentY);
+		level1TextButton.setWidth (BUTTON_WIDTH);
+		level1TextButton.setHeight (BUTTON_HEIGHT);
+		level1TextButton.addListener (new InputListener ()
 		{
 			@Override
 			public boolean handle (Event event)
 			{
-				game.setScreen (game.getLevelSelectScreen ());
+				game.setScreen (game.getLevelScreen (1));
 				return true;
 			}
 		});
-		stage.addActor (startGameButton);
+		stage.addActor (level1TextButton);
 
-		TextButton highscoresButton = new TextButton ("Highscores", skin);
-		highscoresButton.setX (buttonX);
-		highscoresButton.setY (currentY -= BUTTON_HEIGHT + BUTTON_SPACING);
-		highscoresButton.setWidth (BUTTON_WIDTH);
-		highscoresButton.setHeight (BUTTON_HEIGHT);
-		highscoresButton.addListener (new InputListener ()
+		// medium
+		TextButton level2TextButton = new TextButton ("MEDIUM", skin);
+		level2TextButton.setX (buttonX);
+		level2TextButton.setY (currentY -= BUTTON_HEIGHT + BUTTON_SPACING);
+		level2TextButton.setWidth (BUTTON_WIDTH);
+		level2TextButton.setHeight (BUTTON_HEIGHT);
+		level2TextButton.addListener (new InputListener ()
 		{
 			@Override
 			public boolean handle (Event event)
 			{
-				game.setScreen (game.getHigscoresScreen (Integer.MIN_VALUE, 1));
+				game.setScreen (game.getLevelScreen (2));
 				return true;
 			}
 		});
-		stage.addActor (highscoresButton);
+		stage.addActor (level2TextButton);
 
-		/*// button "hall of fame"
-		TextButton hallOfFameButton = new TextButton ("Highscores", skin);
-		hallOfFameButton.setX (buttonX);
-		hallOfFameButton.setY (currentY -= BUTTON_HEIGHT + BUTTON_SPACING);
-		hallOfFameButton.setWidth (BUTTON_WIDTH);
-		hallOfFameButton.setHeight (BUTTON_HEIGHT);
-		stage.addActor (hallOfFameButton);*/
+		// hard
+		TextButton level3TextButton = new TextButton ("HARD", skin);
+		level3TextButton.setX (buttonX);
+		level3TextButton.setY (currentY -= BUTTON_HEIGHT + BUTTON_SPACING);
+		level3TextButton.setWidth (BUTTON_WIDTH);
+		level3TextButton.setHeight (BUTTON_HEIGHT);
+		level3TextButton.addListener (new InputListener ()
+		{
+			@Override
+			public boolean handle (Event event)
+			{
+				game.setScreen (game.getLevelScreen (3));
+				return true;
+			}
+		});
+		stage.addActor (level3TextButton);
 	}
 
 	@Override
@@ -99,10 +109,20 @@ public class MainMenu extends ScreenAdapter
 	}
 
 	@Override
+	public void hide ()
+	{
+		super.hide ();
+	}
+
+	@Override
 	public void render (float delta)
 	{
 		if (Gdx.input.isKeyPressed (Keys.BACK))
-			Gdx.app.exit ();
+		{
+			while (Gdx.input.isKeyPressed (Keys.BACK))
+				; // hack
+			game.setScreen (game.getMainMenu ());
+		}
 
 		stage.act (delta);
 
@@ -117,4 +137,5 @@ public class MainMenu extends ScreenAdapter
 		super.dispose ();
 		stage.dispose ();
 	}
+
 }

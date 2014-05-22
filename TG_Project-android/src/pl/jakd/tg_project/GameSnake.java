@@ -21,14 +21,19 @@ public class GameSnake extends Game
 		return new MainMenu (this);
 	}
 
-	public LevelScreen getLevelScreen ()
+	public LevelScreen getLevelScreen (int levelNumber)
 	{
-		return new LevelScreen (this, context);
+		return new LevelScreen (this, context, levelNumber);
 	}
-	
-	public HighscoresScreen getHigscoresScreen()
+
+	public HighscoresScreen getHigscoresScreen (int score, int levelNumber)
 	{
-		return new HighscoresScreen(this, Integer.MIN_VALUE);
+		return new HighscoresScreen (this, score, levelNumber);
+	}
+
+	public LevelSelectScreen getLevelSelectScreen ()
+	{
+		return new LevelSelectScreen (this);
 	}
 
 	@Override

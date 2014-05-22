@@ -68,15 +68,17 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	private float gameOverFontScale = 0.001f;
 
 	private long secondsCounter;
+	private int levelNumber;
 
 	float aX = 0, aY = 0, aZ = 0, gX = 0, gY = 0, gZ = 0, mX = 0, mY = 0,
 			mZ = 0;
 	Boolean hasA = false, hasG = false, hasM = false;
 	Mad mad;
 
-	public LevelScreen (GameSnake game, Context ctx)
+	public LevelScreen (GameSnake game, Context ctx, int level)
 	{
 		this.game = game;
+		this.levelNumber = level;
 
 		mad = new Mad ();
 		// System.loadLibrary ("mad");
@@ -444,12 +446,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	@Override
 	public boolean keyDown (int keycode)
 	{
-		if (keycode == Keys.BACK)
-		{
-			Gdx.input.setCatchBackKey (false);
-			game.setScreen (new MainMenu (game));
-		}
-		return true;
+		return false;
 	}
 
 	@Override
@@ -459,9 +456,13 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	}
 
 	@Override
-	public boolean keyUp (int arg0)
+	public boolean keyUp (int keycode)
 	{
-		return false;
+		if (keycode == Keys.BACK)
+		{
+			game.setScreen (game.getLevelSelectScreen ());
+		}
+		return true;
 	}
 
 	@Override
@@ -484,8 +485,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	{
 		if (gameOver)
 		{
-			Gdx.input.setCatchBackKey (false);
-			game.setScreen (new HighscoresScreen (game, player.getScore ()));
+			game.setScreen (game.getHigscoresScreen (player.getScore (), levelNumber));
 		}
 
 		if (arg0 < Gdx.app.getGraphics ().getWidth () / 2)
@@ -500,7 +500,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		}
 		return false;
 	}
-
 	@Override
 	public boolean touchDragged (int arg0, int arg1, int arg2)
 	{

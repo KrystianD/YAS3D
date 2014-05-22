@@ -32,6 +32,7 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 	public String playerName = "player";
 	public int newScore = Integer.MIN_VALUE;
 
+	private int levelNumber;
 	private GameSnake game;
 	private Stage stage;
 	private Skin skin;
@@ -42,9 +43,10 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 
 	private Label highscoreLabel;
 
-	public HighscoresScreen (GameSnake game, int score)
+	public HighscoresScreen (GameSnake game, int score, int levelNumber)
 	{
 		this.game = game;
+		this.levelNumber = levelNumber;
 		stage = new Stage (0, 0, true);
 
 		FileHandle skinFile = Gdx.files.internal ("uiskin.json");
@@ -148,12 +150,8 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 	@Override
 	public boolean keyDown (int keycode)
 	{
-		if (keycode == Keys.BACK)
-		{
-			Gdx.input.setCatchBackKey (false);
-			game.setScreen (new MainMenu (game));
-		}
-		return true;
+
+		return false;
 	}
 
 	private void readHighscores ()
@@ -264,8 +262,11 @@ public class HighscoresScreen extends ScreenAdapter implements InputProcessor
 	@Override
 	public boolean keyUp (int arg0)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		if (arg0 == Keys.BACK)
+		{
+			game.setScreen (game.getMainMenu ());
+		}
+		return true;
 	}
 
 	@Override
