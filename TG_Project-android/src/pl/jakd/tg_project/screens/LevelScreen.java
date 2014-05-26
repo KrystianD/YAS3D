@@ -72,6 +72,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	private Timer countdownTimer = new Timer ();
 	private Random rand = new Random ();
 
+	private ModelInstance instSnakePart;
 	private PlayerSnake player;
 	private FoodManager foodManager;
 	private ArrayList<Enemy> enemies = new ArrayList<Enemy> ();
@@ -164,7 +165,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				PlayerSnake.SNAKE_SPHERE_SIZE, PlayerSnake.SNAKE_SPHERE_SIZE, 9, 9, new Material (
 						ColorAttribute.createDiffuse (Color.GREEN)),
 				Usage.Position | Usage.Normal);
-		ModelInstance instSnakePart = new ModelInstance (modelPlayerSnakePart);
+		instSnakePart = new ModelInstance (modelPlayerSnakePart);
 		player = new PlayerSnake (new Vector3 (1, 0, 0.2f), new Vector3 (0, 0, 1), instSnakePart);
 
 		//Create opponents
@@ -258,6 +259,13 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		light.position.set (lightPos);
 
 		modelBatch.begin (cam);
+
+		Vector3 v = new Vector3 (0, 0, -1);
+		v.mul (worldQuat.cpy ().conjugate ());
+		instSnakePart.transform.idt ();
+		instSnakePart.transform.rotate (worldQuat);
+		instSnakePart.transform.translate (v);
+		modelBatch.render (instSnakePart);
 
 		worldInstance.transform.idt ();
 		worldInstance.transform.rotate (worldQuat);
