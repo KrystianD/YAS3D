@@ -78,6 +78,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	private ArrayList<Enemy> enemies = new ArrayList<Enemy> ();
 	private ArrayList<Wall> walls = new ArrayList<Wall> ();
 
+	private boolean isStarted = false;
 	private boolean gameOver = false;
 	private float gameOverFontScale = 0.001f;
 
@@ -166,7 +167,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 						ColorAttribute.createDiffuse (Color.GREEN)),
 				Usage.Position | Usage.Normal);
 		instSnakePart = new ModelInstance (modelPlayerSnakePart);
-		player = new PlayerSnake (new Vector3 (1, 0, 0.2f), new Vector3 (0, 0, 1), instSnakePart);
+		//player = new PlayerSnake (new Vector3 (1, 0, 0.2f), new Vector3 (0, 0, 1), instSnakePart);
 
 		//Create opponents
 		Model modelEnemySnakePart = modelBuilder.createSphere (PlayerSnake.SNAKE_SPHERE_SIZE,
@@ -215,16 +216,6 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				calc ();
 			}
 		}, 0.02f, 0.02f);
-
-		countdownTimer.scheduleTask (new Timer.Task ()
-		{
-			@Override
-			public void run ()
-			{
-				countdown ();
-			}
-		}, 0, 1);
-
 	}
 
 	@Override
@@ -260,18 +251,24 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 		modelBatch.begin (cam);
 
-		Vector3 v = new Vector3 (0, 0, -1);
-		v.mul (worldQuat.cpy ().conjugate ());
-		instSnakePart.transform.idt ();
-		instSnakePart.transform.rotate (worldQuat);
-		instSnakePart.transform.translate (v);
-		modelBatch.render (instSnakePart);
+		if (!isStarted)
+		{
+			Vector3 v = new Vector3 (0, 0, -1);
+			v.mul (worldQuat.cpy ().conjugate ());
+			instSnakePart.transform.idt ();
+			instSnakePart.transform.rotate (worldQuat);
+			instSnakePart.transform.translate (v);
+			modelBatch.render (instSnakePart);
+		}
 
 		worldInstance.transform.idt ();
 		worldInstance.transform.rotate (worldQuat);
 		modelBatch.render (worldInstance);
 
-		player.render (modelBatch, worldQuat, environment, cam.frustum);
+		if (isStarted)
+		{
+			player.render (modelBatch, worldQuat, environment, cam.frustum);
+		}
 
 		foodManager.render (modelBatch, worldQuat, environment, cam.frustum);
 
@@ -291,7 +288,15 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 		font.setScale (0.5f);
 
-		String status = "Points: " + player.getScore () + "\nLives: " + player.getLives ();
+		String status = "";
+		if (!isStarted)
+		{
+			status = "Points: " + 0 + "\nLives: " + 0;
+		}
+		else
+		{
+			status = "Points: " + player.getScore () + "\nLives: " + player.getLives ();
+		}
 		font.drawMultiLine (spriteBatch, status, 0, (float)Gdx.app.getGraphics ().getHeight ());
 
 		String time = String.format ("TIME LEFT: %02d:%02d", secondsCounter / 60, secondsCounter % 60);
@@ -423,17 +428,20 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		}
 		player.setMoveAngle (snakeAngInc);
 
-		if (!gameOver && player.calc () == ECalcResult.COLLIDED)
+		if (isStarted)
 		{
-			Log.d ("KD", "gjam ovah");
-			gameOver ();
+			if (!gameOver && player.calc () == ECalcResult.COLLIDED)
+			{
+				Log.d ("KD", "gjam ovah");
+				gameOver ();
+			}
+			//check player collision
+			if (foodManager.checkCollison (player))
+			{
+				player.grow ();
+			}
 		}
 
-		//check player collision
-		if (foodManager.checkCollison (player))
-		{
-			player.grow ();
-		}
 		//calc enemies
 		for (Enemy e : enemies)
 		{
@@ -464,12 +472,15 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			w.calc ();
 		}
 
-		//check all collision
-		Utils.ECollisionResult collisionResult = Utils.checkCollision (player, enemies, walls);
-		if (!gameOver && collisionResult == ECollisionResult.PLAYER_COLLIDED)
+		if (isStarted)
 		{
-			Log.d ("KD", "gjam ovah");
-			gameOver ();
+			//check all collision
+			Utils.ECollisionResult collisionResult = Utils.checkCollision (player, enemies, walls);
+			if (!gameOver && collisionResult == ECollisionResult.PLAYER_COLLIDED)
+			{
+				Log.d ("KD", "gjam ovah");
+				gameOver ();
+			}
 		}
 	}
 
@@ -514,6 +525,18 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		return false;
 	}
 
+	private void startLevelTimer ()
+	{
+		countdownTimer.scheduleTask (new Timer.Task ()
+		{
+			@Override
+			public void run ()
+			{
+				countdown ();
+			}
+		}, 0, 1);
+	}
+
 	private boolean leftPressed = false, rightPressed = false;
 	private int lastPressed = 0;
 
@@ -523,6 +546,19 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		if (gameOver)
 		{
 			game.setScreen (game.getHigscoresScreen (player.getScore (), levelNumber));
+		}
+		if (!isStarted)
+		{
+			Vector3 vdir = new Vector3 (0, 1, 0); 
+			vdir.mul (worldQuat.cpy ().conjugate ());
+			
+			Vector3 v = new Vector3 (0, 0, -1);
+			v.mul (worldQuat.cpy ().conjugate ());
+			
+			player = new PlayerSnake (v, vdir, instSnakePart);
+			isStarted = true;
+			startLevelTimer ();
+			return true;
 		}
 
 		if (arg0 < Gdx.app.getGraphics ().getWidth () / 2)
