@@ -11,20 +11,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import pl.jakd.tg_project.GameSnake;
-
 import android.util.Log;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Input.TextInputListener;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -74,6 +74,7 @@ public class HighscoresScreen extends ScreenAdapter
 			this.newScore = score;
 			addNewHighscore (score);
 		}
+		//changeLevel (levelNumber);
 	}
 
 	private void openHighscoresFile (int level)
@@ -139,6 +140,11 @@ public class HighscoresScreen extends ScreenAdapter
 		final float buttonX = (width - BUTTON_WIDTH * 3 - BUTTON_SPACING * 2) / 2;
 		float currentY = height;
 
+		Texture backgroundTexture = new Texture (Gdx.files.internal ("universe.jpg"));
+		Image background = new Image (backgroundTexture);
+		background.sizeBy (width, height);
+		stage.addActor (background);
+
 		Label welcomeLabel = new Label ("Highscores", skin);
 		welcomeLabel.setX ((width - welcomeLabel.getWidth ()) / 2);
 		welcomeLabel.setY (currentY -= 100);
@@ -200,7 +206,8 @@ public class HighscoresScreen extends ScreenAdapter
 
 		stage.addActor (highscoreLabel);
 
-		changeLevel (levelNumber);
+		setNewHighscores ();
+		//changeLevel (levelNumber);
 	}
 	public void changeLevel (int level)
 	{
@@ -218,7 +225,6 @@ public class HighscoresScreen extends ScreenAdapter
 		readHighscores ();
 		setNewHighscores ();
 	}
-
 	@Override
 	public void resume ()
 	{
@@ -252,7 +258,7 @@ public class HighscoresScreen extends ScreenAdapter
 				String name = "";
 				for (int i = 0; i < tmp.length - 1; i++)
 				{
-					name += tmp[i]+" ";
+					name += tmp[i] + " ";
 				}
 				name.trim ();
 				highscoreList.add (new MyPair (name, Integer.valueOf (tmp[tmp.length - 1])));
@@ -271,16 +277,16 @@ public class HighscoresScreen extends ScreenAdapter
 	{
 		boolean isNewHighscore = false;
 
-		MyPair p = null;
+		MyPair minScore = null;
 		try
 		{
-			p = highscoreList.get (highscoreList.size () - 1);
+			minScore = highscoreList.get (highscoreList.size () - 1);
 		}
 		catch (Exception e)
 		{
 		}
 
-		if (p == null || score > p.score)
+		if (minScore == null || score > minScore.score)
 		{
 			isNewHighscore = true;
 		}
@@ -289,8 +295,13 @@ public class HighscoresScreen extends ScreenAdapter
 
 		if (highscoreList.size () < HIGHSCORE_LIST_SIZE || isNewHighscore)
 		{
+			Log.d ("KD", "size" + (highscoreList.size () >= HIGHSCORE_LIST_SIZE));
 			if (highscoreList.size () >= HIGHSCORE_LIST_SIZE)
-				highscoreList.remove (p);
+			{
+				Log.d ("KD", "size bef" + (highscoreList.size ()));
+				highscoreList.remove (highscoreList.size () - 1);
+				Log.d ("KD", "size aft" + (highscoreList.size ()));
+			}
 
 			Gdx.input.setOnscreenKeyboardVisible (true);
 
@@ -305,13 +316,15 @@ public class HighscoresScreen extends ScreenAdapter
 		String line;
 		try
 		{
+			int i = 0;
 			fos.getChannel ().truncate (0);
 			for (MyPair p : highscoreList)
 			{
-				line = p.name + " " + p.score + '\n';
+				Log.d ("KD", "saves" + i++);
+				line = p.name.trim () + " " + p.score + '\n';
 				bw.append (line);
 			}
-			line = playerName + " " + newScore + '\n';
+			line = playerName.trim () + " " + newScore + '\n';
 			bw.append (line);
 			bw.flush ();
 			Log.d ("KD", line);
@@ -339,7 +352,7 @@ public class HighscoresScreen extends ScreenAdapter
 		float labelY = (Gdx.app.getGraphics ().getHeight () / 2) + (bounds.height / 2);
 
 		highscoreLabel.setX (labelX);
-		highscoreLabel.setY (labelY - 150);
+		highscoreLabel.setY (labelY - 250);
 	}
 
 	private class MyTextInputListener implements TextInputListener
@@ -383,5 +396,11 @@ class MyPair implements Comparable<MyPair>
 	public int compareTo (MyPair o)
 	{
 		return score < o.score ? -1 : score > o.score ? 1 : 0;
+	}
+
+	@Override
+	public String toString ()
+	{
+		return "name: " + name + " score:" + score;
 	}
 }

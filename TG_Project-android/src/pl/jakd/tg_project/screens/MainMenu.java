@@ -7,9 +7,11 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -46,6 +48,11 @@ public class MainMenu extends ScreenAdapter
 		final float buttonX = (width - BUTTON_WIDTH) / 2;
 		float currentY = 480f;
 
+		Texture backgroundTexture = new Texture (Gdx.files.internal ("universe.jpg"));
+		Image background = new Image (backgroundTexture);
+		background.sizeBy (width, height);
+		stage.addActor (background);
+		
 		// label "welcome"
 		Label welcomeLabel = new Label ("Welcome to YAS3D!", skin);
 		welcomeLabel.setX ((width - welcomeLabel.getWidth ()) / 2);

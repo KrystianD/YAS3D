@@ -315,6 +315,16 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			fontY = (Gdx.app.getGraphics ().getHeight () / 2) + (bounds.height / 2);
 			font.draw (spriteBatch, "GAME OVER", fontX, fontY);
 		}
+		
+		if(!isStarted){
+			font.setScale (1.5f);
+			bounds = font.getBounds ("TAP TO START");
+			fontX = (Gdx.app.getGraphics ().getWidth () / 2) - (bounds.width / 2);
+			fontY = (Gdx.app.getGraphics ().getHeight () / 2) - bounds.height;
+			font.draw (spriteBatch, "TAP TO START", fontX, fontY);
+
+		}
+		
 		spriteBatch.end ();
 	}
 	@Override
