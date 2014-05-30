@@ -1,6 +1,7 @@
 package pl.jakd.tg_project.screens;
 
 import pl.jakd.tg_project.GameSnake;
+import pl.jakd.tg_project.screens.LevelScreen.Difficulty;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -86,7 +87,7 @@ public class MainMenu extends ScreenAdapter
 			@Override
 			public boolean handle (Event event)
 			{
-				game.setScreen (game.getHigscoresScreen (Integer.MIN_VALUE, 1));
+				game.setScreen (game.getHigscoresScreen (Integer.MIN_VALUE, Difficulty.EASY));
 				return true;
 			}
 		});

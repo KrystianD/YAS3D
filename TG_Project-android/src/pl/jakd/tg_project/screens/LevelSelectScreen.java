@@ -70,14 +70,14 @@ public class LevelSelectScreen extends ScreenAdapter
 			@Override
 			public boolean handle (Event event)
 			{
-				game.setScreen (game.getLevelScreen (1));
+				game.setScreen (game.getLevelScreen (LevelScreen.Difficulty.EASY));
 				return true;
 			}
 		});
 		stage.addActor (level1TextButton);
 
 		// medium
-		TextButton level2TextButton = new TextButton ("MEDIUM", skin);
+		TextButton level2TextButton = new TextButton ("NORMAL", skin);
 		level2TextButton.setX (buttonX);
 		level2TextButton.setY (currentY -= BUTTON_HEIGHT + BUTTON_SPACING);
 		level2TextButton.setWidth (BUTTON_WIDTH);
@@ -87,7 +87,7 @@ public class LevelSelectScreen extends ScreenAdapter
 			@Override
 			public boolean handle (Event event)
 			{
-				game.setScreen (game.getLevelScreen (2));
+				game.setScreen (game.getLevelScreen (LevelScreen.Difficulty.NORMAL));
 				return true;
 			}
 		});
@@ -104,7 +104,7 @@ public class LevelSelectScreen extends ScreenAdapter
 			@Override
 			public boolean handle (Event event)
 			{
-				game.setScreen (game.getLevelScreen (3));
+				game.setScreen (game.getLevelScreen (LevelScreen.Difficulty.HARD));
 				return true;
 			}
 		});

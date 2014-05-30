@@ -2,6 +2,7 @@ package pl.jakd.tg_project;
 
 import pl.jakd.tg_project.screens.HighscoresScreen;
 import pl.jakd.tg_project.screens.LevelScreen;
+import pl.jakd.tg_project.screens.LevelScreen.Difficulty;
 import pl.jakd.tg_project.screens.LevelSelectScreen;
 import pl.jakd.tg_project.screens.MainMenu;
 import android.content.Context;
@@ -25,14 +26,14 @@ public class GameSnake extends Game
 		return new MainMenu (this);
 	}
 
-	public LevelScreen getLevelScreen (int levelNumber)
+	public LevelScreen getLevelScreen (Difficulty difficulty)
 	{
-		return new LevelScreen (this, context, levelNumber);
+		return new LevelScreen (this, context, difficulty);
 	}
 
-	public HighscoresScreen getHigscoresScreen (int score, int levelNumber)
+	public HighscoresScreen getHigscoresScreen (int score, Difficulty difficulty)
 	{
-		return new HighscoresScreen (this, score, levelNumber);
+		return new HighscoresScreen (this, score, difficulty);
 	}
 
 	public LevelSelectScreen getLevelSelectScreen ()

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import pl.jakd.tg_project.GameSnake;
+import pl.jakd.tg_project.screens.LevelScreen.Difficulty;
 import android.util.Log;
 
 import com.badlogic.gdx.Gdx;
@@ -41,7 +42,7 @@ public class HighscoresScreen extends ScreenAdapter
 	public String playerName = "player";
 	public int newScore = Integer.MIN_VALUE;
 
-	private int levelNumber;
+	private Difficulty difficulty;
 	private GameSnake game;
 	private Stage stage;
 	private Skin skin;
@@ -52,10 +53,10 @@ public class HighscoresScreen extends ScreenAdapter
 
 	private Label highscoreLabel;
 
-	public HighscoresScreen (GameSnake game, int score, int levelNumber)
+	public HighscoresScreen (GameSnake game, int score, Difficulty difficulty)
 	{
 		this.game = game;
-		this.levelNumber = levelNumber;
+		this.difficulty = difficulty;
 		stage = new Stage (0, 0, true);
 
 		FileHandle skinFile = Gdx.files.internal ("uiskin.json");
@@ -66,7 +67,7 @@ public class HighscoresScreen extends ScreenAdapter
 
 		highscoreList = new ArrayList<MyPair> ();
 
-		openHighscoresFile (levelNumber);
+		openHighscoresFile (difficulty);
 
 		readHighscores ();
 		if (score != Integer.MIN_VALUE)
@@ -77,9 +78,9 @@ public class HighscoresScreen extends ScreenAdapter
 		//changeLevel (levelNumber);
 	}
 
-	private void openHighscoresFile (int level)
+	private void openHighscoresFile (Difficulty difficulty)
 	{
-		file = new File (game.getContext ().getFilesDir (), HIGHSCORE_FILE + level);
+		file = new File (game.getContext ().getFilesDir (), HIGHSCORE_FILE + difficulty.ordinal ());
 		try
 		{
 			Log.d ("KD", "filexists" + file.exists ());
@@ -162,7 +163,7 @@ public class HighscoresScreen extends ScreenAdapter
 			@Override
 			public boolean handle (Event event)
 			{
-				changeLevel (1);
+				changeLevel (Difficulty.EASY);
 				return true;
 			}
 		});
@@ -179,7 +180,7 @@ public class HighscoresScreen extends ScreenAdapter
 			@Override
 			public boolean handle (Event event)
 			{
-				changeLevel (2);
+				changeLevel (Difficulty.NORMAL);
 				return true;
 			}
 		});
@@ -196,7 +197,7 @@ public class HighscoresScreen extends ScreenAdapter
 			@Override
 			public boolean handle (Event event)
 			{
-				changeLevel (3);
+				changeLevel (Difficulty.HARD);
 				return true;
 			}
 		});
@@ -209,10 +210,10 @@ public class HighscoresScreen extends ScreenAdapter
 		setNewHighscores ();
 		//changeLevel (levelNumber);
 	}
-	public void changeLevel (int level)
+	public void changeLevel (Difficulty difficulty)
 	{
 
-		this.levelNumber = level;
+		this.difficulty = difficulty;
 		try
 		{
 			bw.close ();
@@ -221,7 +222,7 @@ public class HighscoresScreen extends ScreenAdapter
 		catch (IOException e)
 		{
 		}
-		openHighscoresFile (level);
+		openHighscoresFile (difficulty);
 		readHighscores ();
 		setNewHighscores ();
 	}
