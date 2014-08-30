@@ -521,9 +521,10 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				snakeAngInc = 0.02f;
 		}
 		
+		
 		if(player != null){
 			player.setMoveAngle (snakeAngInc);
-		}
+		}	
 			
 		if (isStarted)
 		{
@@ -562,27 +563,50 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			e.setMoveDir (new Vector3 (e.getMoveDir ()).mul (ratio).add (a.mul (1 - ratio)));
 			e.calc ();
 			
-		//check all collision
-			//Utils.ECollisionResult collisionResult = Utils.checkCollision(player,enemies);
+		
+		}
 
-			// sending data
-			if (System.currentTimeMillis () - lastSend > 1000 / 35)
+		//calc walls
+		for (Wall w : walls)
+		{
+			w.calc ();
+		}
+
+		if (isStarted)
+		{
+			//check all collision
+			Utils.ECollisionResult collisionResult = Utils.checkCollision (player, enemies, walls);
+			if (!gameOver && collisionResult == ECollisionResult.PLAYER_COLLIDED)
 			{
-				lastSend = System.currentTimeMillis ();
+				Log.d ("KD", "gjam ovah");
+				gameOver ();
+			}
+		}
+		
+	//check all collision
+		//Utils.ECollisionResult collisionResult = Utils.checkCollision(player,enemies);
 
-				int type = Byte.SIZE * 1;
+		// sending data
+		if (System.currentTimeMillis () - lastSend > 1000 / 35)
+		{
+			lastSend = System.currentTimeMillis ();
 
+			int type = Byte.SIZE * 1;
+			ByteBuffer bBuff;
+			
+			if(player !=null)
+			{
 				// send player data
 				int playerSize = Short.SIZE * 1;
 				int playerTailSize = 2 * Short.SIZE * player.tail.size ();
 				int frustrumSize = 8 * 3 * Float.SIZE;
 				int playerInfoSize = 3 * Integer.SIZE; 
 				
-				ByteBuffer bBuff = ByteBuffer.allocate (type + playerSize + frustrumSize + playerInfoSize + playerTailSize);
+				bBuff = ByteBuffer.allocate (type + playerSize + frustrumSize + playerInfoSize + playerTailSize);
 				bBuff.order (ByteOrder.LITTLE_ENDIAN);
-
+	
 				bBuff.put (Sender.TYPE_PLAYER); // type
-
+	
 				bBuff.putShort ((short)player.tail.size ()); // player size
 				for (int i = 0; i < 8; i++)
 				{
@@ -600,62 +624,47 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 					buffAppendXYZ (bBuff, v);
 				}
 				sender.sendData (bBuff.array ());
+			}
+			
+			//send food data
+			int foodSize = Short.SIZE * 1;
+			int foodDataSize = 2 * Short.SIZE * foodManager.foodPositions.size ();
 
-				//send food data
-				int foodSize = Short.SIZE * 1;
-				int foodDataSize = 2 * Short.SIZE * foodManager.foodPositions.size ();
+			bBuff = ByteBuffer.allocate (type + foodSize + foodDataSize);
+			bBuff.order (ByteOrder.LITTLE_ENDIAN);
 
-				bBuff = ByteBuffer.allocate (type + foodSize + foodDataSize);
+			bBuff.put (Sender.TYPE_FOOD);
+			bBuff.putShort ((short)foodManager.foodPositions.size ());
+
+			for (Vector3 v : foodManager.foodPositions)
+			{
+				buffAppendXYZ (bBuff, v);
+			}
+			sender.sendData (bBuff.array ());
+
+			//send enemies data
+			int timeSize = Integer.SIZE;
+			int enemyIdSize = Short.SIZE * 1;
+			int enemySize = Short.SIZE * 1;
+			int enemyTailSize;
+
+			for (Enemy enemy : enemies)
+			{
+				enemyTailSize = 2 * Short.SIZE * enemy.tail.size ();
+
+				bBuff = ByteBuffer.allocate (type + timeSize + enemyIdSize + enemySize + enemyTailSize);
 				bBuff.order (ByteOrder.LITTLE_ENDIAN);
 
-				bBuff.put (Sender.TYPE_FOOD);
-				bBuff.putShort ((short)foodManager.foodPositions.size ());
+				bBuff.put (Sender.TYPE_ENEMY);
+				bBuff.putInt ((int)System.currentTimeMillis ());
+				bBuff.putShort ((short)enemies.indexOf (enemy));
+				bBuff.putShort ((short)enemy.tail.size ());
 
-				for (Vector3 v : foodManager.foodPositions)
+				for (Vector3 v : enemy.tail)
 				{
 					buffAppendXYZ (bBuff, v);
 				}
 				sender.sendData (bBuff.array ());
-
-				//send enemies data
-				int enemyIdSize = Short.SIZE * 1;
-				int enemySize = Short.SIZE * 1;
-				int enemyTailSize;
-
-				for (Enemy enemy : enemies)
-				{
-					enemyTailSize = 2 * Short.SIZE * enemy.tail.size ();
-
-					bBuff = ByteBuffer.allocate (type + enemyIdSize + enemySize + enemyTailSize);
-					bBuff.order (ByteOrder.LITTLE_ENDIAN);
-
-					bBuff.put (Sender.TYPE_ENEMY);
-					bBuff.putShort ((short)enemies.indexOf (enemy));
-					bBuff.putShort ((short)e.tail.size ());
-
-					for (Vector3 v : enemy.tail)
-					{
-						buffAppendXYZ (bBuff, v);
-					}
-					sender.sendData (bBuff.array ());
-				}
-			}
-		}
-
-		//calc walls
-		for (Wall w : walls)
-		{
-			w.calc ();
-		}
-
-		if (isStarted)
-		{
-			//check all collision
-			Utils.ECollisionResult collisionResult = Utils.checkCollision (player, enemies, walls);
-			if (!gameOver && collisionResult == ECollisionResult.PLAYER_COLLIDED)
-			{
-				Log.d ("KD", "gjam ovah");
-				gameOver ();
 			}
 		}
 	}
