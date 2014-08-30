@@ -309,6 +309,38 @@
       </rect>
      </property>
     </widget>
+    <widget class="QLabel" name="lbInfo">
+     <property name="geometry">
+      <rect>
+       <x>1030</x>
+       <y>300</y>
+       <width>221</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lbInfo_2">
+     <property name="geometry">
+      <rect>
+       <x>1310</x>
+       <y>300</y>
+       <width>221</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
+     </property>
+    </widget>
    </widget>
   </widget>
  </widget>

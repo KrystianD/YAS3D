@@ -23,11 +23,8 @@ SOURCES += main.cpp\
         MainWindow.cpp \
     RemoteGL.cpp \
     utils.cpp \
-    UsbRFM70.cpp \
-    QuadroGL.cpp \
     ReferenceWidget.cpp \
     kutils.cpp \
-    globals.cpp \
     MadgwickAHRS.cpp \
     RawReadsWidget.cpp \
     WorldGL.cpp \
@@ -38,12 +35,10 @@ SOURCES += main.cpp\
 HEADERS  += MainWindow.h \
     RemoteGL.h \
     utils.h \
-    UsbRFM70.h \
     QuadroGL.h \
     ReferenceWidget.h \
     kutils.h \
     classes.h \
-    globals.h \
     MadgwickAHRS.h \
     RawReadsWidget.h \
     WorldGL.h \

@@ -20,10 +20,10 @@ struct TData
 	QQuaternion worldQuat;
 	float ax, ay, az, gx, gy, gz, mx, my, mz;
 	float pitch, roll, yaw;
-	
+
 	QVector<QVector3D> playerPoints, foodPoints;
 	QVector<Enemy> enemies;
-	
+
 	uint8_t sphereEnabled;
 
 	QVector3D frustum[8];
@@ -46,17 +46,19 @@ struct TUdpDataSENSORS
 	float q0, q1, q2, q3;
 	uint64_t ticks;
 	uint8_t sphereEnabled, isStabilized;
-	// float 
+	// float
 };
 struct TUdpDataPLAYER
 {
 	uint8_t type;
 	uint16_t playerSize;
 	float frustumPoints[8][3];
+	uint32_t points, lives, timeLeft;
 };
 struct TUdpDataENEMY
 {
 	uint8_t type;
+	uint32_t time;
 	uint16_t idx;
 	uint16_t enemiesSize;
 };
