@@ -13,12 +13,17 @@ import com.badlogic.gdx.graphics.FPSLogger;
 
 public class GameSnake extends Game
 {
+	public static final byte NO_SPHERE = 0;
+	public static final byte SPHERE = 1;
+
 	private Context context;
 	private FPSLogger fpsLogger;
+	private Sender sender;
 
-	public GameSnake (Context context)
+	public GameSnake (Context context, Sender sender)
 	{
 		this.context = context;
+		this.sender = sender;
 	}
 
 	public MainMenu getMainMenu ()
@@ -28,7 +33,7 @@ public class GameSnake extends Game
 
 	public LevelScreen getLevelScreen (Difficulty difficulty)
 	{
-		return new LevelScreen (this, context, difficulty);
+		return new LevelScreen (this, context, difficulty, sender);
 	}
 
 	public HighscoresScreen getHigscoresScreen (int score, Difficulty difficulty)
