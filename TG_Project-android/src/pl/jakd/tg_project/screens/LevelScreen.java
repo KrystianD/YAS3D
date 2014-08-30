@@ -1,11 +1,14 @@
 package pl.jakd.tg_project.screens;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Random;
 
 import javax.microedition.khronos.opengles.GL10;
 
 import pl.jakd.tg_project.GameSnake;
+import pl.jakd.tg_project.Sender;
 import pl.jakd.tg_project.objects.Enemy;
 import pl.jakd.tg_project.objects.FoodManager;
 import pl.jakd.tg_project.objects.PlayerSnake;
@@ -53,6 +56,11 @@ import com.badlogic.gdx.utils.Timer;
 public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		InputProcessor
 {
+	public enum Difficulty
+	{
+		EASY, NORMAL, HARD
+	}
+
 	public PerspectiveCamera cam;
 	public ModelBatch modelBatch;
 	public Model model[] = new Model[10];
@@ -62,6 +70,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	public CameraInputController camController;
 	public BitmapFont font;
 	public SpriteBatch spriteBatch;
+	private PointLight light = new PointLight ();
 
 	private Quaternion worldQuat = new Quaternion ();
 	private GameSnake game;
@@ -73,6 +82,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	private Random rand = new Random ();
 
 	private ModelInstance instSnakePart;
+	private Sender sender;
 	private PlayerSnake player;
 	private FoodManager foodManager;
 	private ArrayList<Enemy> enemies = new ArrayList<Enemy> ();
@@ -83,21 +93,23 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	private float gameOverFontScale = 0.001f;
 
 	private long secondsCounter;
-	private int levelNumber;
+	private Difficulty difficulty;
 
 	float aX = 0, aY = 0, aZ = 0, gX = 0, gY = 0, gZ = 0, mX = 0, mY = 0,
 			mZ = 0;
 	Boolean hasA = false, hasG = false, hasM = false;
 	Mad mad;
 
-	public LevelScreen (GameSnake game, Context ctx, int level)
+	public LevelScreen (GameSnake game, Context ctx, Difficulty difficulty, Sender sender)
 	{
 		this.game = game;
-		this.levelNumber = level;
+		this.difficulty = difficulty;
 
 		mad = new Mad ();
 		// System.loadLibrary ("mad");
 		Gdx.input.setCatchBackKey (true);
+
+		this.sender = sender;
 
 		mSensorManager = (SensorManager)ctx
 				.getSystemService (Context.SENSOR_SERVICE);
@@ -116,16 +128,44 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		font = generator.generateFont (90);
 		generator.dispose ();
 
-		//TODO przekazać czas
-		secondsCounter = 30;
-
 	}
-
-	PointLight light = new PointLight ();
 
 	@Override
 	public void show ()
 	{
+		int opponentsCount = 0;
+		int wallsCount = 0;
+		int foodCount = 0;
+		float wallLength = 0;
+		int wallSpeed = 0;
+		
+		switch (difficulty)
+		{
+		case EASY:
+			opponentsCount = 2;
+			wallsCount = 0;
+			foodCount = 150;
+			secondsCounter = 30;
+			break;
+		case NORMAL:
+			opponentsCount = 5;
+			wallsCount = 5;
+			wallLength = 3.14f / 6;
+			wallSpeed = 30;
+			foodCount = 100;
+			secondsCounter = 60;
+			break;
+		case HARD:
+			opponentsCount = 5;
+			wallsCount = 75;
+			wallLength = 3.14f / 48;
+			wallSpeed = 5;
+			foodCount = 20;
+			secondsCounter = 90;
+			break;
+		}
+		
+		
 		spriteBatch = new SpriteBatch ();
 		modelBatch = new ModelBatch ();
 
@@ -152,7 +192,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		modelBuilder.part ("0", Utils.createUniverse (), GL20.GL_TRIANGLE_STRIP, m);
 		Model worldModel = modelBuilder.end ();
 
-		Log.d ("KD", worldModel.meshes.get (0).getVertexAttributes ().toString ());
+		//Log.d ("KD", worldModel.meshes.get (0).getVertexAttributes ().toString ());
 		Texture tex = new Texture (Gdx.files.internal ("universe.jpg"));
 		tex.setWrap (TextureWrap.Repeat, TextureWrap.Repeat);
 		TextureAttribute texat = new TextureAttribute (TextureAttribute.Diffuse, tex);
@@ -175,7 +215,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 						ColorAttribute.createDiffuse (Color.BLUE)),
 				Usage.Position | Usage.Normal);
 		ModelInstance instEnemySnakePart = new ModelInstance (modelEnemySnakePart);
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < opponentsCount; i++)
 		{
 			Enemy e = new Enemy (instEnemySnakePart);
 			e.reset ();
@@ -188,9 +228,9 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 						ColorAttribute.createDiffuse (Color.GRAY)),
 				Usage.Position | Usage.Normal);
 		ModelInstance instWallPart = new ModelInstance (modelWallPart);
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < wallsCount; i++)
 		{
-			Wall w = new Wall (Utils.randSpherePoint (), Utils.randSpherePoint ().nor (), 0, 3.14f / 6, 30, instWallPart);
+			Wall w = new Wall (Utils.randSpherePoint (), Utils.randSpherePoint ().nor (), 0, wallLength, wallSpeed, instWallPart);
 			walls.add (w);
 		}
 
@@ -201,7 +241,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				Usage.Position | Usage.Normal);
 		ModelInstance foodInstance = new ModelInstance (foodModel);
 
-		foodManager = new FoodManager (100, foodInstance);
+		foodManager = new FoodManager (foodCount, foodInstance);
 
 		environment = new Environment ();
 		environment.set (new ColorAttribute (ColorAttribute.AmbientLight, 0.4f,
@@ -315,8 +355,9 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			fontY = (Gdx.app.getGraphics ().getHeight () / 2) + (bounds.height / 2);
 			font.draw (spriteBatch, "GAME OVER", fontX, fontY);
 		}
-		
-		if(!isStarted){
+
+		if (!isStarted)
+		{
 			font.setScale (1.5f);
 			bounds = font.getBounds ("TAP TO START");
 			fontX = (Gdx.app.getGraphics ().getWidth () / 2) - (bounds.width / 2);
@@ -324,7 +365,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			font.draw (spriteBatch, "TAP TO START", fontX, fontY);
 
 		}
-		
+
 		spriteBatch.end ();
 	}
 	@Override
@@ -379,6 +420,44 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 	private float oq0 = 0, oq1 = 0, oq2 = 0, oq3 = 0;
 	private boolean isStabilized = false;
+	private long lastSend = 0;
+
+	private void sendSensorsPacket (long ticks)
+	{
+		ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2);
+		bArray.order (ByteOrder.LITTLE_ENDIAN);
+
+		bArray.put (Sender.TYPE_SENSORS);
+		bArray.putFloat (aX);
+		bArray.putFloat (aY);
+		bArray.putFloat (aZ);
+		bArray.putFloat (gX);
+		bArray.putFloat (gY);
+		bArray.putFloat (gZ);
+		bArray.putFloat (mX);
+		bArray.putFloat (mY);
+		bArray.putFloat (mZ);
+		bArray.putFloat (mad.q0);
+		bArray.putFloat (mad.q1);
+		bArray.putFloat (mad.q2);
+		bArray.putFloat (mad.q3);
+		bArray.putLong (ticks);
+		bArray.put ((byte)1);
+		bArray.put (isStabilized ? (byte)1 : (byte)0);
+		sender.sendData (bArray.array ());
+	}
+
+	private void buffAppendXYZ (ByteBuffer buff, Vector3 v)
+	{
+		float lat = (float)Math.acos (v.z);
+		float lon = (float)Math.atan2 (v.y, v.x);
+
+		short latU = (short)(lat * 5000.0f);
+		short lonU = (short)(lon * 5000.0f);
+
+		buff.putShort (latU);
+		buff.putShort (lonU);
+	}
 
 	public void calc ()
 	{
@@ -395,6 +474,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				lastCalc = ticks;
 				mad.MadgwickAHRSupdate (gX, gY, gZ, aX, aY, aZ, mX, mY, mZ, diff);
 				gX = gY = gZ = 0;
+				sendSensorsPacket (ticks);
 			}
 
 		}
@@ -411,10 +491,13 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			{
 				isStabilized = true;
 			}
+
 			oq0 = mad.q0;
 			oq1 = mad.q1;
 			oq2 = mad.q2;
 			oq3 = mad.q3;
+
+			sendSensorsPacket (ticks);
 		}
 
 		//check couter
@@ -422,6 +505,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		{
 			gameOver ();
 		}
+		long start = System.currentTimeMillis ();
 
 		// calculate player position
 		float snakeAngInc = 0f;
@@ -436,8 +520,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			if (rightPressed)
 				snakeAngInc = 0.02f;
 		}
-		player.setMoveAngle (snakeAngInc);
-
+		
+		
+		if(player != null){
+			player.setMoveAngle (snakeAngInc);
+		}	
+			
 		if (isStarted)
 		{
 			if (!gameOver && player.calc () == ECalcResult.COLLIDED)
@@ -474,6 +562,8 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			float ratio = 0.92f;
 			e.setMoveDir (new Vector3 (e.getMoveDir ()).mul (ratio).add (a.mul (1 - ratio)));
 			e.calc ();
+			
+		
 		}
 
 		//calc walls
@@ -490,6 +580,91 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			{
 				Log.d ("KD", "gjam ovah");
 				gameOver ();
+			}
+		}
+		
+	//check all collision
+		//Utils.ECollisionResult collisionResult = Utils.checkCollision(player,enemies);
+
+		// sending data
+		if (System.currentTimeMillis () - lastSend > 1000 / 35)
+		{
+			lastSend = System.currentTimeMillis ();
+
+			int type = Byte.SIZE * 1;
+			ByteBuffer bBuff;
+			
+			if(player !=null)
+			{
+				// send player data
+				int playerSize = Short.SIZE * 1;
+				int playerTailSize = 2 * Short.SIZE * player.tail.size ();
+				int frustrumSize = 8 * 3 * Float.SIZE;
+				int playerInfoSize = 3 * Integer.SIZE; 
+				
+				bBuff = ByteBuffer.allocate (type + playerSize + frustrumSize + playerInfoSize + playerTailSize);
+				bBuff.order (ByteOrder.LITTLE_ENDIAN);
+	
+				bBuff.put (Sender.TYPE_PLAYER); // type
+	
+				bBuff.putShort ((short)player.tail.size ()); // player size
+				for (int i = 0; i < 8; i++)
+				{
+					bBuff.putFloat (cam.frustum.planePoints[i].x);
+					bBuff.putFloat (cam.frustum.planePoints[i].y);
+					bBuff.putFloat (cam.frustum.planePoints[i].z);
+				}
+				
+				bBuff.putInt (player.getScore ());
+				bBuff.putInt (player.getLives ());
+				bBuff.putInt ((int)secondsCounter);
+				
+				for (Vector3 v : player.tail)
+				{
+					buffAppendXYZ (bBuff, v);
+				}
+				sender.sendData (bBuff.array ());
+			}
+			
+			//send food data
+			int foodSize = Short.SIZE * 1;
+			int foodDataSize = 2 * Short.SIZE * foodManager.foodPositions.size ();
+
+			bBuff = ByteBuffer.allocate (type + foodSize + foodDataSize);
+			bBuff.order (ByteOrder.LITTLE_ENDIAN);
+
+			bBuff.put (Sender.TYPE_FOOD);
+			bBuff.putShort ((short)foodManager.foodPositions.size ());
+
+			for (Vector3 v : foodManager.foodPositions)
+			{
+				buffAppendXYZ (bBuff, v);
+			}
+			sender.sendData (bBuff.array ());
+
+			//send enemies data
+			int timeSize = Integer.SIZE;
+			int enemyIdSize = Short.SIZE * 1;
+			int enemySize = Short.SIZE * 1;
+			int enemyTailSize;
+
+			for (Enemy enemy : enemies)
+			{
+				enemyTailSize = 2 * Short.SIZE * enemy.tail.size ();
+
+				bBuff = ByteBuffer.allocate (type + timeSize + enemyIdSize + enemySize + enemyTailSize);
+				bBuff.order (ByteOrder.LITTLE_ENDIAN);
+
+				bBuff.put (Sender.TYPE_ENEMY);
+				bBuff.putInt ((int)System.currentTimeMillis ());
+				bBuff.putShort ((short)enemies.indexOf (enemy));
+				bBuff.putShort ((short)enemy.tail.size ());
+
+				for (Vector3 v : enemy.tail)
+				{
+					buffAppendXYZ (bBuff, v);
+				}
+				sender.sendData (bBuff.array ());
 			}
 		}
 	}
@@ -555,16 +730,16 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	{
 		if (gameOver)
 		{
-			game.setScreen (game.getHigscoresScreen (player.getScore (), levelNumber));
+			game.setScreen (game.getHigscoresScreen (player.getScore (), difficulty));
 		}
 		if (!isStarted)
 		{
-			Vector3 vdir = new Vector3 (0, 1, 0); 
+			Vector3 vdir = new Vector3 (0, 1, 0);
 			vdir.mul (worldQuat.cpy ().conjugate ());
-			
+
 			Vector3 v = new Vector3 (0, 0, -1);
 			v.mul (worldQuat.cpy ().conjugate ());
-			
+
 			player = new PlayerSnake (v, vdir, instSnakePart);
 			isStarted = true;
 			startLevelTimer ();

@@ -2,10 +2,6 @@ package pl.jakd.tg_project.objects;
 
 import java.util.ArrayList;
 
-import pl.jakd.tg_project.objects.Snake.ECalcResult;
-
-import android.util.Log;
-
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 
@@ -21,6 +17,7 @@ public class Wall extends Snake
 	{
 		super (startPos, dir, snakePartInstance);
 		this.speed = speed;
+		
 		tail.clear ();
 
 		float step = dir.len () * SPHERES_DISTANCE;
