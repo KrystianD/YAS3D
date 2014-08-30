@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1558</width>
+    <height>565</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>966</width>
+    <height>565</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>KDcopter</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QWidget" name="widgetSensors" native="true">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>1141</width>
+      <height>541</height>
+     </rect>
+    </property>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>480</x>
+       <y>0</y>
+       <width>231</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Akcelerometr + Żyroskop</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="RemoteGL" name="visAccelMagnet" native="true">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>294</y>
+       <width>231</width>
+       <height>211</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>231</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Żyroskop</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="RemoteGL" name="visAccel" native="true">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>24</y>
+       <width>231</width>
+       <height>211</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbGyroAccel">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>244</y>
+       <width>81</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Reset</string>
+     </property>
+    </widget>
+    <widget class="RemoteGL" name="visGyro" native="true">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>24</y>
+       <width>231</width>
+       <height>211</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbFull">
+     <property name="geometry">
+      <rect>
+       <x>320</x>
+       <y>514</y>
+       <width>81</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Reset</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbAccel">
+     <property name="geometry">
+      <rect>
+       <x>320</x>
+       <y>244</y>
+       <width>81</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Reset</string>
+     </property>
+    </widget>
+    <widget class="RemoteGL" name="visFull" native="true">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>294</y>
+       <width>231</width>
+       <height>211</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>0</y>
+       <width>231</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Akcelerometr</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbGyro">
+     <property name="geometry">
+      <rect>
+       <x>70</x>
+       <y>244</y>
+       <width>81</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Reset</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>270</y>
+       <width>231</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Akcelerometr + Magnetometr</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="RemoteGL" name="visGyroAccel" native="true">
+     <property name="geometry">
+      <rect>
+       <x>480</x>
+       <y>24</y>
+       <width>231</width>
+       <height>211</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbAccelMagnet">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>514</y>
+       <width>81</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Reset</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>270</y>
+       <width>231</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Wszystkie czujniki</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="RawReadsWidget" name="rawReads" native="true">
+     <property name="geometry">
+      <rect>
+       <x>720</x>
+       <y>0</y>
+       <width>421</width>
+       <height>211</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="widgetSpheres" native="true">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>1536</width>
+      <height>541</height>
+     </rect>
+    </property>
+    <widget class="WorldGL" name="visWorld" native="true">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>500</width>
+       <height>500</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="WorldGL" name="visWorld2" native="true">
+     <property name="geometry">
+      <rect>
+       <x>520</x>
+       <y>10</y>
+       <width>500</width>
+       <height>500</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="ScreenGL" name="visScreen" native="true">
+     <property name="geometry">
+      <rect>
+       <x>1030</x>
+       <y>10</y>
+       <width>500</width>
+       <height>281</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>RemoteGL</class>
+   <extends>QWidget</extends>
+   <header>RemoteGL.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RawReadsWidget</class>
+   <extends>QWidget</extends>
+   <header>RawReadsWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WorldGL</class>
+   <extends>QWidget</extends>
+   <header>WorldGL.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ScreenGL</class>
+   <extends>QWidget</extends>
+   <header>ScreenGL.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
