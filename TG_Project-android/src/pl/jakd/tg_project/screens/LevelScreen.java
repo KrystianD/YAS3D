@@ -708,7 +708,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 				bBuff.put (Sender.TYPE_WALL);
 				bBuff.putInt ((int)System.currentTimeMillis ());
-				bBuff.putShort ((short)enemies.indexOf (w));
+				bBuff.putShort ((short)walls.indexOf (w));
 				bBuff.putShort ((short)w.tail.size ());
 
 				for (Vector3 v : w.tail)
