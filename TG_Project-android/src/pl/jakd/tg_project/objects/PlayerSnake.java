@@ -2,7 +2,6 @@ package pl.jakd.tg_project.objects;
 
 import java.util.ArrayList;
 
-
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 

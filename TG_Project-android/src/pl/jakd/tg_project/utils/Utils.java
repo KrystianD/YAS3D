@@ -16,30 +16,29 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
+/**
+ * klasa zawierająca pomocnicze metody
+ */
 public class Utils
 {
 	public static Random rand = new Random ();
 
+	/**
+	 * wynik kolizji gracza z elementami na planszy (za wyjątkiem obiektów food) 
+	 */
 	public enum ECollisionResult
 	{
 		PLAYER_COLLIDED,
 		PLAYER_NOT_COLLIDED
 	}
-
-	public static float intersectPlane (Vector3 n, Vector3 p0, Vector3 l0, Vector3 l)
-	{
-		// assuming vectors are all normalized
-		float denom = n.dot (l);
-		if (denom > 1e-6)
-		{
-			Vector3 p0l0 = new Vector3 (p0);
-			p0l0.sub (l0);
-			float d = p0l0.dot (n) / denom;
-			return d;
-		}
-		return 999999;
-	}
-
+	
+	/**
+	 * sprawdza, czy gracz koliduje z obiektami na planszy
+	 * @param player obiekt gracza
+	 * @param enemies lista przeciwników
+	 * @param walls lista ścian
+	 * @return wynik kolizji
+	 */
 	public static ECollisionResult checkCollision (PlayerSnake player, ArrayList<Enemy> enemies, ArrayList<Wall> walls)
 	{
 		for (Enemy e : enemies)
@@ -109,12 +108,22 @@ public class Utils
 
 		return ECollisionResult.PLAYER_NOT_COLLIDED;
 	}
+	
+	/**
+	 * losuje punkt na sferze
+	 * @return losowy punkt na sferze
+	 */
 	public static Vector3 randSpherePoint ()
 	{
 		return new Vector3 (rand.nextFloat () * 2 - 1,
 				rand.nextFloat () * 2 - 1, rand.nextFloat () * 2 - 1).nor ();
 	}
 
+	/**
+	 * przekształca pozycję z współrzędnych geograficznych na metry
+	 * @param pos pozycja we współrzędnych geograficznych
+	 * @return pozycja w metrach
+	 */
 	public static Vector2 latlongToMeters (Vector2 pos)
 	{
 		float longtitude = pos.y;
@@ -122,6 +131,11 @@ public class Utils
 		return new Vector2 (latitude, longtitude);
 	}
 
+	
+	/**
+	 * Tworzy i zwraca obiekt mesh planszy otaczającej gracza
+	 * @return mesh planszy
+	 */
 	public static Mesh createUniverse ()
 	{
 		double a, b;
@@ -172,12 +186,11 @@ public class Utils
 			}
 		}
 
-		Log.d("KD", "cnt: " + vert.length/5);
 		Mesh mesh = new Mesh (true, vert.length / 5, indices.length,
 				new VertexAttribute (Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
 				new VertexAttribute (Usage.TextureCoordinates, 2, ShaderProgram.TEXCOORD_ATTRIBUTE + "0"));
 
-		mesh.setIndices(indices);
+		mesh.setIndices (indices);
 		mesh.setVertices (vert);
 
 		return mesh;

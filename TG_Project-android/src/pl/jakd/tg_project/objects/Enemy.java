@@ -7,6 +7,9 @@ import pl.jakd.tg_project.utils.Utils;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 
+/**
+ * klasa reprezentująca przeciwnika w grze
+ */
 public class Enemy extends Snake
 {
 	public static final float DIFF = 0.1f;
@@ -15,11 +18,16 @@ public class Enemy extends Snake
 	public long timeNoChangeDist;
 	public int needNewFood = 0;
 
+	
+	/**
+	 * @param snakePartInstance wyświetlany element reprezentujący fragment węża
+	 */
 	public Enemy (ModelInstance snakePartInstance)
 	{
 		super (new Vector3 (), new Vector3 (), snakePartInstance);
 	}
 
+	@Override
 	public ECalcResult calc ()
 	{
 
@@ -48,16 +56,28 @@ public class Enemy extends Snake
 		return ECalcResult.NOT_COLLIDED;
 	}
 
+	
+	/**
+	 * zwraca kierunek poruszania się
+	 * @return wektor kierunku ruchu
+	 */
 	public Vector3 getMoveDir ()
 	{
 		return moveDir;
 	}
 
+	/**
+	 * ustawia kierunek ruchu
+	 * @param moveDir wektor kierunku ruchu
+	 */
 	public void setMoveDir (Vector3 moveDir)
 	{
 		this.moveDir = moveDir;
 	}
 
+	/**
+	 * resetuje przeciwnika
+	 */
 	public void reset ()
 	{
 		Vector3 startPos = Utils.randSpherePoint ();
@@ -69,5 +89,4 @@ public class Enemy extends Snake
 		moveDir = startPos.crs (p).nor ();
 		tail.add (startPos);
 	}
-
 }

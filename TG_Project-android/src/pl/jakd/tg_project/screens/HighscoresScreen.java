@@ -30,6 +30,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
+/**
+ * klasa reprezentująca ekran najwyższych wyników
+ */
 public class HighscoresScreen extends ScreenAdapter
 {
 	public static final int HIGHSCORE_LIST_SIZE = 10;
@@ -53,6 +56,11 @@ public class HighscoresScreen extends ScreenAdapter
 
 	private Label highscoreLabel;
 
+	/**
+	 * @param game główny obiekt gry
+	 * @param score aktualny wynik gracza
+	 * @param difficulty aktualna trudność gry
+	 */
 	public HighscoresScreen (GameSnake game, int score, Difficulty difficulty)
 	{
 		this.game = game;
@@ -78,6 +86,10 @@ public class HighscoresScreen extends ScreenAdapter
 		//changeLevel (levelNumber);
 	}
 
+	/**
+	 * wczytuje najwyższe wyniki
+	 * @param difficulty trudność
+	 */
 	private void openHighscoresFile (Difficulty difficulty)
 	{
 		file = new File (game.getContext ().getFilesDir (), HIGHSCORE_FILE + difficulty.ordinal ());
@@ -210,6 +222,11 @@ public class HighscoresScreen extends ScreenAdapter
 		setNewHighscores ();
 		//changeLevel (levelNumber);
 	}
+	
+	/**
+	 * zmienia wyświetlaną trudność
+	 * @param difficulty trudność do wyświetlenia
+	 */
 	public void changeLevel (Difficulty difficulty)
 	{
 
@@ -226,6 +243,7 @@ public class HighscoresScreen extends ScreenAdapter
 		readHighscores ();
 		setNewHighscores ();
 	}
+	
 	@Override
 	public void resume ()
 	{
@@ -244,6 +262,9 @@ public class HighscoresScreen extends ScreenAdapter
 		}
 	}
 
+	/**
+	 * wyświetla tabelę wyników
+	 */
 	private void readHighscores ()
 	{
 		String line = null;
@@ -274,6 +295,11 @@ public class HighscoresScreen extends ScreenAdapter
 		}
 	}
 
+	
+	/**
+	 * dodaje wynik do listy
+	 * @param score nowy wynik do dodania
+	 */
 	private void addNewHighscore (int score)
 	{
 		boolean isNewHighscore = false;

@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 
+/**
+ * klasa reprezentująca ścianę w grze
+ */
 public class Wall extends Snake
 {
 	public static final float DIFF = 0.1f;
@@ -13,11 +16,19 @@ public class Wall extends Snake
 
 	ArrayList<Vector3> moveDirs = new ArrayList<Vector3> ();
 
+	/**
+	 * @param startPos pozycja startowa
+	 * @param dir kierunek startowy
+	 * @param start początek walla
+	 * @param end długość walla
+	 * @param speed prędkość poruszania ściany
+	 * @param snakePartInstance wyświetlany element reprezentujący fragment węża
+	 */
 	public Wall (Vector3 startPos, Vector3 dir, float start, float end, int speed, ModelInstance snakePartInstance)
 	{
 		super (startPos, dir, snakePartInstance);
 		this.speed = speed;
-		
+
 		tail.clear ();
 
 		float step = dir.len () * SPHERES_DISTANCE;
@@ -38,6 +49,8 @@ public class Wall extends Snake
 			startPos = newPt;
 		}
 	}
+	
+	@Override
 	public ECalcResult calc ()
 	{
 		if (counter++ >= speed)

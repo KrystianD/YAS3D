@@ -18,7 +18,8 @@ public class Sender
 	public static final byte TYPE_STABILIZING = 2;
 	public static final byte TYPE_ENEMY = 3;
 	public static final byte TYPE_FOOD = 4;
-
+	public static final byte TYPE_WALL = 5;
+	
 	private DatagramSocket udpSocket = null;
 	private LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<byte[]> ();
 	private Thread t;
@@ -69,7 +70,7 @@ public class Sender
 
 					int len = 700;
 					int size;
-					
+
 					Deflater deflater = new Deflater (Deflater.BEST_COMPRESSION);
 					byte[] buff = null;
 

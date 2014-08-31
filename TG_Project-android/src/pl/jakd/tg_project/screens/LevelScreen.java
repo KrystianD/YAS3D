@@ -53,9 +53,16 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Timer;
 
+/**
+ * klasa reprezentująca ekran poziomu gry
+ */
 public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		InputProcessor
 {
+	
+	/**
+	 * trudność gry
+	 */
 	public enum Difficulty
 	{
 		EASY, NORMAL, HARD
@@ -100,6 +107,13 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	Boolean hasA = false, hasG = false, hasM = false;
 	Mad mad;
 
+	
+	/**
+	 * @param game główny obiekt ry
+	 * @param ctx kontekst
+	 * @param difficulty poziom trudności
+	 * @param sender obiekt do wysyłania danych (tylko do prezentacji)
+	 */
 	public LevelScreen (GameSnake game, Context ctx, Difficulty difficulty, Sender sender)
 	{
 		this.game = game;
@@ -138,7 +152,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		int foodCount = 0;
 		float wallLength = 0;
 		int wallSpeed = 0;
-		
+
 		switch (difficulty)
 		{
 		case EASY:
@@ -164,8 +178,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			secondsCounter = 90;
 			break;
 		}
-		
-		
+
 		spriteBatch = new SpriteBatch ();
 		modelBatch = new ModelBatch ();
 
@@ -422,6 +435,11 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 	private boolean isStabilized = false;
 	private long lastSend = 0;
 
+	
+	/**
+	 * służy do wysyłania pakietów z danymi gry (tylko do prezentacji)
+	 * @param ticks czas systemowy w ms
+	 */
 	private void sendSensorsPacket (long ticks)
 	{
 		ByteBuffer bArray = ByteBuffer.allocate (1 * 1 + 13 * 4 + 1 * 8 + 1 * 2);
@@ -447,6 +465,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		sender.sendData (bArray.array ());
 	}
 
+	
+	/**
+	 * dodaje do bufora współrzędne xyz punktów (tylko do prezentacji)
+	 * @param buff bufor wysyłania
+	 * @param v wektor współrzędnych
+	 */
 	private void buffAppendXYZ (ByteBuffer buff, Vector3 v)
 	{
 		float lat = (float)Math.acos (v.z);
@@ -459,6 +483,10 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		buff.putShort (lonU);
 	}
 
+	
+	/**
+	 * główna pętla gry, przeliczająca wartości wszysckich elementów znajdujących się na ekranie
+	 */
 	public void calc ()
 	{
 		long ticks = System.currentTimeMillis ();
@@ -520,12 +548,12 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			if (rightPressed)
 				snakeAngInc = 0.02f;
 		}
-		
-		
-		if(player != null){
+
+		if (player != null)
+		{
 			player.setMoveAngle (snakeAngInc);
-		}	
-			
+		}
+
 		if (isStarted)
 		{
 			if (!gameOver && player.calc () == ECalcResult.COLLIDED)
@@ -562,8 +590,7 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 			float ratio = 0.92f;
 			e.setMoveDir (new Vector3 (e.getMoveDir ()).mul (ratio).add (a.mul (1 - ratio)));
 			e.calc ();
-			
-		
+
 		}
 
 		//calc walls
@@ -582,8 +609,8 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				gameOver ();
 			}
 		}
-		
-	//check all collision
+
+		//check all collision
 		//Utils.ECollisionResult collisionResult = Utils.checkCollision(player,enemies);
 
 		// sending data
@@ -593,20 +620,20 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 
 			int type = Byte.SIZE * 1;
 			ByteBuffer bBuff;
-			
-			if(player !=null)
+
+			if (player != null)
 			{
 				// send player data
 				int playerSize = Short.SIZE * 1;
 				int playerTailSize = 2 * Short.SIZE * player.tail.size ();
 				int frustrumSize = 8 * 3 * Float.SIZE;
-				int playerInfoSize = 3 * Integer.SIZE; 
-				
+				int playerInfoSize = 3 * Integer.SIZE;
+
 				bBuff = ByteBuffer.allocate (type + playerSize + frustrumSize + playerInfoSize + playerTailSize);
 				bBuff.order (ByteOrder.LITTLE_ENDIAN);
-	
+
 				bBuff.put (Sender.TYPE_PLAYER); // type
-	
+
 				bBuff.putShort ((short)player.tail.size ()); // player size
 				for (int i = 0; i < 8; i++)
 				{
@@ -614,18 +641,18 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 					bBuff.putFloat (cam.frustum.planePoints[i].y);
 					bBuff.putFloat (cam.frustum.planePoints[i].z);
 				}
-				
+
 				bBuff.putInt (player.getScore ());
 				bBuff.putInt (player.getLives ());
 				bBuff.putInt ((int)secondsCounter);
-				
+
 				for (Vector3 v : player.tail)
 				{
 					buffAppendXYZ (bBuff, v);
 				}
 				sender.sendData (bBuff.array ());
 			}
-			
+
 			//send food data
 			int foodSize = Short.SIZE * 1;
 			int foodDataSize = 2 * Short.SIZE * foodManager.foodPositions.size ();
@@ -666,9 +693,37 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 				}
 				sender.sendData (bBuff.array ());
 			}
+			
+			//send wall data
+			int wallIdSize = Short.SIZE * 1;
+			int wallSize = Short.SIZE * 1;
+			int wallTailSize;
+
+			for (Wall w : walls)
+			{
+				wallTailSize = 2 * Short.SIZE * w.tail.size ();
+
+				bBuff = ByteBuffer.allocate (type + timeSize + wallIdSize + wallSize + wallTailSize);
+				bBuff.order (ByteOrder.LITTLE_ENDIAN);
+
+				bBuff.put (Sender.TYPE_WALL);
+				bBuff.putInt ((int)System.currentTimeMillis ());
+				bBuff.putShort ((short)enemies.indexOf (w));
+				bBuff.putShort ((short)w.tail.size ());
+
+				for (Vector3 v : w.tail)
+				{
+					buffAppendXYZ (bBuff, v);
+				}
+				sender.sendData (bBuff.array ());
+			}
 		}
 	}
 
+	
+	/**
+	 * obsługa końca gry
+	 */
 	private void gameOver ()
 	{
 		gameOver = true;
@@ -710,6 +765,10 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		return false;
 	}
 
+	
+	/**
+	 * służy do włączenia timera dla licznika czasu gry
+	 */
 	private void startLevelTimer ()
 	{
 		countdownTimer.scheduleTask (new Timer.Task ()
@@ -774,6 +833,10 @@ public class LevelScreen extends ScreenAdapter implements SensorEventListener,
 		return false;
 	}
 
+	
+	/**
+	 * zmniejszanie wartości licznika czasu gry
+	 */
 	public void countdown ()
 	{
 		secondsCounter--;

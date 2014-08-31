@@ -12,6 +12,13 @@ import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 
+/**
+ * klasa reprezentująca obiekty poruszające się po planszy
+ */
+/**
+ * @author jacek
+ *
+ */
 public abstract class Snake
 {
 	public static final float SNAKE_SPHERE_SIZE = 0.5f / 15f;
@@ -20,6 +27,10 @@ public abstract class Snake
 
 	protected static final float SPHERES_DISTANCE = 0.01f;
 
+	
+	/**
+	 * wynik kolizji obiektu
+	 */
 	public enum ECalcResult
 	{
 		COLLIDED,
@@ -34,7 +45,12 @@ public abstract class Snake
 
 	private ModelInstance snakePartInstance;
 	private boolean isDead = false;
-
+	
+	/**
+	 * @param startPos pozycja startowa
+	 * @param startDir startowy kierunek
+	 * @param snakePartInstance wyświetlany element reprezentujący fragment węża
+	 */
 	public Snake (Vector3 startPos, Vector3 startDir, ModelInstance snakePartInstance)
 	{
 		tail.add (startPos);
@@ -42,6 +58,14 @@ public abstract class Snake
 		this.snakePartInstance = snakePartInstance;
 	}
 
+	
+	/**
+	 * metoda renderująca węża
+	 * @param modelBatch batch na którym renderujemy elementy węża
+	 * @param worldQuat kwaternian obrotu świata
+	 * @param env parametry do renderowania
+	 * @param f widok kamery
+	 */
 	public void render (ModelBatch modelBatch, Quaternion worldQuat, Environment env, Frustum f)
 	{
 		for (Vector3 v : tail)
@@ -58,14 +82,26 @@ public abstract class Snake
 		}
 	}
 
+	/**
+	 * funkcja wyliczająca nową pozycję
+	 * @return wynik kolizji po przeliczeniu nowej pozycji
+	 */
 	public abstract ECalcResult calc ();
 
+
+	/**
+	 * klasa przechowująca rezultat kolizji przemieszczenia się węża
+	 */
 	class AdvancePositionResult
 	{
 		public ECalcResult result;
 		public int collidedIndex;
 	}
 
+	/**
+	 * oblicza nową pozycję obiektu i zwraca wartość kolizji
+	 * @return kolizje z obiektami
+	 */
 	protected AdvancePositionResult advancePosition ()
 	{
 		AdvancePositionResult result = new AdvancePositionResult ();
@@ -94,11 +130,18 @@ public abstract class Snake
 		return result;
 	}
 
+	/**
+	 * zwraca aktualną pozycję głowy węża
+	 * @return pozycja głowy węża
+	 */
 	public Vector3 getCurrentPosition ()
 	{
 		return tail.get (0);
 	}
-
+	
+	/**
+	 * dodaje nowy fragment węża
+	 */
 	public void grow ()
 	{
 		length += 5;
@@ -106,6 +149,11 @@ public abstract class Snake
 			length = SNAKE_MAX_SIZE;
 	}
 
+	/**
+	 * sprawdza kolizję węża z punktem
+	 * @param point punkt do kolizji
+	 * @return zwraca indeks elementu z którym punkt koliduje lub -1 jeżeli nie koliduje
+	 */
 	public int collideWithPoint (Vector3 point)
 	{
 		for (Vector3 v : tail)
@@ -114,6 +162,11 @@ public abstract class Snake
 		return -1;
 	}
 
+	
+	/**
+	 * ucina węża do zadanego indeksu
+	 * @param colsPos indeks kolizji
+	 */
 	public void cutTo (int colsPos)
 	{
 		if (colsPos < SNAKE_START_LENGTH)

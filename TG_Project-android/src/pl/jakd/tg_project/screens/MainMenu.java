@@ -17,6 +17,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
+
+/**
+ * klasa reprezentująca główne menu gry
+ */
 public class MainMenu extends ScreenAdapter
 {
 	// setup the dimensions of the menu buttons
@@ -28,7 +32,10 @@ public class MainMenu extends ScreenAdapter
 
 	private Skin skin;
 	private Stage stage;
-
+	
+	/**
+	 * @param game główny obiekt gry
+	 */
 	public MainMenu (GameSnake game)
 	{
 		this.game = game;
@@ -53,7 +60,7 @@ public class MainMenu extends ScreenAdapter
 		Image background = new Image (backgroundTexture);
 		background.sizeBy (width, height);
 		stage.addActor (background);
-		
+
 		// label "welcome"
 		Label welcomeLabel = new Label ("Welcome to YAS3D!", skin);
 		welcomeLabel.setX ((width - welcomeLabel.getWidth ()) / 2);
@@ -121,6 +128,7 @@ public class MainMenu extends ScreenAdapter
 
 		stage.draw ();
 	}
+	
 	@Override
 	public void dispose ()
 	{

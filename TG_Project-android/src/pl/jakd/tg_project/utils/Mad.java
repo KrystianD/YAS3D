@@ -150,7 +150,7 @@ public class Mad
 	//---------------------------------------------------------------------------------------------------
 	//IMU algorithm update
 
-	public	void MadgwickAHRSupdateIMU (float gx, float gy, float gz, float ax, float ay, float az, float time)
+	public void MadgwickAHRSupdateIMU (float gx, float gy, float gz, float ax, float ay, float az, float time)
 	{
 		float recipNorm;
 		float s0, s1, s2, s3;

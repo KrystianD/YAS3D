@@ -16,6 +16,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
+
+/**
+ * klasa reprezentująca ekran wyboru poziomu trudności
+ */
 public class LevelSelectScreen extends ScreenAdapter
 {
 	// setup the dimensions of the menu buttons
@@ -28,6 +32,10 @@ public class LevelSelectScreen extends ScreenAdapter
 	private Skin skin;
 	private Stage stage;
 
+	
+	/**
+	 * @param game główny obiekt gry
+	 */
 	public LevelSelectScreen (GameSnake game)
 	{
 		this.game = game;
@@ -52,7 +60,7 @@ public class LevelSelectScreen extends ScreenAdapter
 		Image background = new Image (backgroundTexture);
 		background.sizeBy (width, height);
 		stage.addActor (background);
-		
+
 		// label "welcome"
 		Label welcomeLabel = new Label ("SELECT LEVEL", skin);
 		welcomeLabel.setX ((width - welcomeLabel.getWidth ()) / 2);
