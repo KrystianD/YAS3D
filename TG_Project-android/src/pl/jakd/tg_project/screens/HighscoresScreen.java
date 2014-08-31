@@ -338,6 +338,9 @@ public class HighscoresScreen extends ScreenAdapter
 		}
 	}
 
+	/**
+	 * zapisuje nowe wyniki
+	 */
 	public void writeHighscores ()
 	{
 		String line;
@@ -364,6 +367,10 @@ public class HighscoresScreen extends ScreenAdapter
 			Log.d ("KD", "zapis nieudany");
 		}
 	}
+	
+	/**
+	 * ustawia na ekranie listę nowych wyników
+	 */
 	private void setNewHighscores ()
 	{
 		String highscores = "";
@@ -382,6 +389,9 @@ public class HighscoresScreen extends ScreenAdapter
 		highscoreLabel.setY (labelY - 250);
 	}
 
+	/**
+	 * klasa obsługująca przyciski użytkownika na ekranie najwyższych wyników
+	 */
 	private class MyTextInputListener implements TextInputListener
 	{
 		HighscoresScreen screen;
