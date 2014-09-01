@@ -418,11 +418,18 @@ public class HighscoresScreen extends ScreenAdapter
 
 }
 
+/**
+ * klasa reprezentująca najwyższy wynik
+ */
 class MyPair implements Comparable<MyPair>
 {
 	public final String name;
 	public final int score;
 
+	/**
+	 * @param name imię gracza
+	 * @param score wynik gracza
+	 */
 	public MyPair (String name, int score)
 	{
 		this.name = name;

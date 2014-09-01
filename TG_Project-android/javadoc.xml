@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc access="protected" author="true" classpath="libs/gdx.jar:/home/jacek/Android/tools/support/annotations.jar:libs/gdx-freetype.jar:libs/gdx-backend-android.jar:libs/gdx-backend-android-sources.jar" destdir="/home/jacek/Projekty/uczelnia/teoria%20gier/TiProjekt/TG_Project-android/doc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="pl.jakd.tg_project.screens,pl.jakd.tg_project.utils,pl.jakd.tg_project.objects" source="1.6" sourcefiles="src/pl/jakd/tg_project/Sender.java,src/pl/jakd/tg_project/GameSnake.java,src/pl/jakd/tg_project/MainActivity.java" sourcepath="gen:src" splitindex="true" use="true" version="true">
+            <link href="file:/home/jacek/Projekty/uczelnia/teoria%2520gier/TiProjekt/TG_Project-android/doc/"/>
+        </javadoc>
+    </target>
+</project>

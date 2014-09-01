@@ -7,8 +7,6 @@ import pl.jakd.tg_project.objects.Enemy;
 import pl.jakd.tg_project.objects.PlayerSnake;
 import pl.jakd.tg_project.objects.Wall;
 
-import android.util.Log;
-
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;

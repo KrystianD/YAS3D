@@ -11,6 +11,9 @@ import android.util.Log;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.FPSLogger;
 
+/**
+ * klasa reprezentująca grę
+ */
 public class GameSnake extends Game
 {
 	public static final byte NO_SPHERE = 0;
@@ -20,27 +23,46 @@ public class GameSnake extends Game
 	private FPSLogger fpsLogger;
 	private Sender sender;
 
+	/**
+	 * @param context kontekst aplikacji
+	 * @param sender obiekt obsługujący wysyłanie danych (na czas prezenacji)
+	 */
 	public GameSnake (Context context, Sender sender)
 	{
 		this.context = context;
 		this.sender = sender;
 	}
 
+	/**
+	 * @return obiekt głównego menu gry
+	 */
 	public MainMenu getMainMenu ()
 	{
 		return new MainMenu (this);
 	}
 
+	/**
+	 * @param difficulty trudność gry
+	 * @return obiekt planszy gry
+	 */
 	public LevelScreen getLevelScreen (Difficulty difficulty)
 	{
 		return new LevelScreen (this, context, difficulty, sender);
 	}
 
+	/**
+	 * @param score aktualny wynik
+	 * @param difficulty trudność
+	 * @return obiekt ekranu najwyższych wyników
+	 */
 	public HighscoresScreen getHigscoresScreen (int score, Difficulty difficulty)
 	{
 		return new HighscoresScreen (this, score, difficulty);
 	}
 
+	/**
+	 * @return ekran wyboru poziomu trudności
+	 */
 	public LevelSelectScreen getLevelSelectScreen ()
 	{
 		return new LevelSelectScreen (this);
@@ -66,6 +88,9 @@ public class GameSnake extends Game
 		fpsLogger.log ();
 	}
 
+	/**
+	 * @return kontekst aplikacji
+	 */
 	public Context getContext ()
 	{
 		return context;

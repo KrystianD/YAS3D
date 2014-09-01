@@ -7,10 +7,12 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 
+/**
+ * główna klasa projektu uruchamiana przy włączeniu aplikacji
+ */
 public class MainActivity extends AndroidApplication
 {
-
-	Sender sender;
+	public Sender sender;
 
 	@Override
 	public void onCreate (Bundle savedInstanceState)

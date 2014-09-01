@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 
+/**
+ * klasa reprezentująca obiekt gracza w grze
+ */
 public class PlayerSnake extends Snake
 {
 	public static final int STARTING_LIVES = 3;
@@ -13,11 +16,17 @@ public class PlayerSnake extends Snake
 	private int lives = STARTING_LIVES;
 	private int score = 0;
 
+	/**
+	 * @param startPos pozycja początkowa gracza
+	 * @param startDir początkowy kierunek ruchu gracza
+	 * @param snakePartInstance wyświetlany element reprezentujący fragment węża
+	 */
 	public PlayerSnake (Vector3 startPos, Vector3 startDir, ModelInstance snakePartInstance)
 	{
 		super (startPos, startDir, snakePartInstance);
 	}
 
+	@Override
 	public ECalcResult calc ()
 	{
 		moveDir.rotateRad (getCurrentPosition (), snakeAngleInc * 5);
@@ -38,27 +47,44 @@ public class PlayerSnake extends Snake
 		return ECalcResult.NOT_COLLIDED;
 	}
 
+	/**
+	 * ustawia kąt obrotu gracza
+	 * @param angle kąt obrotu
+	 */
 	public void setMoveAngle (float angle)
 	{
 		this.snakeAngleInc = angle;
 	}
 
+	
+	/**
+	 * @return aktualny wynik gracza
+	 */
 	public int getScore ()
 	{
 		score = tail.size () - SNAKE_START_LENGTH;
 		return score;
 	}
 
+	/**
+	 * @return ilość żyć gracza
+	 */
 	public int getLives ()
 	{
 		return lives;
 	}
 
+	/**
+	 * natychmiastowo zabija gracza
+	 */
 	public void kill ()
 	{
 		lives = 0;
 	}
 
+	/**
+	 * zmniejsza ilość życia i ustawia początkową długość gracza
+	 */
 	public void shrink ()
 	{
 		lives--;

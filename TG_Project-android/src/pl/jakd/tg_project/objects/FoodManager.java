@@ -12,6 +12,9 @@ import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 
+/**
+ * klasa do obsługi żywności w grze
+ */
 public class FoodManager
 {
 	public static final float FOOD_SPHERE_SIZE = 0.5f / 15f;
@@ -24,6 +27,10 @@ public class FoodManager
 
 	public boolean isTarget = false;
 
+	/**
+	 * @param count ilość żywności na planszy
+	 * @param foodInstance wyświetlany element reprezentujący żywność
+	 */
 	public FoodManager (int count, ModelInstance foodInstance)
 	{
 		this.foodInstance = foodInstance;
@@ -34,6 +41,13 @@ public class FoodManager
 		}
 	}
 
+	/**
+	 * służy do renderowania obiektu żywności
+	 * @param modelBatch batch na którym renderujemy elementy węża
+	 * @param worldQuat kwaternian obrotu świata
+	 * @param env parametry do renderowania
+	 * @param f widok kamery
+	 */
 	public void render (ModelBatch modelBatch, Quaternion worldQuat, Environment env, Frustum f)
 	{
 		for (Vector3 v : foodPositions)
@@ -50,6 +64,11 @@ public class FoodManager
 		}
 	}
 
+	/**
+	 * sprawdza czy gracz lub przeciwnik dotknął jedzenia
+	 * @param snake obiekt gracza lub przeciwnika
+	 * @return true jeżeli nastąpiła kolizja z jedzeniem
+	 */
 	public boolean checkCollison (Snake snake)
 	{
 		for (int i = 0; i < foodPositions.size (); i++)

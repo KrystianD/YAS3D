@@ -8,6 +8,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.Deflater;
 
+
+/**
+ * klasa służąca do wysyłania danych gry
+ * używana tylko podczas prezentacji
+ */
 public class Sender
 {
 	public static final int PORT = 9999;

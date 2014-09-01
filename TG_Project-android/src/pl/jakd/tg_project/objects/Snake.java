@@ -3,8 +3,6 @@ package pl.jakd.tg_project.objects;
 import java.util.ArrayList;
 import java.util.Random;
 
-import android.util.Log;
-
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -15,10 +13,7 @@ import com.badlogic.gdx.math.Vector3;
 /**
  * klasa reprezentująca obiekty poruszające się po planszy
  */
-/**
- * @author jacek
- *
- */
+
 public abstract class Snake
 {
 	public static final float SNAKE_SPHERE_SIZE = 0.5f / 15f;
